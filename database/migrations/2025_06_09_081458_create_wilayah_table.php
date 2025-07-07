@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('nm_kelompok');
             $table->string('alias')->nullable(); // Nama PAC
             $table->string('nm_masjid')->nullable(); // Nama masjid PAC
-            $table->boolean('is_desa'); // Masjid Desa atau bukan
+            $table->boolean('is_desa')->default(false); // Masjid Desa atau bukan
             $table->timestamps();
         });
     }

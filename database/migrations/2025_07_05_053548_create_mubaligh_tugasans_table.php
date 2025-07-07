@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('mubaligh_tugasans', function (Blueprint $table) {
             $table->id();
+            $table->enum('tingkatan_tugas', ['DAERAH', 'DESA', 'KELOMPOK']);
+            $table->string('asal_pondok');
+            $table->enum('is_menikah', ['SUDAH', 'BELUM'])->default('BELUM');
+            $table->integer('tugasan_ke');
+            $table->date('tgl_mulai_tugas');
+            $table->date('tgl_selesai_tugas')->nullable();
+            $table->boolean('selesai_tugas');
             $table->timestamps();
         });
     }

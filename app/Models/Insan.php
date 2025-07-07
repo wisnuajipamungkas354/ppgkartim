@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class MubalighSetempat extends Model
+class Insan extends Model
 {
+    use SoftDeletes;
+    
     protected $guarded = ['id'];
 }
