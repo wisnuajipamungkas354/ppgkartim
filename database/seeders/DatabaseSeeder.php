@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Daerah;
+use App\Models\Dapukan;
 use App\Models\Desa;
+use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\InsanRole;
 use App\Models\Kelompok;
@@ -25,13 +28,20 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        $daerah = Daerah::create([
+            'nm_daerah' => 'Karawang Timur',
+        ]);
+
         $desas = ['KLARI', 'LEMAH MULYA', 'ADIARSA TIMUR', 'TUNGGAK JATI'];
         foreach($desas as $d) {
-            Desa::create(['nm_desa' => $d]);
+            Desa::create([
+                'daerah_id' => $daerah->id,
+                'nm_desa' => $d
+            ]);
         }
 
         $kelompokKlari = ['CIREJAG', 'BELENDUNG', 'CIBALONGSARI 1', 'CIBALONGSARI 2', 'PANCAWATI', 'KALIMULYA'];
-        $kelompokLm = ['TAMIANG 1', 'TAMIANG 2', 'CKM', 'TIPAR', 'HNH', 'ANGGADITA'];
+        $kelompokLm = ['TAMIANG 1', 'TAMIANG 2', 'CKM', 'TIPAR', 'HNH', 'ANGGADITA', 'KARAWANG MEGAH'];
         $kelompokAtm = ['WIRASABA', 'BABAKAN JATI', 'KARAWANG KOTA 1', 'KARAWANG KOTA 2', 'WADAS'];
         $kelompokTj = ['TANJUNG BARU BARAT', 'TANJUNG BARU TIMUR', 'TUNGGAK JATI', 'KALANGSURIA', 'PAKIS JAYA'];
 
@@ -79,15 +89,17 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Peran Insan
-        $peranInsan = ['GENERUS', 'MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'];
-        foreach($peranInsan as $peran) {
-            PeranInsan::create([
-                'nm_peran' => $peran
+        // Dapukan
+        $dapukans = ['GENERUS', 'MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'];
+        foreach($dapukans as $dapukan) {
+            Dapukan::create([
+                'nm_dapukan' => $dapukan
             ]);
         }
 
+        // Individu / Insan
         $insanSatu = [
+            'daerah_id' => 1,
             'desa_id' => 1,
             'kelompok_id' => 1,
             'nama' => 'Wisnu Aji Pamungkas',
@@ -96,12 +108,27 @@ class DatabaseSeeder extends Seeder
             'tgl_lahir' => '2002-03-05',
             'no_hp' => '085889634432',
             'pendidikan_terakhir' => 'SMA/K',
+            'jurusan' => 'Teknik Komputer & Jaringan'
         ];
 
         $insan = Insan::create($insanSatu);
-        InsanRole::create([
+        $insanRole = InsanRole::create([
             'insan_id' => $insan->id,
-            'peran_insan_id' => 1,
+            'dapukan_id' => 1,
+        ]);
+
+        Generus::create([
+            'insan_role_id' => $insanRole->id,
+            'nis' => 123456,
+            'jenis_data' => 'MM',
+            'kategori' => 'PRA_NIKAH',
+            'gol_dar' => 'A',
+            'kelas_di_ppg' => 'E',
+            'status' => 'Mahasiswa/S1',
+            'detail_status' => 'Sistem Informasi',
+            'nm_wali' => 'Sutarso',
+            'minat' => 'Bidang IT',
+            'siap_nikah' => 'BELUM',
         ]);
     }
 }

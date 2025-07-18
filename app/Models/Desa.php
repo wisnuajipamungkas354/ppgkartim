@@ -8,6 +8,10 @@ class Desa extends Model
 {
     protected $fillable = ['nm_desa'];
 
+    public function daerah() {
+        return $this->belongsTo(Daerah::class);
+    }
+
     public function kelompok() {
         return $this->hasMany(Kelompok::class);
     }

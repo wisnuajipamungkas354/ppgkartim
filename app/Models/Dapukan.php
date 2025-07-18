@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MubalighTugasan extends Model
+class Dapukan extends Model
 {
     protected $guarded = ['id'];
 
     public function insanRole() {
-        return $this->belongsTo(InsanRole::class);
+        return $this->hasMany(InsanRole::class);
     }
 }

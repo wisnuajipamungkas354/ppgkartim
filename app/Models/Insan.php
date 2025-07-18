@@ -10,4 +10,8 @@ class Insan extends Model
     use SoftDeletes;
     
     protected $guarded = ['id'];
+
+    public function insanRole() {
+        return $this->hasMany(InsanRole::class);
+    }
 }

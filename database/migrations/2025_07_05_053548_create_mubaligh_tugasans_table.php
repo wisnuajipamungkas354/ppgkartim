@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('mubaligh_tugasans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('insan_role_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->enum('tingkatan_tugas', ['DAERAH', 'DESA', 'KELOMPOK']);
             $table->string('asal_pondok');
             $table->enum('is_menikah', ['SUDAH', 'BELUM'])->default('BELUM');

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('generuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('peran_insan_id')->constrained('peran_insans', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('insan_role_id')->constrained('insan_roles', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('nis');
             $table->enum('jenis_data', ['MM', 'CBRWT']);
-            $table->enum('kategori', ['PAUD','CABERAWIT', 'PRA REMAJA', 'REMAJA', 'PRA NIKAH']);
+            $table->enum('kategori', ['PAUD','CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH']);
             $table->enum('gol_dar', ['A', 'B', 'O', 'AB'])->nullable();
             $table->string('kelas_di_ppg')->nullable(); // Kemungkinan Relasi ke tabel kelas PPG
 
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('no_hp_wali', 15)->nullable();
             $table->string('minat')->nullable();
             $table->enum('siap_nikah', ['SIAP', 'BELUM']);
-            $table->string('riwayat_delete'); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, DLL
+            $table->string('riwayat_delete')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, DLL
             $table->timestamps();
             $table->softDeletes();
         });

@@ -12,8 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         // Desa Table
+        Schema::create('daerahs', function (Blueprint $table) {
+            $table->id();
+            $table->string('nm_daerah');
+            $table->string('alias')->nullable(); // Nama DPD
+            $table->timestamps();
+        });
+
+        // Desa Table
         Schema::create('desas', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('daerah_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('nm_desa');
             $table->string('alias')->nullable(); // Nama PC
             $table->timestamps();
@@ -22,7 +31,7 @@ return new class extends Migration
         // Kelompok Table
         Schema::create('kelompoks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desas', 'id');
+            $table->foreignId('desa_id')->constrained('desas', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('nm_kelompok');
             $table->string('alias')->nullable(); // Nama PAC
             $table->string('nm_masjid')->nullable(); // Nama masjid PAC
@@ -36,6 +45,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('daerahs');
         Schema::dropIfExists('desas');
         Schema::dropIfExists('kelompoks');
     }

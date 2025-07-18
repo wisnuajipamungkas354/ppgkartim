@@ -14,6 +14,7 @@ return new class extends Migration
         // Menyimpan data individu jamaah
         Schema::create('insans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('daerah_id')->constrained('daerahs', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('desa_id')->constrained('desas', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('kelompok_id')->constrained('kelompoks', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->json('url_foto')->nullable();
@@ -23,15 +24,16 @@ return new class extends Migration
             $table->date('tgl_lahir')->nullable();
             $table->string('no_hp')->nullable();
             $table->string('pendidikan_terakhir', 15)->nullable();
-            // Khusus Lepas Pelajar Selain Mahasiswa = SD, SMP, SMA/K, D3, S1/D4, S2, S3
+            $table->string('jurusan')->nullable();
+            // Khusus Lepas Pelajar Selain Mahasiswa (SD, SMP, SMA/K, D3, S1/D4, S2, S3)
             $table->timestamps();
             $table->softDeletes();
         });
 
         // Menyimpan list-list peran jamaah
-        Schema::create('peran_insans', function (Blueprint $table) {
+        Schema::create('dapukans', function (Blueprint $table) {
             $table->id();
-            $table->string('nm_peran');
+            $table->string('nm_dapukan');
             $table->timestamps();
         });
 
@@ -39,7 +41,7 @@ return new class extends Migration
         Schema::create('insan_roles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('insan_id')->constrained('insans', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('peran_insan_id')->constrained('peran_insans','id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('dapukan_id')->constrained()->cascadeOnDelete()->cascadeOnDelete();
             $table->timestamps();
         });
     }
