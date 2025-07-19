@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Desa extends Model
 {
-    protected $fillable = ['nm_desa'];
+    protected $guarded = ['id'];
 
     public function daerah() {
         return $this->belongsTo(Daerah::class);

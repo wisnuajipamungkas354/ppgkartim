@@ -10,6 +10,7 @@ use App\Models\Insan;
 use App\Models\InsanRole;
 use App\Models\Kelompok;
 use App\Models\PeranInsan;
+use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -22,11 +23,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
 
         $daerah = Daerah::create([
             'nm_daerah' => 'Karawang Timur',
@@ -88,6 +84,13 @@ class DatabaseSeeder extends Seeder
                 'is_desa' => $isDesa,
             ]);
         }
+
+        User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@ppg.com',
+            'password' => bcrypt('password'),
+            'plain_password' => 'password',
+        ]);
 
         // Dapukan
         $dapukans = ['GENERUS', 'MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'];
