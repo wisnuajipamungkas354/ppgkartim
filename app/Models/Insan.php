@@ -14,4 +14,19 @@ class Insan extends Model
     public function insanRole() {
         return $this->hasMany(InsanRole::class);
     }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(Kelompok::class);
+    }
+
+    public function desa() 
+    { 
+        return $this->belongsTo(Desa::class); 
+    }
+
+    public function daerah() 
+    { 
+        return $this->belongsTo(Daerah::class); 
+    }
 }

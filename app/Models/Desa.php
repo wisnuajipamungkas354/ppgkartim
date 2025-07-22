@@ -15,4 +15,8 @@ class Desa extends Model
     public function kelompok() {
         return $this->hasMany(Kelompok::class);
     }
+
+    public function insan() {
+        return $this->hasMany(Insan::class);
+    }
 }

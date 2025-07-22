@@ -100,6 +100,12 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Status
+        $this->call([
+            StatusSeeder::class,
+            MinatSeeder::class,
+        ]);
+
         // Individu / Insan
         $insanSatu = [
             'daerah_id' => 1,
@@ -109,6 +115,7 @@ class DatabaseSeeder extends Seeder
             'jk' => 'L',
             'kota_lahir' => 'Brebes',
             'tgl_lahir' => '2002-03-05',
+            'usia' => 23,
             'no_hp' => '085889634432',
             'pendidikan_terakhir' => 'SMA/K',
             'jurusan' => 'Teknik Komputer & Jaringan'
@@ -127,10 +134,11 @@ class DatabaseSeeder extends Seeder
             'kategori' => 'PRA_NIKAH',
             'gol_dar' => 'A',
             'kelas_di_ppg' => 'E',
-            'status' => 'Mahasiswa/S1',
+            'status_id' => 6,
             'detail_status' => 'Sistem Informasi',
             'nm_wali' => 'Sutarso',
-            'minat' => 'Bidang IT',
+            'minat_id' => 6,
+            'detail_minat' => 'Ngoding & Servis Hardware',
             'siap_nikah' => 'BELUM',
         ]);
     }

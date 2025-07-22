@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('jk', ['L', 'P']);
             $table->string('kota_lahir')->nullable();
             $table->date('tgl_lahir')->nullable();
+            $table->integer('usia')->nullable();
             $table->string('no_hp')->nullable();
             $table->string('pendidikan_terakhir', 15)->nullable();
             $table->string('jurusan')->nullable();

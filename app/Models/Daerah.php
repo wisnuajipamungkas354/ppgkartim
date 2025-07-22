@@ -11,8 +11,12 @@ class Daerah extends Model
     public function desa() {
         return $this->hasMany(Desa::class);
     }
-
+    
     public function kelompok() {
         return $this->hasManyThrough(Kelompok::class, Desa::class);
+    }
+
+    public function insan() {
+        return $this->hasMany(Insan::class);
     }
 }

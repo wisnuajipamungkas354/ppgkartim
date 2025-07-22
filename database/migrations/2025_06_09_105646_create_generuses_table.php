@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('gol_dar', ['A', 'B', 'O', 'AB'])->nullable();
             $table->string('kelas_di_ppg')->nullable(); // Kemungkinan Relasi ke tabel kelas PPG
 
-            $table->string('status')->nullable(); 
+            $table->foreignId('status_id')->nullable()->constrained()->cascadeOnUpdate();
             // PAUD/TK, SD, SMP, SMA/K,
             // Mahasiswa D3, Mahasiswa S1/D4, Mahasiswa S2, Mahasiswa S3, 
             // Pencari Kerja, Karyawan/Pegawai, Wirausaha/Freelance
@@ -39,7 +39,8 @@ return new class extends Migration
 
             $table->string('nm_wali')->nullable(); // Nama orang tua atau wali
             $table->string('no_hp_wali', 15)->nullable();
-            $table->string('minat')->nullable();
+            $table->foreignId('minat_id')->nullable()->constrained();
+            $table->string('detail_minat')->nullable();
             $table->enum('siap_nikah', ['SIAP', 'BELUM']);
             $table->string('riwayat_delete')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, DLL
             $table->timestamps();

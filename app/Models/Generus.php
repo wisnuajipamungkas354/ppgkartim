@@ -13,4 +13,8 @@ class Generus extends Model
     public function insanRole() {
         return $this->belongsTo(InsanRole::class);
     }
+
+    public function status() {
+        return $this->belongsTo(Status::class);
+    }
 }
