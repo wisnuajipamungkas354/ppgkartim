@@ -19,6 +19,10 @@ class StatusResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Manajemen List';
+
+    protected static ?string $navigationLabel = 'Status';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -28,6 +32,8 @@ class StatusResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('slug')
                     ->maxLength(255),
+                Forms\Components\TextInput::make('placeholder')
+                    ->maxLength(255),
             ]);
     }
 
@@ -36,9 +42,11 @@ class StatusResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nm_status')
+                    ->label('Nama Status')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('placeholder'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

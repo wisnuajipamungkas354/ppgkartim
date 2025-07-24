@@ -5,6 +5,7 @@ namespace App\Filament\Resources\StatusResource\Pages;
 use App\Filament\Resources\StatusResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ManageStatuses extends ManageRecords
 {
@@ -13,7 +14,13 @@ class ManageStatuses extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Buat Status'),
         ];
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return 'List Status';
     }
 }

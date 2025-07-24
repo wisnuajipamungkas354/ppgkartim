@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\GenerusResource\Pages;
 use App\Filament\Resources\GenerusResource\RelationManagers;
+use App\Helpers\AccessHelper;
 use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Kelompok;
@@ -20,6 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Wizard;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 class GenerusResource extends Resource
 {
@@ -31,11 +33,17 @@ class GenerusResource extends Resource
 
     protected static ?string $navigationGroup = 'Database';
 
-    public static function form(Form $form): Form
+    public static function canViewAny(): bool
     {
-        $roles = auth()->user()->getRoleNames();
-        dd($roles);
+        if(!auth()->user()->hasRole('super_admin')) {
+            return AccessHelper::canAccess(static::getSlug());
+        } else {
+            return true;
+        }
+    }
 
+    public static function form(Form $form): Form
+    {   
         return $form
             ->schema([
                 Wizard::make([
@@ -44,21 +52,17 @@ class GenerusResource extends Resource
                             Forms\Components\Select::make('kategori')
                             ->label('Kategori Generus')
                             ->options(function() {
-                                if(auth()->user()->hasAnyRole(['pjp_desa,pjp_kelompok,phppg,kurikulum'])) {
+                                $roleName = AccessHelper::getActiveRoleName();
+                                if(in_array($roleName, ['phppg', 'pjp_desa', 'pjp_kelompok', 'kurikulum', 'super_admin'])) {
                                     return [
                                         'PAUD' => 'Paud/TK',
                                         'CABERAWIT' => 'Caberawit (SD)',
-                                    ];
-                                } elseif(auth()->user()->hasAnyRole(['mudamudi_daerah,mudamudi_desa,mudamudi_kelompok'])) {
-                                    return [
                                         'PRA_REMAJA' => 'Pra Remaja (SMP)',
                                         'REMAJA' => 'Remaja (SMA/K)',
                                         'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
                                     ];
-                                } else {
+                                } elseif(in_array($roleName, ['mudamudi_daerah', 'mudamudi_desa', 'mudamudi_kelompok'])) {
                                     return [
-                                        'PAUD' => 'Paud/TK',
-                                        'CABERAWIT' => 'Caberawit (SD)',
                                         'PRA_REMAJA' => 'Pra Remaja (SMP)',
                                         'REMAJA' => 'Remaja (SMA/K)',
                                         'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
@@ -79,11 +83,12 @@ class GenerusResource extends Resource
                                 ->required()
                                 ->live()
                                 ->preload()
-                                ->visible(fn() => auth()->user()->hasRole(['super_admin']) ? true : false),
+                                ->visible(auth()->user()->hasRole('super_admin')),
                             Forms\Components\Select::make('desa_id')
                                 ->label('Desa')
                                 ->options(function(Get $get){
-                                    if(auth()->user()->hasRole(['super_admin, mudamudi_daerah, phppg, kurikulum'])) {
+                                    $roleName = AccessHelper::getActiveRoleName();
+                                    if(in_array($roleName, ['super_admin', 'mudamudi_daerah', 'phppg', 'kurikulum'])) {
                                         if(auth()->user()->hasRole(['super_admin'])) {
                                             return Desa::query()->where('daerah_id', $get('daerah_id'))->pluck('nm_desa', 'id');
                                         } else {
@@ -96,11 +101,12 @@ class GenerusResource extends Resource
                                 ->afterStateUpdated(fn (Set $set) => $set('kelompok_id', null))
                                 ->live()
                                 ->preload()
-                                ->visible(fn() => auth()->user()->hasAnyRole(['super_admin, mudamudi_daerah, phppg, kurikulum']) ? true : false),
+                                ->visible(fn() => in_array(AccessHelper::getActiveRoleName(), ['super_admin',  'mudamudi_daerah', 'phppg', 'kurikulum'])),
                             Forms\Components\Select::make('kelompok_id')
                                 ->label('Kelompok')
                                 ->options(function (Get $get) {
-                                    if(auth()->user()->hasAnyRole(['super_admin, phppg, kurikulum, mudamudi_daerah, pjp_desa, mudamudi_desa'])) {
+                                    $roleName = AccessHelper::getActiveRoleName();
+                                    if(in_array($roleName, ['super_admin', 'phppg', 'kurikulum', 'mudamudi_daerah', 'pjp_desa', 'mudamudi_desa'])) {
                                         return Kelompok::query()->where('desa_id', $get('desa_id'))->pluck('nm_kelompok', 'id');
                                     }
                                 })
@@ -108,112 +114,122 @@ class GenerusResource extends Resource
                                 ->searchable()
                                 ->live()
                                 ->preload()
-                                ->visible(fn() => !auth()->user()->hasAnyRole(['pjp_kelompok, mudamudi_kelompok'])),
-                        ])
-                    // Forms\Components\Section::make('Data Diri')
-                    //     ->schema([
-                    //         Forms\Components\TextInput::make('nama')
-                    //             ->label('Nama Lengkap')
-                    //             ->placeholder('Masukkan Nama Lengkap')
-                    //             // Mengubah Text Menjadi Camel Casing
-                    //             ->dehydrateStateUsing(fn ($state) => Str::title($state))
-                    //             ->maxLength(255)
-                    //             ->required()
-                    //             ->columnSpanFull(),
-                    //         Forms\Components\Radio::make('jk')
-                    //             ->label('Jenis Kelamin')
-                    //             ->options(['L' => 'Laki-laki', 'P' => 'Perempuan'])
-                    //             ->required(),
-                    //         Forms\Components\TextInput::make('kota_lahir')
-                    //             ->label('Kota Lahir')
-                    //             ->placeholder('Kota Lahir')
-                    //             // Mengubah Text Menjadi Camel Casing
-                    //             ->dehydrateStateUsing(fn ($state) => Str::title($state))
-                    //             ->required()
-                    //             ->maxLength(255),
-                    //         Forms\Components\DatePicker::make('tgl_lahir')
-                    //             ->native(false)
-                    //             ->displayFormat('d/m/Y')
-                    //             ->label('Tanggal Lahir')
-                    //             ->maxDate(now()->format('Y-m-d'))
-                    //             ->required(),
-                    //         Forms\Components\Radio::make('mubaligh')
-                    //             ->label('Mubaligh')
-                    //             ->options(['MT' => 'Mubaligh Tugas (MT)', 'MS' => 'Mubaligh Setempat (MS)', 'BUKAN' => 'Bukan Mubaligh'])
-                    //             ->required(),
-                    //         Forms\Components\Select::make('status_id')
-                    //             ->label('Status')
-                    //             ->relationship('status', 'nm_status')
-                    //             ->live()
-                    //             ->required(),
-                    //         Forms\Components\Textarea::make('detail_status')
-                    //             ->label('Detail Status')
-                    //             ->placeholder(fn (Get $get): string => match($get('status_id')) {
-                    //                 1 => 'Contoh : SDN Nagasari 1, SDN Cibalongsari 2, dll',
-                    //                 2 => 'Contoh : SMPN 1 Karawang, SMPN 3 Klari, dll',
-                    //                 3 => 'Contoh : IPA, IPS, Teknik Komputer & Jaringan, dll',
-                    //                 4 => 'Contoh : Sistem Informasi, Manajemen, dll',
-                    //                 default => '',
-                    //             })
-                    //             ->required(),
-                    //         Forms\Components\Select::make('kelas_di_sekolah')
-                    //             ->label('Kelas Di Sekolah')
-                    //             ->options(function(Get $get) {
-                    //                 if($get('status_id') !== null) {
-    
-                    //                     $status = Status::find($get('status_id'));
-                    //                     switch($status->nm_status) {
-                    //                         case 'SD' :
-                    //                             return [
-                    //                                 1 => 'Kelas 1',
-                    //                                 2 => 'Kelas 2',
-                    //                                 3 => 'Kelas 3',
-                    //                                 4 => 'Kelas 4',
-                    //                                 5 => 'Kelas 5',
-                    //                                 6 => 'Kelas 6',
-                    //                             ];
-                    //                         case 'SMP' :
-                    //                             return [
-                    //                                 7 => 'Kelas 7',
-                    //                                 8 => 'Kelas 8',
-                    //                                 9 => 'Kelas 9',
-                    //                             ];
-                    //                         case 'SMA/K' :
-                    //                             return [
-                    //                                 10 => 'Kelas 10',
-                    //                                 11 => 'Kelas 11',
-                    //                                 12 => 'Kelas 12',
-                    //                             ];
-                    //                         default: 
-                    //                             return [];
-                    //                     }
-                    //                 }
-                    //             })
-                    //             ->preload()
-                    //             ->visible(function(Get $get) {
-                    //                 if($get('status_id') !== null) {
-                    //                     $status = Status::find($get('status_id'));
-                    //                     switch ($status->nm_status) {
-                    //                         case 'SD' :
-                    //                             return true;
-                    //                         case 'SMP' :
-                    //                             return true;
-                    //                         case 'SMA/K' :
-                    //                             return true;
-                    //                         default:
-                    //                             return false;
-                    //                     }
-                    //                 }
-                    //             }),
-                    //         Forms\Components\Radio::make('siap_nikah')
-                    //             ->label('Siap Nikah')
-                    //             ->options(['Siap' => 'Siap', 'Belum' => 'Belum'])
-                    //             ->required()
-                    //             ->visible(function() {
-                                    
-                    //             }),
-                    //     ])
-                ])
+                                ->visible(fn() => in_array(AccessHelper::getActiveRoleName(), ['super_admin', 'phppg', 'kurikulum', 'mudamudi_daerah', 'pjp_desa', 'mudamudi_desa'])),
+                    ])->visible(fn() => in_array(AccessHelper::getActiveRoleName(), ['super_admin', 'phppg', 'kurikulum', 'mudamudi_daerah', 'pjp_desa', 'mudamudi_desa'])),
+                    Wizard\Step::make('Data Diri')
+                        ->schema([
+                            Forms\Components\TextInput::make('nama')
+                            ->label('Nama Lengkap')
+                            ->placeholder('Masukkan Nama Lengkap')
+                            // Mengubah Text Menjadi Camel Casing
+                            ->dehydrateStateUsing(fn ($state) => Str::title($state))
+                            ->maxLength(255)
+                            ->required()
+                            ->columnSpanFull(),
+                        Forms\Components\Radio::make('jk')
+                            ->label('Jenis Kelamin')
+                            ->options(['L' => 'Laki-laki', 'P' => 'Perempuan'])
+                            ->required(),
+                        Forms\Components\TextInput::make('kota_lahir')
+                            ->label('Kota Lahir')
+                            ->placeholder('Kota Lahir')
+                            // Mengubah Text Menjadi Camel Casing
+                            ->dehydrateStateUsing(fn ($state) => Str::title($state))
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\DatePicker::make('tgl_lahir')
+                            ->native(false)
+                            ->displayFormat('d/m/Y')
+                            ->label('Tanggal Lahir')
+                            ->maxDate(now()->format('Y-m-d'))
+                            ->required(),
+                        Forms\Components\Radio::make('mubaligh')
+                            ->label('Mubaligh')
+                            ->options(['MT' => 'Mubaligh Tugas (MT)', 'MS' => 'Mubaligh Setempat (MS)', 'BUKAN' => 'Bukan Mubaligh'])
+                            ->required(),
+                        Forms\Components\Select::make('status_id')
+                            ->label('Status')
+                            ->relationship(
+                                name: 'status', 
+                                titleAttribute: 'nm_status', 
+                                modifyQueryUsing: function(Builder $query, Get $get) {
+                                    if(in_array($get('kategori'), ['PAUD', 'CABERAWIT'])) {
+                                        $query->where('slug', 'paudtk')->orWhere('slug', 'sd');
+                                    } else {
+                                        
+                                    }
+                                })
+                            ->live()
+                            ->required(),
+                        Forms\Components\Textarea::make('detail_status')
+                            ->label('Detail Status')
+                            ->placeholder(fn (Get $get) => Status::query()->where('id', $get('status_id'))->value('placeholder'))
+                            ->required(),
+                        Forms\Components\Select::make('kelas_di_sekolah')
+                            ->label('Kelas Di Sekolah')
+                            ->options(function(Get $get) {
+                                if($get('status_id') !== null) {
+
+                                    $status = Status::find($get('status_id'));
+                                    switch($status->nm_status) {
+                                        case 'SD' :
+                                            return [
+                                                1 => 'Kelas 1',
+                                                2 => 'Kelas 2',
+                                                3 => 'Kelas 3',
+                                                4 => 'Kelas 4',
+                                                5 => 'Kelas 5',
+                                                6 => 'Kelas 6',
+                                            ];
+                                        case 'SMP' :
+                                            return [
+                                                7 => 'Kelas 7',
+                                                8 => 'Kelas 8',
+                                                9 => 'Kelas 9',
+                                            ];
+                                        case 'SMA/K' :
+                                            return [
+                                                10 => 'Kelas 10',
+                                                11 => 'Kelas 11',
+                                                12 => 'Kelas 12',
+                                            ];
+                                        default: 
+                                            return [];
+                                    }
+                                }
+                            })
+                            ->preload()
+                            ->visible(function(Get $get) {
+                                if($get('status_id') !== null) {
+                                    $status = Status::find($get('status_id'));
+                                    switch ($status->nm_status) {
+                                        case 'SD' :
+                                            return true;
+                                        case 'SMP' :
+                                            return true;
+                                        case 'SMA/K' :
+                                            return true;
+                                        default:
+                                            return false;
+                                    }
+                                }
+                            }),
+                        Forms\Components\Radio::make('siap_nikah')
+                            ->label('Siap Nikah')
+                            ->options(['Siap' => 'Siap', 'Belum' => 'Belum'])
+                            ->required()
+                            ->visible(function(Get $get) {
+                                if($get('status_id') != null) {
+                                    $status = Status::find($get('status_id'))->value('slug');
+                                    if(!in_array($status, ['paudtk', 'sd', 'smp', 'sma-smk'])) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            }),
+                        ]),
+                ])->columnSpanFull()
             ]);
     }
 

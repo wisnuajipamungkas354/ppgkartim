@@ -10,10 +10,14 @@ use App\Models\Insan;
 use App\Models\InsanRole;
 use App\Models\Kelompok;
 use App\Models\PeranInsan;
+use App\Models\Resource;
+use Spatie\Permission\Models\Permission;
 use App\Models\Role;
+use App\Models\RoleResourceAccess;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\App;
 
 class DatabaseSeeder extends Seeder
 {
@@ -85,12 +89,58 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        Permission::insert([
+            ['name' => 'view_any_daerah', 'guard_name' => 'web'],
+            ['name' => 'view_daerah', 'guard_name' => 'web']
+        ]);
+
+        $role = Role::create([
+            'name' => 'phppg',
+            'guard_name' => 'web'
+        ]);
+        $role->givePermissionTo('view_any_daerah');
+        $role->givePermissionTo('view_daerah');
+
+        Resource::insert([
+            ['name' => 'Daerah', 'slug' => 'daerahs', 'icon' => 'heroicon-o-building-office', 'is_active' => true],
+            ['name' => 'Desa', 'slug' => 'desas', 'icon' => 'heroicon-o-rectangle-stack', 'is_active' => true],
+            ['name' => 'Kelompok', 'slug' => 'kelompoks', 'icon' => 'heroicon-o-calendar', 'is_active' => true],
+        ]);
+
+        $roleAccessMap = [
+            'phppg' => ['daerahs', 'desas', 'kelompoks'],
+        ];
+
+        foreach ($roleAccessMap as $roleName => $allowedSlugs) {
+            $role = Role::where('name', $roleName)->first();
+            if (!$role) continue;
+
+            foreach ($allowedSlugs as $slug) {
+                $resource = Resource::where('slug', $slug)->first();
+                if (!$resource) continue;
+
+                RoleResourceAccess::updateOrCreate([
+                    'role_id' => $role->id,
+                    'resource_id' => $resource->id,
+                ]);
+            }
+        }
+        
         User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@ppg.com',
             'password' => bcrypt('password'),
             'plain_password' => 'password',
         ]);
+
+        $user = User::create([
+            'name' => 'PPG',
+            'email' => 'ppg@ppg.com',
+            'password' => bcrypt('password'),
+            'plain_password' => 'password',
+            'daerah_id' => 1,
+        ]);
+        $user->assignRole('phppg');
 
         // Dapukan
         $dapukans = ['GENERUS', 'MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'];
