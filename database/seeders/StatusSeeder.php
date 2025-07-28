@@ -27,6 +27,7 @@ class StatusSeeder extends Seeder
             ['nm_status' => 'Mubaligh Tugasan (MT)', 'slug' => Str::slug('MT')],
             ['nm_status' => 'Pencari Kerja', 'slug' => Str::slug('Pencari Kerja')],
             ['nm_status' => 'Karyawan/Pegawai', 'slug' => Str::slug('Karyawan Pegawai')],
+            ['nm_status' => 'Kuliah Kerja', 'slug' => Str::slug('Kuliah Kerja')],
             ['nm_status' => 'Tenaga Sabilillah (SB)', 'slug' => Str::slug('SB')],
             ['nm_status' => 'Wirausaha/Freelance', 'slug' => Str::slug('Wirausaha Freelance')],
         ]);

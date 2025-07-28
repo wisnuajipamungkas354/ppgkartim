@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('generuses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('insan_role_id')->constrained('insan_roles', 'id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('nis');
+            $table->string('nis')->nullable();
             $table->enum('jenis_data', ['MM', 'CBRWT']);
             $table->enum('kategori', ['PAUD','CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH']);
             $table->enum('gol_dar', ['A', 'B', 'O', 'AB'])->nullable();
@@ -37,12 +37,13 @@ return new class extends Migration
             // Wirausaha/Freelance = Bidang Usaha
             // Kalau MT akan terisi otomatis dikelompok mana dia tugas
 
-            $table->string('nm_wali')->nullable(); // Nama orang tua atau wali
+            $table->string('nm_ayah')->nullable(); // Nama ayah
+            $table->string('nm_ibu')->nullable(); // Nama ibu
             $table->string('no_hp_wali', 15)->nullable();
             $table->foreignId('minat_id')->nullable()->constrained();
             $table->string('detail_minat')->nullable();
-            $table->enum('siap_nikah', ['SIAP', 'BELUM']);
-            $table->string('riwayat_delete')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, DLL
+            $table->enum('siap_nikah', ['SIAP', 'BELUM'])->nullable();
+            $table->string('riwayat_delete')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, MENINGGAL KAH, DLL
             $table->timestamps();
             $table->softDeletes();
         });

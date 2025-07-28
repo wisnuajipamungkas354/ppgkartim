@@ -8,6 +8,16 @@ class Daerah extends Model
 {
     protected $guarded = ['id'];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->nm_daerah = strtoupper($model->nm_daerah);
+            $model->alias = $model->alias ? strtoupper($model->alias) : null;
+        });
+    }
+
     public function desa() {
         return $this->hasMany(Desa::class);
     }

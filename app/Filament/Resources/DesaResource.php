@@ -11,6 +11,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -72,7 +73,13 @@ class DesaResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus')
+                    ->modalHeading('Hapus Data')
+                    ->modalDescription('Apakah kamu yakin ingin menghapus desa ini ?')
+                    ->modalSubmitActionLabel('Ya')
+                    ->modalCancelActionLabel('Batal')
+                    ->successNotification(fn(Notification $notification) => $notification->title('Dihapus')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

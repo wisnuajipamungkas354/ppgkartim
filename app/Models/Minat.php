@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Minat extends Model
 {
-    //
+    protected $guarded = ['id'];
+
+    public function generus() {
+        return $this->hasMany(Generus::class);
+    }
 }

@@ -101,14 +101,26 @@ class DatabaseSeeder extends Seeder
         $role->givePermissionTo('view_any_daerah');
         $role->givePermissionTo('view_daerah');
 
+        Role::insert([
+            ['name' => 'mudamudi_daerah', 'guard_name' => 'web'],
+            ['name' => 'kurikulum', 'guard_name' => 'web'],
+            ['name' => 'tenaga_pendidik', 'guard_name' => 'web'],
+            ['name' => 'pjp_desa', 'guard_name' => 'web'],
+            ['name' => 'mudamudi_desa', 'guard_name' => 'web'],
+            ['name' => 'pjp_kelompok', 'guard_name' => 'web'],
+            ['name' => 'mudamudi_kelompok', 'guard_name' => 'web'],
+        ]);
+
         Resource::insert([
             ['name' => 'Daerah', 'slug' => 'daerahs', 'icon' => 'heroicon-o-building-office', 'is_active' => true],
             ['name' => 'Desa', 'slug' => 'desas', 'icon' => 'heroicon-o-rectangle-stack', 'is_active' => true],
             ['name' => 'Kelompok', 'slug' => 'kelompoks', 'icon' => 'heroicon-o-calendar', 'is_active' => true],
+            ['name' => 'Generus', 'slug' => 'generuses', 'icon' => 'heroicon-o-academic-cap', 'is_active' => true],
         ]);
 
         $roleAccessMap = [
-            'phppg' => ['daerahs', 'desas', 'kelompoks'],
+            'phppg' => ['generuses'],
+            'mudamudi_daerah' => ['daerahs','desas','kelompoks','generuses'],
         ];
 
         foreach ($roleAccessMap as $roleName => $allowedSlugs) {
@@ -141,6 +153,7 @@ class DatabaseSeeder extends Seeder
             'daerah_id' => 1,
         ]);
         $user->assignRole('phppg');
+        $user->assignRole('mudamudi_daerah');
 
         // Dapukan
         $dapukans = ['GENERUS', 'MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'];
@@ -186,10 +199,11 @@ class DatabaseSeeder extends Seeder
             'kelas_di_ppg' => 'E',
             'status_id' => 6,
             'detail_status' => 'Sistem Informasi',
-            'nm_wali' => 'Sutarso',
+            'siap_nikah' => 'BELUM',
+            'nm_ayah' => 'Sutarso',
+            'nm_ibu' => 'Nuning Handayani',
             'minat_id' => 6,
             'detail_minat' => 'Ngoding & Servis Hardware',
-            'siap_nikah' => 'BELUM',
         ]);
     }
 }
