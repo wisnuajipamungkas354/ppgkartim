@@ -84,51 +84,21 @@ class DatabaseSeeder extends Seeder
                 'is_desa' => $isDesa,
             ]);
         }
-
-        $role = Role::create([
-            'name' => 'phppg',
-            'guard_name' => 'web'
-        ]);
-
-        Role::insert([
-            ['name' => 'mudamudi_daerah', 'guard_name' => 'web'],
-            ['name' => 'kurikulum', 'guard_name' => 'web'],
-            ['name' => 'tenaga_pendidik', 'guard_name' => 'web'],
-            ['name' => 'pjp_desa', 'guard_name' => 'web'],
-            ['name' => 'mudamudi_desa', 'guard_name' => 'web'],
-            ['name' => 'pjp_kelompok', 'guard_name' => 'web'],
-            ['name' => 'mudamudi_kelompok', 'guard_name' => 'web'],
-        ]);
         
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@ppg.com',
-            'password' => bcrypt('password'),
-            'plain_password' => 'password',
-        ]);
-
-        $user = User::create([
-            'name' => 'PPG',
-            'email' => 'ppg@ppg.com',
-            'password' => bcrypt('password'),
-            'plain_password' => 'password',
-            'daerah_id' => 1,
-        ]);
-        $user->assignRole('phppg');
-        $user->assignRole('mudamudi_daerah');
-
         // Dapukan
-        $dapukans = ['GENERUS', 'MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'];
-        foreach($dapukans as $dapukan) {
-            Dapukan::create([
-                'nm_dapukan' => $dapukan
-            ]);
-        }
+        Dapukan::insert([
+            ['nm_dapukan' => 'GENERUS'],
+            ['nm_dapukan' => 'MUBALIGH TUGASAN'],
+            ['nm_dapukan' => 'MUBALIGH SETEMPAT'],
+            ['nm_dapukan' => 'PENGURUS'],
+        ]);
 
         // Status
         $this->call([
             StatusSeeder::class,
             MinatSeeder::class,
+            RoleSeeder::class,
+            UserSeeder::class,
         ]);
 
         // Individu / Insan
