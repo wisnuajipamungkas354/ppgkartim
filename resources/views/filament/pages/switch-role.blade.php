@@ -8,10 +8,11 @@
                 <div class="text-lg font-semibold text-gray-800 dark:text-white">
                     {{ $role->name }}
                 </div>
-
-                {{-- <form wire:submit.prevent="switchRole({{ $role->id }})"> --}}
+                @if($activeRole == $role->name)
+                    <x-filament::button class="mt-2" color="success">Sedang Aktif</x-filament::button>
+                @else
                     <x-filament::button class="mt-2" wire:click="switchRole({{ $role->id }})">Gunakan Role Ini</x-filament::button>
-                {{-- </form> --}}
+                @endif
             </div>
         @endforeach
     </div>

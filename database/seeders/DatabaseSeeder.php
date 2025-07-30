@@ -9,11 +9,7 @@ use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\InsanRole;
 use App\Models\Kelompok;
-use App\Models\PeranInsan;
-use App\Models\Resource;
-use Spatie\Permission\Models\Permission;
 use App\Models\Role;
-use App\Models\RoleResourceAccess;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -89,17 +85,10 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        Permission::insert([
-            ['name' => 'view_any_daerah', 'guard_name' => 'web'],
-            ['name' => 'view_daerah', 'guard_name' => 'web']
-        ]);
-
         $role = Role::create([
             'name' => 'phppg',
             'guard_name' => 'web'
         ]);
-        $role->givePermissionTo('view_any_daerah');
-        $role->givePermissionTo('view_daerah');
 
         Role::insert([
             ['name' => 'mudamudi_daerah', 'guard_name' => 'web'],
@@ -110,33 +99,6 @@ class DatabaseSeeder extends Seeder
             ['name' => 'pjp_kelompok', 'guard_name' => 'web'],
             ['name' => 'mudamudi_kelompok', 'guard_name' => 'web'],
         ]);
-
-        Resource::insert([
-            ['name' => 'Daerah', 'slug' => 'daerahs', 'icon' => 'heroicon-o-building-office', 'is_active' => true],
-            ['name' => 'Desa', 'slug' => 'desas', 'icon' => 'heroicon-o-rectangle-stack', 'is_active' => true],
-            ['name' => 'Kelompok', 'slug' => 'kelompoks', 'icon' => 'heroicon-o-calendar', 'is_active' => true],
-            ['name' => 'Generus', 'slug' => 'generuses', 'icon' => 'heroicon-o-academic-cap', 'is_active' => true],
-        ]);
-
-        $roleAccessMap = [
-            'phppg' => ['generuses'],
-            'mudamudi_daerah' => ['daerahs','desas','kelompoks','generuses'],
-        ];
-
-        foreach ($roleAccessMap as $roleName => $allowedSlugs) {
-            $role = Role::where('name', $roleName)->first();
-            if (!$role) continue;
-
-            foreach ($allowedSlugs as $slug) {
-                $resource = Resource::where('slug', $slug)->first();
-                if (!$resource) continue;
-
-                RoleResourceAccess::updateOrCreate([
-                    'role_id' => $role->id,
-                    'resource_id' => $resource->id,
-                ]);
-            }
-        }
         
         User::create([
             'name' => 'Super Admin',

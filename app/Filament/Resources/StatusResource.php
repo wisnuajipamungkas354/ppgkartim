@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\StatusResource\Pages;
 use App\Filament\Resources\StatusResource\RelationManagers;
 use App\Models\Status;
+use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class StatusResource extends Resource
 {
+    use HandlesActiveRolePermission;
+    
     protected static ?string $model = Status::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

@@ -23,11 +23,14 @@ use Filament\Forms\Components\Wizard;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\GenerusResource\Pages\Forms\GenerusForm;
+use App\Traits\HandlesActiveRolePermission;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GenerusResource extends Resource
 {
+    use HandlesActiveRolePermission;
+
     protected static ?string $model = Generus::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
@@ -35,15 +38,6 @@ class GenerusResource extends Resource
     protected static ?string $navigationLabel = 'Generus';
 
     protected static ?string $navigationGroup = 'Database';
-
-    public static function canViewAny(): bool
-    {
-        if(!auth()->user()->hasRole('super_admin')) {
-            return AccessHelper::canAccess(static::getSlug());
-        } else {
-            return true;
-        }
-    }
 
     public static function form(Form $form): Form
     {   
@@ -160,6 +154,8 @@ class GenerusResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('index')
+                    ->rowIndex(),
                 TextColumn::make('nis')
                     ->label('NIS'),
                 TextColumn::make('insanrole.insan.desa.nm_desa')
@@ -174,7 +170,8 @@ class GenerusResource extends Resource
                     ->label('Nama Lengkap')
                     ->searchable(),
                 TextColumn::make('insanrole.insan.jk')
-                    ->label('L/P'),
+                    ->label('L/P')
+                    ->sortable(),
                 TextColumn::make('insanrole.insan.kota_lahir')
                     ->label('Kota Lahir')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -185,9 +182,11 @@ class GenerusResource extends Resource
                 TextColumn::make('status.nm_status')
                     ->label('Status'),
                 TextColumn::make('detail_status')
-                    ->label('Detail Status'),
+                    ->label('Detail Status')
+                    ->limit(30),
                 TextColumn::make('insanrole.insan.usia')
-                    ->label('Usia'),
+                    ->label('Usia')
+                    ->sortable(),
                 TextColumn::make('insanrole.insan.no_hp')
                     ->label('No HP'),
             ])

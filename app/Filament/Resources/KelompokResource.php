@@ -7,6 +7,7 @@ use App\Filament\Resources\KelompokResource\RelationManagers;
 use App\Helpers\AccessHelper;
 use App\Models\Desa;
 use App\Models\Kelompok;
+use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -21,22 +22,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class KelompokResource extends Resource
 {
+    use HandlesActiveRolePermission;
+
     protected static ?string $model = Kelompok::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
     protected static ?string $navigationLabel = 'Kelompok';
 
     protected static ?string $navigationGroup = 'Manajemen Wilayah';
-
-    public static function canViewAny(): bool
-    {
-        if(!auth()->user()->hasRole('super_admin')) {
-            return AccessHelper::canAccess(static::getSlug());
-        } else {
-            return true;
-        }
-    }
 
     public static function form(Form $form): Form
     {

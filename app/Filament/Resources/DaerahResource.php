@@ -6,6 +6,7 @@ use App\Filament\Resources\DaerahResource\Pages;
 use App\Filament\Resources\DaerahResource\RelationManagers;
 use App\Helpers\AccessHelper;
 use App\Models\Daerah;
+use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -20,22 +21,16 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DaerahResource extends Resource
 {
+    use HandlesActiveRolePermission;
+
     protected static ?string $model = Daerah::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?string $navigationLabel = 'Daerah';
 
     protected static ?string $navigationGroup = 'Manajemen Wilayah';
 
-    public static function canViewAny(): bool
-    {
-        if(!auth()->user()->hasRole('super_admin')) {
-            return AccessHelper::canAccess(static::getSlug());
-        } else {
-            return true;
-        }
-    }
 
     public static function form(Form $form): Form
     {

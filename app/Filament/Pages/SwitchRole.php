@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Helpers\AccessHelper;
 use App\Models\Role;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -16,10 +17,12 @@ class SwitchRole extends Page
     protected static string $view = 'filament.pages.switch-role';
 
     public $roles;
+    public $activeRole;
 
     public function mount(): void
     {
         $this->roles = Auth::user()->roles;
+        $this->activeRole = AccessHelper::getActiveRoleName();
     }
 
     public function switchRole(int $roleId)

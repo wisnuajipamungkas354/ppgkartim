@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MinatResource\Pages;
 use App\Filament\Resources\MinatResource\RelationManagers;
 use App\Models\Minat;
+use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MinatResource extends Resource
 {
+    use HandlesActiveRolePermission;
+
     protected static ?string $model = Minat::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

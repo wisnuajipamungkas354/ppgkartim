@@ -22,7 +22,7 @@ class ManageDaerahs extends ManageRecords
                 ->modalCancelActionLabel('Batal')
                 ->createAnother(false)
                 ->modalSubmitActionLabel('Simpan')
-                ->successNotificationTitle('Berhasil ditambahkan'),
+                ->successNotificationTitle('Berhasil ditambahkan')
         ];
     }
 

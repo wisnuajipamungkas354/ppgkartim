@@ -7,6 +7,7 @@ use App\Filament\Resources\DesaResource\RelationManagers;
 use App\Helpers\AccessHelper;
 use App\Models\Daerah;
 use App\Models\Desa;
+use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -21,22 +22,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DesaResource extends Resource
 {
+    use HandlesActiveRolePermission;
+
     protected static ?string $model = Desa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-library';
 
     protected static ?string $navigationLabel = 'Desa';
 
     protected static ?string $navigationGroup = 'Manajemen Wilayah';
-
-    public static function canViewAny(): bool
-    {
-        if(!auth()->user()->hasRole('super_admin')) {
-            return AccessHelper::canAccess(static::getSlug());
-        } else {
-            return true;
-        }
-    }
 
     public static function form(Form $form): Form
     {

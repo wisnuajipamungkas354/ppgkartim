@@ -251,7 +251,7 @@ class GenerusForm
             Forms\Components\Select::make('pendidikan_terakhir')
                 ->label('Pendidikan Terakhir')
                 ->options(
-                    fn() => Status::query()->whereIn('slug', ['paudtk','sd','smp','sma-smk','d3','s1-d4','s2','s3'])->pluck('nm_status')
+                    fn() => Status::query()->whereIn('slug', ['paudtk','sd','smp','sma-smk','d3','s1-d4','s2','s3'])->pluck('nm_status', 'nm_status')->toArray()
                     )
                 ->required(),
             Forms\Components\Textarea::make('jurusan')
