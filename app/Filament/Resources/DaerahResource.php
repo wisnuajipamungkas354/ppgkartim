@@ -65,7 +65,7 @@ class DaerahResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->label('Hapus')
                     ->modalHeading('Hapus Data')
-                    ->modalDescription('Apakah kamu yakin ingin menghapus daerah ini ?')
+                    ->modalDescription('Menghapus daerah, berarti menghapus semua data desa, kelompok, generus, dan hal-hal lain yang berkaitan dengannya. Apakah kamu yakin ?')
                     ->modalSubmitActionLabel('Ya')
                     ->modalCancelActionLabel('Batal')
                     ->successNotification(fn(Notification $notification) => $notification->title('Dihapus')),

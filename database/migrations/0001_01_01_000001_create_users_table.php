@@ -18,9 +18,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('plain_password')->nullable();
-            $table->foreignId('daerah_id')->nullable()->constrained();
-            $table->foreignId('desa_id')->nullable()->constrained();
-            $table->foreignId('kelompok_id')->nullable()->constrained();
+            $table->foreignId('daerah_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('desa_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('kelompok_id')->nullable()->constrained()->cascadeOnDelete();
             $table->rememberToken();
             $table->timestamps();
         });

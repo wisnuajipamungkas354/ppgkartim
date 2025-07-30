@@ -114,7 +114,7 @@ class CreateGenerus extends CreateRecord
             // Step 7: Simpan Generus Record
             return static::getModel()::create([
                 'insan_role_id' => $insanRole->id,
-                'nis' => '123345', // TODO: Ganti dengan generator NIS jika perlu
+                'nis' => $data['nis'] ?? null,
                 'jenis_data' => $data['jenis_data'],
                 'kategori' => $data['kategori'],
                 'gol_dar' => $data['gol_dar'] ?? null,
