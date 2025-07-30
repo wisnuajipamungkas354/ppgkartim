@@ -14,7 +14,13 @@ class ManageDesas extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Tambah')
+                ->modalHeading('Tambah Desa')
+                ->modalCancelActionLabel('Batal')
+                ->createAnother(false)
+                ->modalSubmitActionLabel('Simpan')
+                ->successNotificationTitle('Berhasil ditambahkan')
         ];
     }
 

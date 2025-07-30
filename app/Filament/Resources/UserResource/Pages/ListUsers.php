@@ -13,7 +13,13 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Tambah')
+                ->modalHeading('Tambah User')
+                ->modalCancelActionLabel('Batal')
+                ->createAnother(false)
+                ->modalSubmitActionLabel('Simpan')
+                ->successNotificationTitle('Berhasil ditambahkan')
         ];
     }
 }

@@ -15,7 +15,12 @@ class ManageStatuses extends ManageRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Buat Status'),
+                ->label('Tambah')
+                ->modalHeading('Tambah Status')
+                ->modalCancelActionLabel('Batal')
+                ->createAnother(false)
+                ->modalSubmitActionLabel('Simpan')
+                ->successNotificationTitle('Berhasil ditambahkan')
         ];
     }
 

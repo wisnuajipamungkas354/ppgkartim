@@ -31,6 +31,7 @@ class MinatResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nm_minat')
+                    ->label('Nama Minat')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('slug')
@@ -42,7 +43,10 @@ class MinatResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID'),
                 Tables\Columns\TextColumn::make('nm_minat')
+                    ->label('Nama Minat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),

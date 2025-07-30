@@ -36,6 +36,7 @@ class DesaResource extends Resource
     {
         return $form
             ->schema([
+                TextColumn::make('id'),
                 TextInput::make('nm_desa')
                     ->label('Nama Desa')
                     ->required(),

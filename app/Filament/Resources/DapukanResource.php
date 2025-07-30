@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\StatusResource\Pages;
-use App\Filament\Resources\StatusResource\RelationManagers;
-use App\Models\Status;
+use App\Filament\Resources\DapukanResource\Pages;
+use App\Filament\Resources\DapukanResource\RelationManagers;
+use App\Models\Dapukan;
 use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -14,28 +14,25 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class StatusResource extends Resource
+class DapukanResource extends Resource
 {
     use HandlesActiveRolePermission;
-    
-    protected static ?string $model = Status::class;
+
+    protected static ?string $model = Dapukan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Manajemen List';
+    protected static ?string $navigationLabel = 'Dapukan';
 
-    protected static ?string $navigationLabel = 'Status';
+    protected static ?string $navigationGroup = 'Manajemen List';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nm_status')
+                Forms\Components\TextInput::make('nm_dapukan')
+                    ->label('Nama Dapukan')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('placeholder')
                     ->maxLength(255),
             ]);
     }
@@ -46,12 +43,9 @@ class StatusResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID'),
-                Tables\Columns\TextColumn::make('nm_status')
-                    ->label('Nama Status')
+                Tables\Columns\TextColumn::make('nm_dapukan')
+                    ->label('Nama Dapukan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('placeholder'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -78,7 +72,7 @@ class StatusResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageStatuses::route('/'),
+            'index' => Pages\ManageDapukans::route('/'),
         ];
     }
 }

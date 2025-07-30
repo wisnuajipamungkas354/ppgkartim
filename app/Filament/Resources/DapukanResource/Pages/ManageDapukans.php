@@ -1,31 +1,25 @@
 <?php
 
-namespace App\Filament\Resources\KelompokResource\Pages;
+namespace App\Filament\Resources\DapukanResource\Pages;
 
-use App\Filament\Resources\KelompokResource;
+use App\Filament\Resources\DapukanResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
-use Illuminate\Contracts\Support\Htmlable;
 
-class ManageKelompoks extends ManageRecords
+class ManageDapukans extends ManageRecords
 {
-    protected static string $resource = KelompokResource::class;
+    protected static string $resource = DapukanResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make()
                 ->label('Tambah')
-                ->modalHeading('Tambah Kelompok')
+                ->modalHeading('Tambah Dapukan')
                 ->modalCancelActionLabel('Batal')
                 ->createAnother(false)
                 ->modalSubmitActionLabel('Simpan')
                 ->successNotificationTitle('Berhasil ditambahkan')
         ];
-    }
-
-    public function getTitle(): string|Htmlable
-    {
-        return 'Kelompok';
     }
 }
