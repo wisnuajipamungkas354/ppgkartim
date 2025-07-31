@@ -2,38 +2,32 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Kelompok;
-use App\Models\User;
 use App\Traits\HandlesPermissionWidget;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Livewire\Features\SupportEvents\HandlesEvents;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
-class SuperAdminStat extends BaseWidget
+class PpgStats extends BaseWidget
 {
     use HandlesPermissionWidget;
+
+    protected static ?int $sort = 1;
 
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Daerah', Daerah::count())
-                ->chart([1,1,1])
-                ->chartColor('gray'),
             Stat::make('Total Desa', Desa::count())
                 ->chart([1,1,1])
                 ->chartColor('info'),
             Stat::make('Total Kelompok', Kelompok::count())
                 ->chart([1,1,1])
-                ->chartColor('success'),
-            Stat::make('Total User', User::count())
-                ->chart([1,1,1])
-                ->chartColor('danger'),
+                ->chartColor('success'),            
             Stat::make('Total Generus', Generus::count())
                 ->chart([1,1,1])
-                ->chartColor('warning'),
+                ->chartColor('danger'),
         ];
     }
 }

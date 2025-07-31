@@ -26,6 +26,15 @@ class ViewGenerus extends ViewRecord
         }
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\EditAction::make()
+                ->label('Edit')
+                ->icon('heroicon-o-pencil-square'),
+        ];
+    }
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist

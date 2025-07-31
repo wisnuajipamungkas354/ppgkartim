@@ -2,6 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\PpgCategoryPie;
+use App\Filament\Widgets\PpgGenderDoughnut;
+use App\Filament\Widgets\PpgSensusBar;
+use App\Filament\Widgets\PpgStats;
 use App\Filament\Widgets\SuperAdminStat;
 use App\Helpers\AccessHelper;
 use Filament\Pages\Page;
@@ -17,7 +21,10 @@ class Dashboard extends \Filament\Pages\Dashboard
                 SuperAdminStat::class,
             ],
             'phppg' => [
-                // Widgets\PPGOverview::class,
+                PpgStats::class,
+                PpgGenderDoughnut::class,
+                PpgCategoryPie::class,
+                PpgSensusBar::class,
             ],
             'kurikulum' => [
                 // Widgets\MudaMudiStats::class,

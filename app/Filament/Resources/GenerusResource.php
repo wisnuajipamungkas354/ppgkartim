@@ -154,8 +154,6 @@ class GenerusResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('index')
-                    ->rowIndex(),
                 TextColumn::make('nis')
                     ->label('NIS'),
                 TextColumn::make('insanrole.insan.desa.nm_desa')
