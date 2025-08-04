@@ -11,31 +11,31 @@ class ViewsGenerus
 {
     protected static array $listPaud = [
         'nis', 'nama', 'jk',
-        'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status',
+        'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status', 'kelas_ppg'
     ];
 
     protected static array $listCaberawit = [
         'nis', 'nama', 'jk',
         'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status',
-        'kelas_di_sekolah', 'kelas_di_ppg',
+        'kelas_di_sekolah', 'kelas_ppg',
     ];
 
     protected static array $listPraRemaja = [
         'nis', 'nama', 'jk',
         'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'status', 'detail_status',
-        'kelas_di_sekolah', 'kelas_di_ppg',
+        'kelas_di_sekolah', 'kelas_ppg',
     ];
 
     protected static array $listRemaja = [
         'nis', 'nama', 'jk',
         'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'status', 'detail_status',
-        'kelas_di_sekolah', 'kelas_di_ppg', 'minat', 'detail_minat',
+        'kelas_di_sekolah', 'kelas_ppg', 'minat', 'detail_minat',
     ];
 
     protected static array $listPraNikah = [
         'nis', 'nama', 'jk',
         'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'pendidikan_terakhir', 'jurusan',
-        'status', 'detail_status', 'kelas_di_ppg',
+        'status', 'detail_status', 'kelas_ppg',
         'minat', 'detail_minat', 'siap_nikah',
     ];
 
@@ -65,7 +65,7 @@ class ViewsGenerus
                 ->label(fn(Model $record) => $record->kategori != 'PRA_NIKAH' ? 'Nama Sekolah' : 'Detail Status')
                 ->formatStateUsing(fn(?string $state) => Str::title($state)),
             'kelas_di_sekolah' => TextEntry::make('kelas_di_sekolah')->label('Kelas Di Sekolah')->formatStateUsing(fn(?string $state) => 'Kelas ' . $state),
-            'kelas_di_ppg' => TextEntry::make('kelas_di_ppg')->label('Kelas Di PPG')->formatStateUsing(fn(?string $state) => Str::title($state)),
+            'kelas_ppg' => TextEntry::make('kelasPpg.nm_kelas')->label('Kelas Di PPG')->formatStateUsing(fn(?string $state) => Str::title($state)),
             'minat' => TextEntry::make('minat.nm_minat')->label('Bidang Minat/Bakat')->formatStateUsing(fn(?string $state) => Str::title($state)),
             'detail_minat' => TextEntry::make('detail_minat')->label('Detail Minat/Bakat')->formatStateUsing(fn(?string $state) => Str::title($state)),
             'siap_nikah' => TextEntry::make('siap_nikah')->label('Siap Nikah')->badge()->color(fn(?string $state): string => match ($state) {

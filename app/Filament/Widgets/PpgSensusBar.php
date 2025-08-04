@@ -4,11 +4,14 @@ namespace App\Filament\Widgets;
 
 use App\Models\Desa;
 use App\Models\Generus;
+use App\Traits\HandlesPermissionWidget;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Database\Eloquent\Builder;
 
 class PpgSensusBar extends ChartWidget
 {
+    use HandlesPermissionWidget;
+
     protected static ?int $sort = 4;
     protected static ?string $heading = 'Sensus Generus Per Desa';
     protected int | string | array $columnSpan = 'full';
@@ -26,6 +29,8 @@ class PpgSensusBar extends ChartWidget
             'rgb(75, 192, 192)',
             'rgb(153, 102, 255)',
         ];
+
+        $datasets = [];
         
         foreach ($labels as $i => $label) {
             $dataPerKategori = [];

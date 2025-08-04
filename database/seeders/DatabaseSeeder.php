@@ -97,6 +97,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             StatusSeeder::class,
             MinatSeeder::class,
+            KelasPpgSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
         ]);
@@ -128,7 +129,7 @@ class DatabaseSeeder extends Seeder
             'jenis_data' => 'MM',
             'kategori' => 'PRA_NIKAH',
             'gol_dar' => 'A',
-            'kelas_di_ppg' => 'E',
+            'kelas_ppg_id' => 14,
             'status_id' => 6,
             'detail_status' => 'Sistem Informasi',
             'siap_nikah' => 'BELUM',

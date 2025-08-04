@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\RoleResourceAccess;
+use App\Models\KelasPpg;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class RoleResourceAccessPolicy
+class KelasPpgPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class RoleResourceAccessPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_role::access');
+        return $user->can('view_any_kelas::ppg');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, RoleResourceAccess $roleResourceAccess): bool
+    public function view(User $user, KelasPpg $kelasPpg): bool
     {
-        return $user->can('view_role::access');
+        return $user->can('view_kelas::ppg');
     }
 
     /**
@@ -31,23 +31,23 @@ class RoleResourceAccessPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_role::access');
+        return $user->can('create_kelas::ppg');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, RoleResourceAccess $roleResourceAccess): bool
+    public function update(User $user, KelasPpg $kelasPpg): bool
     {
-        return $user->can('update_role::access');
+        return $user->can('update_kelas::ppg');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, RoleResourceAccess $roleResourceAccess): bool
+    public function delete(User $user, KelasPpg $kelasPpg): bool
     {
-        return $user->can('delete_role::access');
+        return $user->can('delete_kelas::ppg');
     }
 
     /**
@@ -55,15 +55,15 @@ class RoleResourceAccessPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_role::access');
+        return $user->can('delete_any_kelas::ppg');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, RoleResourceAccess $roleResourceAccess): bool
+    public function forceDelete(User $user, KelasPpg $kelasPpg): bool
     {
-        return $user->can('force_delete_role::access');
+        return $user->can('force_delete_kelas::ppg');
     }
 
     /**
@@ -71,15 +71,15 @@ class RoleResourceAccessPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_role::access');
+        return $user->can('force_delete_any_kelas::ppg');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, RoleResourceAccess $roleResourceAccess): bool
+    public function restore(User $user, KelasPpg $kelasPpg): bool
     {
-        return $user->can('restore_role::access');
+        return $user->can('restore_kelas::ppg');
     }
 
     /**
@@ -87,15 +87,15 @@ class RoleResourceAccessPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_role::access');
+        return $user->can('restore_any_kelas::ppg');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, RoleResourceAccess $roleResourceAccess): bool
+    public function replicate(User $user, KelasPpg $kelasPpg): bool
     {
-        return $user->can('replicate_role::access');
+        return $user->can('replicate_kelas::ppg');
     }
 
     /**
@@ -103,6 +103,6 @@ class RoleResourceAccessPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_role::access');
+        return $user->can('reorder_kelas::ppg');
     }
 }

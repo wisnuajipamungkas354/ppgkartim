@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Helpers\AccessHelper;
 use App\Models\Role;
+use App\Traits\HandlesPermissionPage;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Session;
 
 class SwitchRole extends Page
 {
+    use HandlesPermissionPage;
+
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
     protected static ?string $title = 'Pilih Peran';
     protected static ?string $routeName = 'filament.pages.switch-role';

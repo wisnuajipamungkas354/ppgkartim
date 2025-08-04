@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('jenis_data', ['MM', 'CBRWT']);
             $table->enum('kategori', ['PAUD','CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH']);
             $table->enum('gol_dar', ['A', 'B', 'O', 'AB'])->nullable();
-            $table->string('kelas_di_ppg')->nullable(); // Kemungkinan Relasi ke tabel kelas PPG
+            $table->foreignId('kelas_ppg_id')->nullable()->constrained('kelas_ppgs', 'id')->nullOnDelete(); // Kemungkinan Relasi ke tabel kelas PPG
 
             $table->foreignId('status_id')->nullable()->constrained()->cascadeOnUpdate();
             // PAUD/TK, SD, SMP, SMA/K,
@@ -43,7 +43,8 @@ return new class extends Migration
             $table->foreignId('minat_id')->nullable()->constrained();
             $table->string('detail_minat')->nullable();
             $table->enum('siap_nikah', ['SIAP', 'BELUM'])->nullable();
-            $table->string('riwayat_delete')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, MENINGGAL KAH, DLL
+            $table->boolean('is_verified')->default(false);
+            $table->string('riwayat_update')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, MENINGGAL KAH, DLL
             $table->timestamps();
             $table->softDeletes();
         });

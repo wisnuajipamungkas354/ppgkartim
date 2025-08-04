@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\GenerusResource\Pages;
 use App\Filament\Resources\GenerusResource\RelationManagers;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use App\Helpers\AccessHelper;
 use App\Models\Daerah;
 use App\Models\Desa;
@@ -27,7 +28,7 @@ use App\Traits\HandlesActiveRolePermission;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class GenerusResource extends Resource
+class GenerusResource extends Resource implements HasShieldPermissions
 {
     use HandlesActiveRolePermission;
 
@@ -39,115 +40,23 @@ class GenerusResource extends Resource
 
     protected static ?string $navigationGroup = 'Database';
 
-    public static function form(Form $form): Form
-    {   
-        return $form
-            ->schema([
-                Wizard::make([
-                    Wizard\Step::make('Jenis Data')
-                        ->schema([
-                            Forms\Components\Select::make('kategori')
-                            ->label('Kategori Generus')
-                            ->options(function() {
-                                $roleName = AccessHelper::getActiveRoleName();
-                                if(in_array($roleName, ['phppg', 'pjp_desa', 'pjp_kelompok', 'kurikulum', 'super_admin'])) {
-                                    return [
-                                        'PAUD' => 'Paud/TK',
-                                        'CABERAWIT' => 'Caberawit (SD)',
-                                        'PRA_REMAJA' => 'Pra Remaja (SMP)',
-                                        'REMAJA' => 'Remaja (SMA/K)',
-                                        'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
-                                    ];
-                                } elseif(in_array($roleName, ['mudamudi_daerah', 'mudamudi_desa', 'mudamudi_kelompok'])) {
-                                    return [
-                                        'PRA_REMAJA' => 'Pra Remaja (SMP)',
-                                        'REMAJA' => 'Remaja (SMA/K)',
-                                        'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
-                                    ];
-                                }
-                            })
-                            ->required()
-                        ]),
-                    Wizard\Step::make('Sambung')
-                        ->schema([
-                            Forms\Components\Select::make('daerah_id')
-                                ->label('Daerah')
-                                ->options(function() {
-                                    if(AccessHelper::isSuperAdmin()) {
-                                        return Daerah::query()->pluck('nm_daerah', 'id');
-                                    }
-                                })
-                                ->required()
-                                ->live()
-                                ->preload()
-                                ->visible(fn() => AccessHelper::isSuperAdmin()),
-                            Forms\Components\Select::make('desa_id')
-                                ->label('Desa')
-                                ->options(function(Get $get){
-                                    if(AccessHelper::isDaerah() || AccessHelper::isSuperAdmin()) {
-                                        if(auth()->user()->hasRole(['super_admin'])) {
-                                            return Desa::query()->where('daerah_id', $get('daerah_id'))->pluck('nm_desa', 'id');
-                                        } else {
-                                            return Desa::query()->where('daerah_id', auth()->user()->daerah_id)->pluck('nm_desa', 'id');
-                                        }
-                                    }
-                                })
-                                ->required()
-                                ->searchable()
-                                ->afterStateUpdated(fn (Set $set) => $set('kelompok_id', null))
-                                ->live()
-                                ->preload()
-                                ->visible(fn() => AccessHelper::isDaerah() || AccessHelper::isSuperAdmin()),
-                            Forms\Components\Select::make('kelompok_id')
-                                ->label('Kelompok')
-                                ->options(function (Get $get) {
-                                    if(!AccessHelper::isKelompok()) {
-                                        return Kelompok::query()->where('desa_id', $get('desa_id'))->pluck('nm_kelompok', 'id');
-                                    }
-                                })
-                                ->required()
-                                ->searchable()
-                                ->live()
-                                ->preload()
-                                ->visible(fn() => !AccessHelper::isKelompok()),
-                    ])->visible(fn() => !AccessHelper::isKelompok()),
-                    Wizard\Step::make('Data Diri')
-                        ->schema(function(Get $get): array {
-                           switch($get('kategori')) {
-                            case 'PAUD':
-                                return GenerusForm::getPaudForm($get);
-                            case 'CABERAWIT':
-                                return GenerusForm::getCaberawitForm($get);
-                            case 'PRA_REMAJA': 
-                                return GenerusForm::getPraRemajaForm($get);
-                            case 'REMAJA': 
-                                return GenerusForm::getRemajaForm($get);
-                            default:
-                                return GenerusForm::getPraNikahForm($get);
-                           }
-                        }),
-                    Wizard\Step::make('Orang Tua')
-                        ->schema([
-                            Forms\Components\TextInput::make('nm_ayah')
-                                ->label('Nama Ayah')
-                                ->placeholder('Masukkan nama ayah'),
-                            Forms\Components\TextInput::make('nm_ibu')
-                                ->label('Nama Ibu')
-                                ->placeholder('Masukkan nama ibu'),
-                            Forms\Components\TextInput::make('no_hp_wali')
-                                ->label('Nomor HP/WhatsApp Orang Tua')
-                                ->placeholder('Masukkan nomor HP/WA'),
-                        ]),
-                    Wizard\Step::make('Minat & Bakat')
-                        ->schema([
-                            Forms\Components\Select::make('minat_id')
-                                ->label('Kategori Minat Bakat')
-                                ->relationship('minat', 'nm_minat'),
-                            Forms\Components\TextInput::make('detail_minat')
-                                ->label('Sebutkan nama minat bakat'),
-                    ])
-                ])->columnSpanFull()
-            ]);
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'approve'
+        ];
     }
 
     public static function table(Table $table): Table
@@ -166,6 +75,7 @@ class GenerusResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('insanrole.insan.nama')
                     ->label('Nama Lengkap')
+                    ->formatStateUsing(fn (string $state) => Str::title($state))
                     ->searchable(),
                 TextColumn::make('insanrole.insan.jk')
                     ->label('L/P')

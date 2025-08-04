@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\GenerusResource\Pages;
 
 use App\Filament\Resources\GenerusResource;
+use App\Filament\Resources\GenerusResource\Pages\Forms\BaseFormGenerus;
 use App\Helpers\AccessHelper;
-use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Dapukan;
 use App\Models\Insan;
@@ -12,8 +12,6 @@ use App\Models\InsanRole;
 use App\Models\Kelompok;
 use App\Models\Status;
 use Carbon\Carbon;
-use Error;
-use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Js;
@@ -24,6 +22,8 @@ use Illuminate\Support\Facades\Log;
 
 class CreateGenerus extends CreateRecord
 {
+    use CreateRecord\Concerns\HasWizard;
+
     protected static string $resource = GenerusResource::class;
 
     public function getTitle(): string|Htmlable
@@ -54,6 +54,11 @@ class CreateGenerus extends CreateRecord
             ->label('Batal')
             ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl ?? static::getResource()::getUrl()) . ')')
             ->color('gray');
+    }
+
+    public function getSteps(): array
+    {
+        return BaseFormGenerus::getBaseForm();
     }
 
     protected function handleRecordCreation(array $data): Model
@@ -89,6 +94,10 @@ class CreateGenerus extends CreateRecord
             // Step 4: Usia
             $data['usia'] = Carbon::parse($data['tgl_lahir'])->age ?? null;
 
+            // Step 5: Data Terverifikasi
+            $data['is_verified'] = true;
+            $data['riwayat_update'] = 'DITAMBAHKAN OLEH ADMIN';
+
             // Step 5: Simpan Insan
             $insan = Insan::create([
                 'daerah_id' => $data['daerah_id'],
@@ -118,7 +127,7 @@ class CreateGenerus extends CreateRecord
                 'jenis_data' => $data['jenis_data'],
                 'kategori' => $data['kategori'],
                 'gol_dar' => $data['gol_dar'] ?? null,
-                'kelas_di_ppg' => $data['kelas_di_ppg'] ?? null,
+                'kelas_ppg_id' => $data['kelas_ppg_id'] ?? null,
                 'status_id' => $data['status_id'],
                 'detail_status' => $data['detail_status'],
                 'kelas_di_sekolah' => $data['kelas_di_sekolah'] ?? null,
@@ -128,6 +137,8 @@ class CreateGenerus extends CreateRecord
                 'minat_id' => $data['minat_id'][0] ?? null,
                 'detail_minat' => $data['detail_minat'] ?? null,
                 'siap_nikah' => $data['siap_nikah'] ?? null,
+                'is_verified' => $data['is_verified'],
+                'riwayat_update' => $data['riwayat_update'],
             ]);
         } catch (\Throwable $e) {
             // Log error jika perlu

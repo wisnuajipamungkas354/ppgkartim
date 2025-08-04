@@ -15,13 +15,29 @@ trait HandlesActiveRolePermission
         return $action . '_' . static::getPermissionSlug();
     }
 
+    protected static function isCombinedWords($string)
+    {
+        // lakukan pengecekan regex: apakah ada huruf kapital A-Z setelah karakter pertama
+        return preg_match('/[A-Z]/', substr($string, 1));
+    }
+
     /**
      * Get the base slug for permission based on the resource class name.
      * Example: GenerusResource => generus
      */
     protected static function getPermissionSlug(): string
     {
-        return strtolower(str_replace('Resource', '', class_basename(static::class)));
+        // Menghilangkan kata Resource
+        $slug = str_replace('Resource', '', class_basename(static::class));
+
+        if(static::isCombinedWords($slug)) {
+            $str = strtolower(preg_replace('/([A-Z])/', '::$1', $slug));
+            $str = ltrim($str, ':');
+        } else {
+            $str = strtolower($slug);
+        }
+
+        return $str;
     }
 
     // Filament resource access gates
