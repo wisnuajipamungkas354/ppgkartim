@@ -6,16 +6,17 @@ use Livewire\Component;
 
 class Counter extends Component
 {
-    public $count = 1;
- 
-    public function increment()
+    public $input = "";
+    public $result;
+
+    public function submit()
     {
-        $this->count++;
-    }
- 
-    public function decrement()
-    {
-        $this->count--;
+        if($this->input == "0042919829") {
+            $this->result = "Halo Arfan!";
+        } else {
+            $this->result = "Halo mas wisnu!";
+        }
+        $this->reset('input');
     }
  
     public function render()

@@ -160,7 +160,7 @@ class Registrasi extends Page implements HasTable
                             'tgl_lahir' => $record->insanRole->insan->tgl_lahir,
                             'no_hp' => $record->insanRole->insan->no_hp,
                             'pendidikan_terakhir' => $record->insanRole->insan->pendidikan_terakhir,
-                            'jurusan' => $record->insanRole->insan->pendidikan_terakhir,
+                            'jurusan' => $record->insanRole->insan->jurusan,
                             'insan_role_id' => $record->insanRole->id,
                             'nis' => $record->nis,
                             'jenis_data' => $record->jenis_data,
