@@ -123,7 +123,8 @@ class GenerusForm
                 ->label('Apakah Anda Seorang Mubaligh ?')
                 ->options(['MT' => 'Ya, Mubaligh Tugasan (MT)', 'MS' => 'Ya, Mubaligh Setempat (MS)', 'BUKAN' => 'Bukan Mubaligh'])
                 ->live()
-                ->afterStateUpdated(fn(Get $get) => null),
+                ->afterStateUpdated(fn(Get $get) => null)
+                ->required(),
             'status_id' => Forms\Components\Select::make('status_id')
                 ->label('Status Saat Ini')
                 ->options($options['listStatus'] ?? [])
