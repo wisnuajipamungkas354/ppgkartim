@@ -46,30 +46,30 @@ class ListGeneruses extends ListRecords
         {
             return [
                 'Paud' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PAUD'))
-                        ->badge(Generus::query()->where('kategori', '=', 'PAUD')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PAUD')->count()),
                 'Caberawit' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'CABERAWIT'))
-                        ->badge(Generus::query()->where('kategori', '=', 'CABERAWIT')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'CABERAWIT')->count()),
                 'Pra Remaja' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PRA_REMAJA'))
-                        ->badge(Generus::query()->where('kategori', '=', 'PRA_REMAJA')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PRA_REMAJA')->count()),
                 'Remaja' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'REMAJA'))
-                        ->badge(Generus::query()->where('kategori', '=', 'REMAJA')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'REMAJA')->count()),
                 'Pra Nikah' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PRA_NIKAH'))
-                        ->badge(Generus::query()->where('kategori', '=', 'PRA_NIKAH')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PRA_NIKAH')->count()),
                 'Semua' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query)
-                        ->badge(Generus::count()),
+                        ->badge(Generus::where('is_verified', true)->count()),
             ];
         } else {
             return [
                 'Semua' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('jenis_data', 'MM'))
-                        ->badge(Generus::query()->where('jenis_data', 'MM')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('jenis_data', 'MM')->count()),
                 'Pra Remaja' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PRA_REMAJA'))
-                        ->badge(Generus::query()->where('kategori', '=', 'PRA_REMAJA')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PRA_REMAJA')->count()),
                 'Remaja' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'REMAJA'))
-                        ->badge(Generus::query()->where('kategori', '=', 'REMAJA')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'REMAJA')->count()),
                 'Mahasiswa' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->with('status')->where('kategori', '=', 'PRA_NIKAH')->whereHas('status', fn(Builder $query) => $query->whereIn('slug', ['d3','s1-d4','s2','s3','kuliahkerja'])))
                         ->badge(Generus::with('status')->where('kategori', '=', 'PRA_NIKAH')->whereHas('status', fn(Builder $query) => $query->whereIn('slug', ['d3','s1-d4','s2','s3','kuliahkerja']))->count()),
                 'Pra Nikah' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PRA_NIKAH'))
-                        ->badge(Generus::query()->where('kategori', '=', 'PRA_NIKAH')->count()),
+                        ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PRA_NIKAH')->count()),
             ];
         }
     }

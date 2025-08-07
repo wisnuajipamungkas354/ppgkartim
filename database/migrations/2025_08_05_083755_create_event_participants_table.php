@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('event_participants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained()->cascadeOnDelete();
+            $table->string('event_id');
+            $table->foreign('event_id')->references('id')->on('events')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('rfid_tag')->nullable()->unique(); // bisa kosong jika manual
             $table->json('data_json');                         // fleksibel simpan data peserta
             $table->timestamps();

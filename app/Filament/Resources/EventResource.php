@@ -99,11 +99,23 @@ class EventResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('date')->date(),
-                TextColumn::make('attendance_method'),
-                TextColumn::make('start_time')->time(),
-                TextColumn::make('end_time')->time(),
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->searchable(),
+                TextColumn::make('date')
+                    ->label('Tanggal Pelaksanaan')
+                    ->date('d-m-Y'),
+                TextColumn::make('name')
+                    ->label('Nama Event')
+                    ->searchable(),
+                TextColumn::make('attendance_method')
+                    ->label('Metode Presensi'),
+                TextColumn::make('start_time')
+                    ->label('Waktu Mulai')
+                    ->time(),
+                TextColumn::make('end_time')
+                    ->label('Waktu Selesai')
+                    ->time(),
             ])
             ->filters([])
             ->actions([
@@ -112,7 +124,6 @@ class EventResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->label('Hapus'),
             ])
-            ->stripped()
             ->emptyStateHeading('Belum ada data event');
     }
 

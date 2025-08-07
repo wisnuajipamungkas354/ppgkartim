@@ -7,6 +7,8 @@ use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
+use App\Models\MubalighTugasan;
+use App\Models\MubalighSetempat;
 use App\Models\Kelompok;
 use App\Traits\HandlesPermissionPage;
 use Carbon\Carbon;
@@ -21,6 +23,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\ForceDeleteAction;
@@ -114,20 +117,7 @@ class Registrasi extends Page implements HasTable
                             ])
                             ->columns(3),
                         FieldSet::make('Data Diri')
-                            ->schema(function(Get $get): array {
-                                switch($get('kategori')) {
-                                 case 'PAUD':
-                                     return GenerusForm::getPaudForm($get);
-                                 case 'CABERAWIT':
-                                     return GenerusForm::getCaberawitForm($get);
-                                 case 'PRA_REMAJA': 
-                                     return GenerusForm::getPraRemajaForm($get);
-                                 case 'REMAJA': 
-                                     return GenerusForm::getRemajaForm($get);
-                                 default:
-                                     return GenerusForm::getPraNikahForm($get);
-                                }
-                             }),
+                            ->schema(fn(Get $get) => GenerusForm::getForms($get)),
                         FieldSet::make('Orang Tua')
                              ->schema([
                                 TextInput::make('nm_ayah')
@@ -150,6 +140,17 @@ class Registrasi extends Page implements HasTable
                              ])
                     ])
                     ->fillForm(function (Generus $record): array {
+                        $mts = '';
+                        $isMT = MubalighTugasan::where('insan_role_id', $record->insanRole->id)->first();
+                        $isMs = MubalighSetempat::where('insan_role_id', $record->insanRole->id)->first();
+                        if($isMT) {
+                            $mts = 'MT';
+                        } elseif($isMs) {
+                            $mts = 'MS';
+                        } else {
+                            $mts = 'BUKAN';
+                        }
+
                         return [
                             'daerah_id' => $record->insanRole->insan->daerah_id,
                             'desa_id' => $record->insanRole->insan->desa_id,
@@ -167,9 +168,24 @@ class Registrasi extends Page implements HasTable
                             'kategori' => $record->kategori,
                             'gol_dar' => $record->gol_dar,
                             'kelas_ppg_id' => $record->kelas_ppg_id,
+                            'mubaligh' => $mts, 
+                            'tingkatan_tugas' => $record->detail_status['tingkatan_tugas'] ?? null, 
+                            'tgl_mulai_tugas' => $record->detail_status['tgl_mulai_tugas'] ?? null, 
+                            'asal_pondok' => $record->detail_status['asal_pondok'] ?? null, 
+                            'tugasan_ke' => $record->detail_status['tugasan_ke'] ?? null, 
+                            'jml_tugas' => $record->detail_status['jml_tugas'] ?? null, 
+                            'lama_tugas' => $record->detail_status['lama_tugas'] ?? null, 
                             'status_id' => $record->status_id,
-                            'detail_status' => $record->detail_status,
-                            'kelas_di_sekolah' => $record->kelas_di_sekolah,
+                            'program_studi' => $record->detail_status['program_studi'] ?? null, 
+                            'universitas' => $record->detail_status['universitas'] ?? null, 
+                            'jabatan' => $record->detail_status['jabatan'] ?? null, 
+                            'nm_perusahaan' => $record->detail_status['nm_perusahaan'] ?? null, 
+                            'bidang_usaha' => $record->detail_status['bidang_usaha'] ?? null, 
+                            'nm_usaha' => $record->detail_status['nm_usaha'] ?? null, 
+                            'keahlian' => $record->detail_status['keahlian'] ?? null,
+                            'nm_sekolah' => $record->detail_status['nm_sekolah'] ?? null,
+                            'kelas_di_sekolah' => $record->detail_status['kelas_di_sekolah'] ?? null,
+                            'peminatan_sekolah' => $record->detail_status['peminatan_sekolah'] ?? null,
                             'nm_ayah' => $record->nm_ayah,
                             'nm_ibu' => $record->nm_ibu,
                             'no_hp_wali' => $record->no_hp_wali,

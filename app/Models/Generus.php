@@ -10,6 +10,10 @@ class Generus extends Model
     use SoftDeletes;
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'detail_status' => 'array',
+    ];
+
     protected static function booted()
     {
         static::creating(function ($generus) {

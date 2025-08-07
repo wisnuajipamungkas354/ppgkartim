@@ -11,6 +11,8 @@ use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\InsanRole;
 use App\Models\Kelompok;
+use App\Models\MubalighSetempat;
+use App\Models\MubalighTugasan;
 use App\Models\Status;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -98,20 +100,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                                 throw new Halt();
                             }
                         })
-                        ->schema(function(Get $get): array {
-                           switch($get('kategori')) {
-                            case 'PAUD':
-                                return GenerusForm::getPaudForm($get);
-                            case 'CABERAWIT':
-                                return GenerusForm::getCaberawitForm($get);
-                            case 'PRA_REMAJA': 
-                                return GenerusForm::getPraRemajaForm($get);
-                            case 'REMAJA': 
-                                return GenerusForm::getRemajaForm($get);
-                            default:
-                                return GenerusForm::getPraNikahForm($get);
-                           }
-                        }),
+                        ->schema(fn(Get $get) => GenerusForm::getForms($get)),
                     Wizard\Step::make('Orang Tua')
                         ->schema([
                             Forms\Components\TextInput::make('nm_ayah')
@@ -163,7 +152,6 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'PRA_REMAJA' => 'smp',
                 'REMAJA' => 'sma-smk',
             ];
-
             $slug = $statusMap[$data['kategori']] ?? null;
             $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : $data['status_id'];
 
@@ -171,11 +159,37 @@ class RegistrasiGenerusForm extends Component implements HasForms
             $data['usia'] = Carbon::parse($data['tgl_lahir'])->age ?? null;
 
             // Step 5: Data Terverifikasi
-            $data['is_verified'] = false;
-            $data['riwayat_update'] = 'REGISTRASI MANDIRI';
+            $data['is_verified'] = true;
+            $data['riwayat_update'] = 'FORM REGISTRASI';
 
-            // Step 5: Simpan Insan
+            // Step 6: Pisahkan dan kumpulkan data detail status
+            $detailStatusKeys = [
+                'program_studi', 'universitas', 'jabatan', 'nm_perusahaan',
+                'bidang_usaha', 'nm_usaha', 'keahlian', 'nm_sekolah',
+                'peminatan_sekolah', 'kelas_di_sekolah',
+            ];
+            $detailStatusData = [];
+            foreach ($detailStatusKeys as $key) {
+                if (isset($data[$key])) {
+                    $detailStatusData[$key] = $data[$key];
+                    unset($data[$key]);
+                }
+            }
+            
+            // Step 7: Menentukan Dapukan 
+            $dapukanGenerus = Dapukan::where('nm_dapukan', 'GENERUS')->value('id');
+            $dapukanMubaligh = null; 
+            if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
+                if ($data['mubaligh'] === 'MT') {
+                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH TUGASAN')->value('id');
+                } elseif ($data['mubaligh'] === 'MS') {
+                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('id');
+                }
+            }
+
+            // Step 8: Simpan Insan
             $insan = Insan::create([
+                'url_foto' => $data['url_foto'] ?? null,
                 'daerah_id' => $data['daerah_id'],
                 'desa_id' => $data['desa_id'],
                 'kelompok_id' => $data['kelompok_id'] ?? null,
@@ -189,24 +203,49 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'jurusan' => $data['jurusan'] ?? null,
             ]);
 
-            // Step 6: Simpan Insan Role
-            $dapukanId = Dapukan::where('nm_dapukan', 'GENERUS')->value('id');
-            $insanRole = InsanRole::create([
+            // Step 9: Simpan Insan Role
+            $insanRoleGenerus = InsanRole::create([
                 'insan_id' => $insan->id,
-                'dapukan_id' => $dapukanId,
+                'dapukan_id' => $dapukanGenerus,
             ]);
+            $insanRoleMubaligh = '';
+            
+            // Step 10: Simpan Data Mubaligh jika ada
+            if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
+                $insanRoleMubaligh = InsanRole::create([
+                    'insan_id' => $insan->id,
+                    'dapukan_id' => $dapukanMubaligh,
+                ]);
 
-            // Step 7: Simpan Generus Record
+                if ($data['mubaligh'] === 'MT') {
+                    MubalighTugasan::create([
+                        'insan_role_id' => $insanRoleMubaligh->id,
+                        'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,
+                        'asal_pondok' => $data['asal_pondok'] ?? null,
+                        'tugasan_ke' => $data['tugasan_ke'] ?? null,
+                        'tgl_mulai_tugas' => $data['tgl_mulai_tugas'] ?? null,
+                    ]);
+                } elseif ($data['mubaligh'] === 'MS') {
+                    MubalighSetempat::create([
+                        'insan_role_id' => $insanRoleMubaligh->id,
+                        'asal_pondok' => $data['asal_pondok'] ?? null,
+                        'jml_tugas' => $data['jml_tugas'] ?? null,
+                        'lama_tugas' => $data['lama_tugas'] ?? null,
+                    ]);
+                }
+                unset($data['mubaligh']);
+            }
+
+            // Step 11: Simpan Generus Record
             Generus::create([
-                'insan_role_id' => $insanRole->id,
+                'insan_role_id' => $insanRoleGenerus->id,
                 'nis' => $data['nis'] ?? null,
                 'jenis_data' => $data['jenis_data'],
                 'kategori' => $data['kategori'],
                 'gol_dar' => $data['gol_dar'] ?? null,
                 'kelas_ppg_id' => $data['kelas_ppg_id'] ?? null,
-                'status_id' => $data['status_id'],
-                'detail_status' => $data['detail_status'],
-                'kelas_di_sekolah' => $data['kelas_di_sekolah'] ?? null,
+                'status_id' => $data['status_id'] ?? null,
+                'detail_status' => $detailStatusData,
                 'nm_ayah' => $data['nm_ayah'] ?? null,
                 'nm_ibu' => $data['nm_ibu'] ?? null,
                 'no_hp_wali' => $data['no_hp_wali'] ?? null,

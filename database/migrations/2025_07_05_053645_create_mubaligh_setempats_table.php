@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('insan_role_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->enum('is_menikah', ['SUDAH', 'BELUM'])->default('BELUM');
+            $table->string('asal_pondok');
             $table->integer('jml_tugas');
             $table->string('lama_tugas');
             $table->boolean('aktif')->default(false);

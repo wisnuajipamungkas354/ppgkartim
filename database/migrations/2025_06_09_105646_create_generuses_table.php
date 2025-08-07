@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('jenis_data', ['MM', 'CBRWT']);
             $table->enum('kategori', ['PAUD','CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH']);
             $table->enum('gol_dar', ['A', 'B', 'O', 'AB'])->nullable();
-            $table->foreignId('kelas_ppg_id')->nullable()->constrained('kelas_ppgs', 'id')->nullOnDelete(); // Kemungkinan Relasi ke tabel kelas PPG
+            $table->foreignId('kelas_ppg_id')->nullable()->constrained('kelas_ppgs', 'id')->nullOnDelete();
 
             $table->foreignId('status_id')->nullable()->constrained()->cascadeOnUpdate();
             // PAUD/TK, SD, SMP, SMA/K,
@@ -26,10 +26,7 @@ return new class extends Migration
             // Pencari Kerja, Karyawan/Pegawai, Wirausaha/Freelance
             // Kalau MT akan terisi otomatis
 
-            $table->integer('kelas_di_sekolah')->nullable();
-            // SD-SMA/K (Kelas 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12) 
-
-            $table->string('detail_status')->nullable(); 
+            $table->json('detail_status')->nullable(); 
             // SMA/K = Jurusan (IPA, IPS, Sastra/Bahasa, Teknik Komputer dan Jaringan, Rekayasa Perangkat Lunak, Tata Boga, dll)
             // Mahasiswa = Nama Prodi (Sistem Informasi, Teknik Informatika, Sastra Inggris, dll)
             // Pencari Kerja = Keahlian Khusus

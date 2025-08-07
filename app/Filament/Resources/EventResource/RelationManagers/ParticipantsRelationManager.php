@@ -5,10 +5,14 @@ namespace App\Filament\Resources\EventResource\RelationManagers;
 use App\Filament\Imports\EventParticipantImporter;
 use App\Models\Event;
 use App\Models\EventParticipant;
+use App\Models\Generus;
+use App\Models\MubalighSetempat;
+use App\Models\MubalighTugasan;
 use App\Traits\HandlesActiveRolePermission;
 use App\Traits\HandlesPermissionRelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -100,7 +104,58 @@ class ParticipantsRelationManager extends RelationManager implements HasShieldPe
                 Action::make('import_from_db')
                     ->label('Database')
                     ->icon('heroicon-o-circle-stack')
-                    ->color('info'),
+                    ->color('info')
+                    ->form([
+                        // pilihan sumber tabel
+                        Select::make('source')
+                            ->label('Ambil Dari')
+                            ->options([
+                                'generus' => 'Generus',
+                                'ms'      => 'Mubaligh Setempat',
+                                'customers' => 'Customers',
+                            ])
+                            ->live()
+                            ->required(),
+                
+                        // pilihan data dari tabel sumber (dinamis berdasarkan source)
+                        Select::make('source_ids')
+                            ->label('Pilih Data')
+                            ->multiple()
+                            ->options(function (callable $get) {
+                                return match ($get('source')) {
+                                    'generus' => Generus::all(),
+                                    'mt'      => MubalighTugasan::pluck('nama', 'id'),
+                                    'ms'      => MubalighSetempat::pluck('nama', 'id'),
+                                    default  => [],
+                                };
+                            })
+                            ->required(),
+                    ])
+                    ->action(function ($data) {
+                        $event = $this->ownerRecord;
+                        $ids   = $data['source_ids'];
+                        $source= $data['source'];
+                
+                        $collection = match ($source) {
+                            'generus' => Generus::all(),
+                            'mt'      => MubalighTugasan::whereIn('id', $ids)->get(),
+                            'ms'      => MubalighSetempat::whereIn('id', $ids)->get(),
+                            default   => collect(),
+                        };
+                
+                        foreach ($collection as $item) {
+                            EventParticipant::firstOrCreate([
+                                'event_id'  => $event->id,
+                            ],[
+                                'rfid_tag'  => $item->rfid_tag ?? null,
+                                'data_json' => [
+                                    'nama' => $item->nama_lengkap ?? $item->nama ?? $item->name ?? null,
+                                    'jk'   => $item->jk ?? $item->gender ?? null,
+                                    // bisa mapping lebih banyak field
+                                ]
+                            ]);
+                        }
+                    }),
                 CreateAction::make()
                     ->label('Manual')
                     ->icon('heroicon-o-plus'),

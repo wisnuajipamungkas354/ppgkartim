@@ -11,6 +11,8 @@ use App\Models\Insan;
 use App\Models\InsanRole;
 use App\Models\Kelompok;
 use App\Models\Status;
+use App\Models\MubalighTugasan;
+use App\Models\MubalighSetempat;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -87,7 +89,6 @@ class CreateGenerus extends CreateRecord
                 'PRA_REMAJA' => 'smp',
                 'REMAJA' => 'sma-smk',
             ];
-
             $slug = $statusMap[$data['kategori']] ?? null;
             $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : $data['status_id'];
 
@@ -98,8 +99,34 @@ class CreateGenerus extends CreateRecord
             $data['is_verified'] = true;
             $data['riwayat_update'] = 'DITAMBAHKAN OLEH ADMIN';
 
-            // Step 5: Simpan Insan
+            // Step 6: Pisahkan dan kumpulkan data detail status
+            $detailStatusKeys = [
+                'program_studi', 'universitas', 'jabatan', 'nm_perusahaan',
+                'bidang_usaha', 'nm_usaha', 'keahlian', 'nm_sekolah',
+                'peminatan_sekolah', 'kelas_di_sekolah',
+            ];
+            $detailStatusData = [];
+            foreach ($detailStatusKeys as $key) {
+                if (isset($data[$key])) {
+                    $detailStatusData[$key] = $data[$key];
+                    unset($data[$key]);
+                }
+            }
+            
+            // Step 7: Menentukan Dapukan 
+            $dapukanGenerus = Dapukan::where('nm_dapukan', 'GENERUS')->value('id');
+            $dapukanMubaligh = null; 
+            if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
+                if ($data['mubaligh'] === 'MT') {
+                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH TUGASAN')->value('id');
+                } elseif ($data['mubaligh'] === 'MS') {
+                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('id');
+                }
+            }
+
+            // Step 8: Simpan Insan
             $insan = Insan::create([
+                'url_foto' => $data['url_foto'] ?? null,
                 'daerah_id' => $data['daerah_id'],
                 'desa_id' => $data['desa_id'],
                 'kelompok_id' => $data['kelompok_id'] ?? null,
@@ -113,24 +140,50 @@ class CreateGenerus extends CreateRecord
                 'jurusan' => $data['jurusan'] ?? null,
             ]);
 
-            // Step 6: Simpan Insan Role
-            $dapukanId = Dapukan::where('nm_dapukan', 'GENERUS')->value('id');
-            $insanRole = InsanRole::create([
+            // Step 9: Simpan Insan Role
+            $insanRoleGenerus = InsanRole::create([
                 'insan_id' => $insan->id,
-                'dapukan_id' => $dapukanId,
+                'dapukan_id' => $dapukanGenerus,
             ]);
+            $insanRoleMubaligh = '';
+            
+            // Step 10: Simpan Data Mubaligh jika ada
+            if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
+                $insanRoleMubaligh = InsanRole::create([
+                    'insan_id' => $insan->id,
+                    'dapukan_id' => $dapukanMubaligh,
+                ]);
 
-            // Step 7: Simpan Generus Record
+                if ($data['mubaligh'] === 'MT') {
+        
+                    MubalighTugasan::create([
+                        'insan_role_id' => $insanRoleMubaligh->id,
+                        'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,
+                        'asal_pondok' => $data['asal_pondok'] ?? null,
+                        'tugasan_ke' => $data['tugasan_ke'] ?? null,
+                        'tgl_mulai_tugas' => $data['tgl_mulai_tugas'] ?? null,
+                    ]);
+                } elseif ($data['mubaligh'] === 'MS') {
+                    MubalighSetempat::create([
+                        'insan_role_id' => $insanRoleMubaligh->id,
+                        'asal_pondok' => $data['asal_pondok'] ?? null,
+                        'jml_tugas' => $data['jml_tugas'] ?? null,
+                        'lama_tugas' => $data['lama_tugas'] ?? null,
+                    ]);
+                }
+                unset($data['mubaligh']);
+            }
+
+            // Step 11: Simpan Generus Record
             return static::getModel()::create([
-                'insan_role_id' => $insanRole->id,
+                'insan_role_id' => $insanRoleGenerus->id,
                 'nis' => $data['nis'] ?? null,
                 'jenis_data' => $data['jenis_data'],
                 'kategori' => $data['kategori'],
                 'gol_dar' => $data['gol_dar'] ?? null,
                 'kelas_ppg_id' => $data['kelas_ppg_id'] ?? null,
-                'status_id' => $data['status_id'],
-                'detail_status' => $data['detail_status'],
-                'kelas_di_sekolah' => $data['kelas_di_sekolah'] ?? null,
+                'status_id' => $data['status_id'] ?? null,
+                'detail_status' => $detailStatusData,
                 'nm_ayah' => $data['nm_ayah'] ?? null,
                 'nm_ibu' => $data['nm_ibu'] ?? null,
                 'no_hp_wali' => $data['no_hp_wali'] ?? null,
@@ -141,7 +194,6 @@ class CreateGenerus extends CreateRecord
                 'riwayat_update' => $data['riwayat_update'],
             ]);
         } catch (\Throwable $e) {
-            // Log error jika perlu
             Log::error('Gagal simpan data generus: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -155,5 +207,4 @@ class CreateGenerus extends CreateRecord
             throw new \Exception("Gagal menyimpan record", 500);
         }
     }
-
 }

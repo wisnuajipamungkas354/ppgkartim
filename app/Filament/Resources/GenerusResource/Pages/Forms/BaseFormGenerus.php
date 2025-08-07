@@ -41,7 +41,9 @@ class BaseFormGenerus
                         })
                         ->required()
                 ]),
-            Step::make('Sambung')
+            Step::make('Data Diri')
+                ->schema(fn(Get $get) => GenerusForm::getForms($get)),
+                Step::make('Sambung')
                 ->schema([
                     Select::make('daerah_id')
                         ->label('Daerah')
@@ -84,28 +86,13 @@ class BaseFormGenerus
                         ->preload()
                         ->visible(fn() => !AccessHelper::isKelompok()),
             ])->visible(fn() => !AccessHelper::isKelompok()),
-            Step::make('Data Diri')
-                ->schema(function(Get $get): array {
-                    switch($get('kategori')) {
-                    case 'PAUD':
-                        return GenerusForm::getPaudForm($get);
-                    case 'CABERAWIT':
-                        return GenerusForm::getCaberawitForm($get);
-                    case 'PRA_REMAJA': 
-                        return GenerusForm::getPraRemajaForm($get);
-                    case 'REMAJA': 
-                        return GenerusForm::getRemajaForm($get);
-                    default:
-                        return GenerusForm::getPraNikahForm($get);
-                    }
-                }),
             Step::make('Orang Tua')
                 ->schema([
                     TextInput::make('nm_ayah')
-                        ->label('Nama Ayah')
+                        ->label('Nama Ayah Kandung')
                         ->placeholder('Masukkan nama ayah'),
                     TextInput::make('nm_ibu')
-                        ->label('Nama Ibu')
+                        ->label('Nama Ibu Kandung')
                         ->placeholder('Masukkan nama ibu'),
                     TextInput::make('no_hp_wali')
                         ->label('Nomor HP/WhatsApp Orang Tua')
@@ -115,9 +102,11 @@ class BaseFormGenerus
                 ->schema([
                     Select::make('minat_id')
                         ->label('Kategori Minat Bakat')
-                        ->relationship('minat', 'nm_minat'),
+                        ->relationship('minat', 'nm_minat')
+                        ->required(fn(Get $get) => $get('kategori') == 'PRA_NIKAH'),
                     TextInput::make('detail_minat')
-                        ->label('Sebutkan nama minat bakat'),
+                        ->label('Sebutkan nama minat bakat, Contoh: Sepak Bola')
+                        ->required(fn(Get $get) => $get('kategori') == 'PRA_NIKAH'),
             ])
         ];
     }

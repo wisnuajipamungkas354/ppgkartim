@@ -11,6 +11,10 @@ class Insan extends Model
     
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'url_foto' => 'array',
+    ];
+
     public function insanRole() {
         return $this->hasMany(InsanRole::class);
     }

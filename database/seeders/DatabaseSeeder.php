@@ -131,7 +131,10 @@ class DatabaseSeeder extends Seeder
             'gol_dar' => 'A',
             'kelas_ppg_id' => 14,
             'status_id' => 6,
-            'detail_status' => 'Sistem Informasi',
+            'detail_status' => [
+                'program_studi' => 'Sistem Informasi',
+                'universitas' => 'Universitas Bina Sarana Informatika Cikarang'
+            ],
             'siap_nikah' => 'BELUM',
             'nm_ayah' => 'Sutarso',
             'nm_ibu' => 'Nuning Handayani',
