@@ -16,7 +16,7 @@ class GenerusForm
         'PAUD' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah'],
         'CABERAWIT' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah'],
         'PRA_REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah'],
-        'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp'],
+        'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas',],
         'PRA_NIKAH' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'pendidikan_terakhir', 'jurusan', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas', 'status_id', 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan', 'bidang_usaha', 'nm_usaha', 'keahlian', 'no_hp', 'siap_nikah'],
     ];
 

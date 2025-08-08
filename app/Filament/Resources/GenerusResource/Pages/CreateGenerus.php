@@ -90,7 +90,7 @@ class CreateGenerus extends CreateRecord
                 'REMAJA' => 'sma-smk',
             ];
             $slug = $statusMap[$data['kategori']] ?? null;
-            $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : $data['status_id'];
+            $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : ($data['mubaligh'] == 'MT' ? Status::where('slug', 'mt')->value('id') : null) ;
 
             // Step 4: Usia
             $data['usia'] = Carbon::parse($data['tgl_lahir'])->age ?? null;
@@ -155,7 +155,6 @@ class CreateGenerus extends CreateRecord
                 ]);
 
                 if ($data['mubaligh'] === 'MT') {
-        
                     MubalighTugasan::create([
                         'insan_role_id' => $insanRoleMubaligh->id,
                         'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,

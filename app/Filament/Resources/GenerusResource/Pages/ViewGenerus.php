@@ -59,7 +59,7 @@ class ViewGenerus extends ViewRecord
             ]),
             Section::make('Data Diri')
             ->schema(function (Generus $generus) {
-                return ViewsGenerus::getColumns($generus->kategori);
+                return ViewsGenerus::getColumns($generus);
             })
             ->columns(4)
             ->columnSpan(4),

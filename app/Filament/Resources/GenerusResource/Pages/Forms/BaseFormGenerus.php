@@ -90,10 +90,12 @@ class BaseFormGenerus
                 ->schema([
                     TextInput::make('nm_ayah')
                         ->label('Nama Ayah Kandung')
-                        ->placeholder('Masukkan nama ayah'),
+                        ->placeholder('Masukkan nama ayah')
+                        ->required(),
                     TextInput::make('nm_ibu')
                         ->label('Nama Ibu Kandung')
-                        ->placeholder('Masukkan nama ibu'),
+                        ->placeholder('Masukkan nama ibu')
+                        ->required(),
                     TextInput::make('no_hp_wali')
                         ->label('Nomor HP/WhatsApp Orang Tua')
                         ->placeholder('Masukkan nomor HP/WA'),

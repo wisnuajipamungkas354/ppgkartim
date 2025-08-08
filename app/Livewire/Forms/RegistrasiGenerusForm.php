@@ -153,7 +153,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'REMAJA' => 'sma-smk',
             ];
             $slug = $statusMap[$data['kategori']] ?? null;
-            $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : $data['status_id'];
+            $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : ($data['mubaligh'] == 'MT' ? Status::where('slug', 'mt')->value('id') : null);
 
             // Step 4: Usia
             $data['usia'] = Carbon::parse($data['tgl_lahir'])->age ?? null;
