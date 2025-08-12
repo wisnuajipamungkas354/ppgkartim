@@ -2,8 +2,8 @@
     <div class="relative flex flex-col justify-center w-full max-w-2xl p-8 bg-white rounded-lg shadow-xl" id="presensi-container">
         
         <button id="fullscreen-btn" class="absolute p-2 text-gray-500 transition duration-300 top-4 right-4 hover:text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m7-5V4m0 0h4m-4 0l5 5m0 7v4m0 0h-4m0 0l-5-5m5 5l-5-5m-5 5v4m0 0h4m-4 0l5-5" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9m5.25 11.25v-4.5m0 4.5h-4.5m4.5 0L15 15" />
             </svg>
         </button>
 
@@ -34,7 +34,6 @@
         @endif        
         
         @if(session('success'))
-           
             <div class="p-4 mb-4 font-semibold  @if(session('over_time')) text-warning-700 bg-warning-100 @else text-green-700 bg-green-100 @endif  rounded-lg">
                 {{ session('success') }}
             </div>
