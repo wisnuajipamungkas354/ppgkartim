@@ -15,6 +15,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\FileUpload;
 
 class EventResource extends Resource
 {
@@ -24,6 +25,11 @@ class EventResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
     protected static ?string $navigationLabel = 'Events';
 
+    public static function getRecordIdentifier(): string
+    {
+        return 'id'; // nama kolom primary key
+    }
+    
     public static function form(Forms\Form $form): Forms\Form
     {
         $timeList = [
@@ -45,6 +51,12 @@ class EventResource extends Resource
                 Grid::make(2)->schema([
                     Forms\Components\TextInput::make('name')
                         ->label('Nama Event')
+                        ->placeholder('Masukkan nama event')
+                        ->required(),
+
+                    Forms\Components\TextInput::make('place')
+                        ->label('Lokasi Event')
+                        ->placeholder('Masukkan nama lokasi')
                         ->required(),
 
                     Select::make('attendance_method')
@@ -92,6 +104,21 @@ class EventResource extends Resource
                     ])
                     ->columns(3)
                     ->required(),
+                FileUpload::make('poster_image')
+                    ->label('Poster Event')
+                    ->disk('public')
+                    ->directory('events')
+                    ->image()
+                    ->imageEditor()
+                    ->imageCropAspectRatio('3:4')
+                    ->imagePreviewHeight('250')
+                    ->imageResizeMode('cover')
+                    ->imageResizeTargetWidth(600)
+                    ->imageResizeTargetHeight(800)
+                    ->directory('posters')
+                    ->maxSize(2048) // ukuran maksimal 2MB
+                    ->hint('Ukuran maksimal 2MB. Rasio 3:4 (potrait)')
+                    ->columnSpanFull(),
             ]);
     }
 
