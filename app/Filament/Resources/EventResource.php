@@ -15,7 +15,10 @@ use Filament\Forms\Components\Repeater;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class EventResource extends Resource
 {
@@ -23,7 +26,7 @@ class EventResource extends Resource
 
     protected static ?string $model = Event::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
-    protected static ?string $navigationLabel = 'Events';
+    protected static ?string $navigationLabel = 'Event';
 
     public static function getRecordIdentifier(): string
     {
@@ -74,12 +77,10 @@ class EventResource extends Resource
 
                     Forms\Components\TimePicker::make('start_time')
                         ->label('Waktu Mulai')
-                        ->seconds(false)
-                        ->minutesStep(15),
+                        ->seconds(false),
                     Forms\Components\TimePicker::make('end_time')
                         ->label('Waktu Selesai')
-                        ->seconds(false)
-                        ->minutesStep(15),
+                        ->seconds(false),
                 ]),
 
                 // konfigurasi kolom dinamis
@@ -107,7 +108,6 @@ class EventResource extends Resource
                 FileUpload::make('poster_image')
                     ->label('Poster Event')
                     ->disk('public')
-                    ->directory('events')
                     ->image()
                     ->imageEditor()
                     ->imageCropAspectRatio('3:4')
@@ -115,7 +115,7 @@ class EventResource extends Resource
                     ->imageResizeMode('cover')
                     ->imageResizeTargetWidth(600)
                     ->imageResizeTargetHeight(800)
-                    ->directory('posters')
+                    ->directory('events/posters')
                     ->maxSize(2048) // ukuran maksimal 2MB
                     ->hint('Ukuran maksimal 2MB. Rasio 3:4 (potrait)')
                     ->columnSpanFull(),
@@ -130,11 +130,19 @@ class EventResource extends Resource
                     ->label('ID')
                     ->searchable(),
                 TextColumn::make('date')
-                    ->label('Tanggal Pelaksanaan')
+                    ->label('Tanggal')
                     ->date('d-m-Y'),
                 TextColumn::make('name')
                     ->label('Nama Event')
                     ->searchable(),
+                TextColumn::make('kode_event')
+                    ->label('Kode Event')
+                    ->searchable()
+                    ->copyable()
+                    ->copyMessage('Kode event berhasil di salin')
+                    ->copyMessageDuration(1500),
+                ToggleColumn::make('is_active')
+                    ->label('Aktif'),                    
                 TextColumn::make('attendance_method')
                     ->label('Metode Presensi'),
                 TextColumn::make('start_time')
@@ -146,10 +154,30 @@ class EventResource extends Resource
             ])
             ->filters([])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('qr-download')
+                ->label('QR-Code')
+                ->url(function(Event $record): string {
+                    $path = 'public/events/qr-images/'. $record->id . '.png';
+                    $url = Storage::url($path);
+                    return $url;
+                })
+                ->extraAttributes(fn(Event $record) => ['download' => $record->name])
+                ->icon('heroicon-s-qr-code')
+                ->color('info'),
+                Tables\Actions\ViewAction::make()
+                    ->label('Detail'),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Hapus'),
+                    ->label('Hapus')
+                    ->modalHeading('Hapus Data Event')
+                    ->modalDescription('Apakah kamu yakin ingin menghapus event ini ?')
+                    ->modalSubmitActionLabel('Ya')
+                    ->modalCancelActionLabel('Batal')
+                    ->action(function(array $data, Event $record) {
+                        if($record->poster_image != null) Storage::delete($record->poster_image);
+                        $record->delete();
+                    })
+                    ->successNotification(fn(Notification $notification) => $notification->title('Dihapus')),
             ])
             ->emptyStateHeading('Belum ada data event');
     }

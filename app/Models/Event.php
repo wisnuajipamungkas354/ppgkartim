@@ -54,7 +54,7 @@ class Event extends Model
 
         // Create QR-Code Images
         $generateQr = QrCode::format('png')->style('round')->size(300)->margin(1)->errorCorrection('H')->generate(url('events/' . $finalId . '/presensi'));
-        Storage::disk('public')->put('qr-images/events/' . $finalId . '.png', $generateQr);
+        Storage::disk('public')->put('events/qr-images/' . $finalId . '.png', $generateQr);
 
         return $finalId;
     }

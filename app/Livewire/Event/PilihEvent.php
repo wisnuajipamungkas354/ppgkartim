@@ -11,7 +11,7 @@ class PilihEvent extends Component
 
     public function render()
     {
-        $events = Event::where('name', 'like', '%' . $this->search . '%')
+        $events = Event::where('name', 'like', '%' . $this->search . '%')->where('is_active', true)
             ->orderByDesc('date')
             ->get();
 

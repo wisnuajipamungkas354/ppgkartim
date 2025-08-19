@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->string('id')->primary();
+            $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('role_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('poster_image')->nullable();
             $table->string('name');
             $table->string('place');
@@ -24,6 +26,8 @@ return new class extends Migration
             $table->time('end_time')->nullable();    // waktu presensi berakhir
 
             $table->json('column_config');           // konfigurasi kolom dinamis presensi
+            $table->integer('kode_event');
+            $table->boolean('is_active');
             $table->timestamps();
         });
     }
