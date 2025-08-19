@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class EventResource extends Resource
@@ -187,6 +188,11 @@ class EventResource extends Resource
         return [
             ParticipantsRelationManager::class
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('role_id', session('active_role_id'));
     }
 
     public static function getPages(): array

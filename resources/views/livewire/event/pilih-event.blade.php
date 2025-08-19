@@ -3,7 +3,7 @@
 
         <div class="mb-8 text-center">
             <h2 class="mb-2 text-3xl font-bold text-gray-800 dark:text-gray-100">Pilih Event Presensi</h2>
-            <p class="text-gray-600 dark:text-gray-400">Silakan pilih event yang ingin Anda kelola presensinya.</p>
+            <p class="text-gray-600 dark:text-gray-400">Silakan pilih event yang ingin anda hadiri.</p>
         </div>
 
         <div class="mb-8">
