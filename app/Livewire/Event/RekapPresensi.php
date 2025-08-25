@@ -49,7 +49,7 @@ class RekapPresensi extends Component implements HasForms, HasTable
             }
         }
 
-        $dynamicColumns[] = TextColumn::make('attendance.check_in')
+        $dynamicColumns[] = TextColumn::make('attendance.check_in_at')
             ->label('Jam')
             ->dateTime('H:i');
         $dynamicColumns[] = TextColumn::make('attendance.arrival_status')
