@@ -195,10 +195,17 @@ class ParticipantsRelationManager extends RelationManager implements HasShieldPe
             $searchable = $config['searchable'];
 
             // Menampilkan data_json->$field
-            $columns[] = Tables\Columns\TextColumn::make("data_json.{$field}")
-                ->label($label)
-                ->sortable()
-                ->searchable($searchable);
+            if($config['type'] !== 'boolean') {
+                $columns[] = Tables\Columns\TextColumn::make("data_json.{$field}")
+                    ->label($label)
+                    ->sortable()
+                    ->searchable($searchable);
+            } else {
+                $columns[] = Tables\Columns\ToggleColumn::make("data_json.{$field}")
+                    ->label($label)
+                    ->sortable()
+                    ->searchable($searchable);
+            }
         }
 
         return $columns;
