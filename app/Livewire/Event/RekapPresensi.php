@@ -38,14 +38,14 @@ class RekapPresensi extends Component implements HasForms, HasTable
                 $dynamicColumns[] = TextColumn::make('data_json.' . $c['field'])
                     ->label($c['label'])
                     ->sortable()
-                    ->searchable($c['searchable']);
+                    ->searchable($c['searchable'] ?? false);
                     // ->toggleable(isToggledHiddenByDefault: $c['hidden']);
             } else {
                 $dynamicColumns[] = ToggleColumn::make('data_json.' . $c['field'])
                     ->label($c['label'])
                     ->sortable()
-                    ->searchable($c['searchable'])
-                    ->toggleable(isToggledHiddenByDefault: $c['hidden']);
+                    ->searchable($c['searchable'] ?? false)
+                    ->toggleable(isToggledHiddenByDefault: $c['hidden'] ?? false);
             }
         }
 
