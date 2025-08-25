@@ -21,6 +21,6 @@ class EventParticipant extends Model
     /* Relasi ke presensi */
     public function attendance()
     {
-        return $this->hasOne(Attendance::class, 'participant_id');
+        return $this->hasOne(Attendance::class, 'participant_id', 'id');
     }
 }

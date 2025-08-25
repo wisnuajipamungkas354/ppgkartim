@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExportPdfController;
 use App\Livewire\Counter;
 use App\Livewire\Event\EventPresensi;
 use App\Livewire\Event\PilihEvent;
@@ -14,3 +15,4 @@ Route::get('/registrasi-generus-form', RegistrasiGenerusForm::class);
 Route::get('/events', PilihEvent::class)->name('events');
 Route::get('/event/{event}/presensi', EventPresensi::class)->name('events.presensi');
 Route::get('/event/{event}/rekap', RekapPresensi::class)->name('events.rekap');
+Route::get('/event/{event}/rekap/download', [ExportPdfController::class, 'rekapPresensiPdf'])->name('events.rekap.download');

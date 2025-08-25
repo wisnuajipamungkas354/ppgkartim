@@ -22,6 +22,6 @@ class Attendance extends Model
     /* Relasi balik ke peserta */
     public function participant()
     {
-        return $this->belongsTo(EventParticipant::class, 'participant_id');
+        return $this->belongsTo(EventParticipant::class, 'participant_id', 'id');
     }
 }

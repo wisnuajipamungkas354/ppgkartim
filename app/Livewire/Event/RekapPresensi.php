@@ -7,12 +7,14 @@ use App\Models\Event;
 use App\Models\EventParticipant;
 use Carbon\Carbon;
 use Filament\Forms\Components\Builder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Livewire\Component;
@@ -51,7 +53,8 @@ class RekapPresensi extends Component implements HasForms, HasTable
 
         $dynamicColumns[] = TextColumn::make('attendance.check_in_at')
             ->label('Jam')
-            ->dateTime('H:i');
+            ->dateTime('H:i')
+            ->sortable();
         $dynamicColumns[] = TextColumn::make('attendance.arrival_status')
             ->label('Status')
             ->badge()
@@ -60,7 +63,8 @@ class RekapPresensi extends Component implements HasForms, HasTable
                 'on_time' => 'success',
                 'over_time' => 'warning',
                 default => 'secondary',
-            });
+            })
+            ->sortable();
 
         return $dynamicColumns;
     }
@@ -91,8 +95,11 @@ class RekapPresensi extends Component implements HasForms, HasTable
     {
         return $table
             ->query(EventParticipant::where('event_id', $this->event->id))
-            ->columns($this->getTableColumns());
-            // ->filters($this->getFilters());
+            ->columns($this->getTableColumns())
+            ->filters([
+                // 
+            ])
+            ->poll('5s');
     }
 
     public function shareOnWhatsApp() {
@@ -108,10 +115,12 @@ class RekapPresensi extends Component implements HasForms, HasTable
         %0A
         %0A📆 {$date}
         %0A🕒 {$startTime} s/d selesai
+        %0A📍 {$this->event->place}
         %0A
         %0A*Kehadiran*
         %0A✅ Hadir : {$attendances->count()}
         %0A❌ Tidak Hadir : {$alfa}
+        %0A👳🏻‍♀🧕 Total Peserta : {$participants->count()}
         %0A
         %0A*Status*
         %0A- In Time : {$attendances->where('arrival_status', 'in_time')->count()}
