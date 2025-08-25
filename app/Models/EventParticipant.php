@@ -19,8 +19,8 @@ class EventParticipant extends Model
     }
 
     /* Relasi ke presensi */
-    public function attendances()
+    public function attendance()
     {
-        return $this->hasMany(Attendance::class, 'participant_id');
+        return $this->hasOne(Attendance::class, 'participant_id');
     }
 }

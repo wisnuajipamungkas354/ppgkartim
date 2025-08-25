@@ -192,12 +192,13 @@ class ParticipantsRelationManager extends RelationManager implements HasShieldPe
         foreach ($event->column_config ?? [] as $config) {
             $field = $config['field'];
             $label = $config['label'];
+            $searchable = $config['searchable'];
 
             // Menampilkan data_json->$field
             $columns[] = Tables\Columns\TextColumn::make("data_json.{$field}")
                 ->label($label)
                 ->sortable()
-                ->searchable();
+                ->searchable($searchable);
         }
 
         return $columns;

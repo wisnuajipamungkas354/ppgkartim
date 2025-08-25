@@ -20,6 +20,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Filament\Forms\Get;
 
 class EventResource extends Resource
 {
@@ -102,10 +103,28 @@ class EventResource extends Resource
                                 'string' => 'Tulisan/Teks',
                                 'select' => 'Pilihan',
                                 'number' => 'Angka',
-                            ])->required(),
-                    ])
-                    ->columns(3)
-                    ->required(),
+                                'boolean' => 'Ya/Tidak',
+                            ])
+                            ->live()
+                            ->required(),
+                        Forms\Components\Repeater::make('options')
+                            ->label('Buat Pilihan')
+                            ->simple(Forms\Components\TextInput::make('option_name')
+                                    ->label('Nama Pilihan')
+                                    ->required())
+                            ->visible(fn(Get $get) => $get('type') === 'select'),
+                        Forms\Components\Toggle::make('searchable')
+                            ->label('Dapat dicari ?'),
+                        Forms\Components\Toggle::make('filterable')
+                            ->label('Dapat difilter ?')
+                            ->visible(fn(Get $get) => $get('type') === 'select'),
+                        Forms\Components\Toggle::make('hidden')
+                            ->label('Sembunyikan kolom secara default ?'),
+                ])
+                ->columns(3)
+                ->columnSpanFull()
+                ->addActionLabel('Tambah Kolom')
+                ->required(),
                 FileUpload::make('poster_image')
                     ->label('Poster Event')
                     ->disk('public')
