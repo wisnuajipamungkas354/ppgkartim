@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Generus extends Model
 {
@@ -12,6 +14,7 @@ class Generus extends Model
 
     protected $casts = [
         'detail_status' => 'array',
+        'detail_minat' => 'array',
     ];
 
     protected static function booted()
@@ -27,6 +30,10 @@ class Generus extends Model
                 $suffix = str_pad($count + 1, 2, '0', STR_PAD_LEFT);
                 $generus->nis = $tanggal . $suffix;
             }
+
+            // Create QR-Code Images
+            $generateQr = QrCode::format('png')->style('round')->size(300)->margin(1)->errorCorrection('H')->generate($generus->nis);
+            Storage::disk('public')->put('generus/qr-images/' . $generus->nis . '.png', $generateQr);
         });
     }
 

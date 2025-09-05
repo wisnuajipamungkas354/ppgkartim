@@ -36,6 +36,9 @@ return new class extends Migration
             $table->string('alias')->nullable(); // Nama PAC
             $table->string('nm_masjid')->nullable(); // Nama masjid PAC
             $table->boolean('is_desa')->default(false); // Masjid Desa atau bukan
+            $table->boolean('is_daerah')->default(false); // Masjid Desa atau bukan
+            $table->json('foto_masjid')->nullable(); // Masjid Desa atau bukan
+            $table->json('lokasi')->nullable(); // Masjid Desa atau bukan
             $table->timestamps();
         });
     }

@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('no_hp')->nullable();
             $table->string('pendidikan_terakhir', 15)->nullable();
             $table->string('jurusan')->nullable();
-            // Khusus Lepas Pelajar Selain Mahasiswa (SD, SMP, SMA/K, D3, S1/D4, S2, S3)
+            // Khusus Pra Nikah Selain Mahasiswa (SD, SMP, SMA/K, D3, S1/D4, S2, S3)
             $table->timestamps();
             $table->softDeletes();
         });

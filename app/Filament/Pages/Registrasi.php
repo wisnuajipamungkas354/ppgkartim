@@ -232,4 +232,9 @@ class Registrasi extends Page implements HasTable
             ])
             ->emptyStateHeading('Belum ada yang registrasi');
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Generus::where('is_verified', false)->count();
+    }
 }

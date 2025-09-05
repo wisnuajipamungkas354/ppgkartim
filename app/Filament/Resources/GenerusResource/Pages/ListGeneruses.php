@@ -42,9 +42,12 @@ class ListGeneruses extends ListRecords
 
     public function getTabs(): array
     {
+        // Jika role aktif adalah Lingkup PPG atau Super admin maka
         if(AccessHelper::isPpg() || AccessHelper::isSuperAdmin()) 
         {
             return [
+                'Semua' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query)
+                        ->badge(Generus::where('is_verified', true)->count()),
                 'Paud' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PAUD'))
                         ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PAUD')->count()),
                 'Caberawit' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'CABERAWIT'))
@@ -55,9 +58,8 @@ class ListGeneruses extends ListRecords
                         ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'REMAJA')->count()),
                 'Pra Nikah' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('kategori', '=', 'PRA_NIKAH'))
                         ->badge(Generus::query()->where('is_verified', true)->where('kategori', '=', 'PRA_NIKAH')->count()),
-                'Semua' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query)
-                        ->badge(Generus::where('is_verified', true)->count()),
             ];
+        //     Jika bukan berarti role tersebut adalah kelompok muda/i
         } else {
             return [
                 'Semua' => Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('jenis_data', 'MM'))

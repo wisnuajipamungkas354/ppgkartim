@@ -58,6 +58,7 @@ class AdminPanelProvider extends PanelProvider
                 EnsureActiveRoleIsSet::class,
             ])
             ->databaseNotifications()
+            ->sidebarCollapsibleOnDesktop(true)
             ->spa();
     }
 }

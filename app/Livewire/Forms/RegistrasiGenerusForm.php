@@ -61,6 +61,25 @@ class RegistrasiGenerusForm extends Component implements HasForms
                                     ])
                             ->required()
                         ]),
+                    Wizard\Step::make('Data Diri')
+                        ->afterValidation(function () {
+                            $data = $this->data;
+                            $validated = Insan::query()->whereHas('insanRole.insan', fn(Builder $query) => $query->where('nama', $data['nama']))->where('jk', $data['jk'])->where('tgl_lahir', $data['tgl_lahir'])->first();
+                            if ($validated) {
+                                redirect('/registrasi-generus-form');
+
+                                Notification::make('failed_notification')
+                                ->title('Data sudah ada di database!')
+                                ->body('Datamu sudah tercatat didatabase, silahkan menghubungi admin jika ada perubahan data yaa!')
+                                ->danger()
+                                ->color('danger')
+                                ->seconds(10)
+                                ->send();
+
+                                throw new Halt();
+                            }
+                        })
+                        ->schema(fn(Get $get) => GenerusForm::getForms($get)),
                     Wizard\Step::make('Sambung')
                         ->schema([
                             Forms\Components\Select::make('daerah_id')
@@ -82,26 +101,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                                 ->required()
                                 ->live()
                                 ->preload(),
-                    ]),
-                    Wizard\Step::make('Data Diri')
-                        ->afterValidation(function () {
-                            $data = $this->data;
-                            $validated = Insan::query()->whereHas('insanRole.insan', fn(Builder $query) => $query->where('nama', $data['nama']))->where('jk', $data['jk'])->where('tgl_lahir', $data['tgl_lahir'])->first();
-                            if ($validated) {
-                                redirect('/registrasi-generus-form');
-
-                                Notification::make('failed_notification')
-                                ->title('Data sudah ada di database!')
-                                ->body('Datamu sudah tercatat didatabase, silahkan menghubungi admin jika ada perubahan data yaa!')
-                                ->danger()
-                                ->color('danger')
-                                ->seconds(10)
-                                ->send();
-
-                                throw new Halt();
-                            }
-                        })
-                        ->schema(fn(Get $get) => GenerusForm::getForms($get)),
+                        ]),
                     Wizard\Step::make('Orang Tua')
                         ->schema([
                             Forms\Components\TextInput::make('nm_ayah')
@@ -121,7 +121,8 @@ class RegistrasiGenerusForm extends Component implements HasForms
                                 ->relationship('minat', 'nm_minat'),
                             Forms\Components\TextInput::make('detail_minat')
                                 ->label('Sebutkan nama minat bakat'),
-                    ])
+                        ])
+                        ->visible(fn(Get $get) => !$get('kategori') == null && !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
                 ])
                 ->columnSpanFull()
                 ->submitAction((new HtmlString(Blade::render(<<<BLADE

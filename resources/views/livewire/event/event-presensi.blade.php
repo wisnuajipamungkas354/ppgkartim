@@ -56,16 +56,8 @@
         document.getElementById('real-time-clock').textContent = `${hours}:${minutes}:${seconds}`;
     }
 
-    function redirect() {
-        const now = Date.now();
-        const endTime = Date.parse('{{ $event->end_time }}');
-        if(now > endTime) {
-            window.location.href = '{{ route("events") }}';
-        }
-    }
     // Perbarui jam setiap detik
     setInterval(updateTime, 1000);
-    setInterval(redirect, 2000);
 
     // Jalankan pertama kali saat halaman dimuat
     document.addEventListener('DOMContentLoaded', updateTime);

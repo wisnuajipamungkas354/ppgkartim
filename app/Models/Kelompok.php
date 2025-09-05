@@ -8,6 +8,11 @@ class Kelompok extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'foto_masjid' => 'array',
+        'lokasi' => 'array',
+    ];
+
     protected static function boot()
     {
         parent::boot();

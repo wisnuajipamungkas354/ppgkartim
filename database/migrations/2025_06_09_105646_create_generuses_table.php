@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('nm_ibu')->nullable(); // Nama ibu
             $table->string('no_hp_wali', 15)->nullable();
             $table->foreignId('minat_id')->nullable()->constrained();
-            $table->string('detail_minat')->nullable();
+            $table->json('detail_minat')->nullable();
             $table->enum('siap_nikah', ['SIAP', 'BELUM'])->nullable();
             $table->boolean('is_verified')->default(false);
             $table->string('riwayat_update')->nullable(); // PINDAH SAMBUNG KAH, MENIKAH KAH, MONDOK KAH, MENINGGAL KAH, DLL

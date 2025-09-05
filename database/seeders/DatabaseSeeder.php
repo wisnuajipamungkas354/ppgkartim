@@ -56,10 +56,12 @@ class DatabaseSeeder extends Seeder
         foreach($kelompokLm as $kelompok) {
             $desaId = Desa::query()->where('nm_desa', 'LEMAH MULYA')->value('id');
             $isDesa = $kelompok === 'TAMIANG 1';
+            $isDaerah = $kelompok === 'TAMIANG 1';
             Kelompok::create([
                 'desa_id' => $desaId,
                 'nm_kelompok' => $kelompok,
                 'is_desa' => $isDesa,
+                'is_daerah' => $isDaerah,
             ]);
         }
 
@@ -113,7 +115,7 @@ class DatabaseSeeder extends Seeder
             'tgl_lahir' => '2002-03-05',
             'usia' => 23,
             'no_hp' => '085889634432',
-            'pendidikan_terakhir' => 'SMA/K',
+            'pendidikan_terakhir' => 'sma-smk',
             'jurusan' => 'Teknik Komputer & Jaringan'
         ];
 

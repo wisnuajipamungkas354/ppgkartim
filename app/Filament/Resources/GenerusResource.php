@@ -72,7 +72,7 @@ class GenerusResource extends Resource implements HasShieldPermissions
                 TextColumn::make('insanrole.insan.kelompok.nm_kelompok')
                     ->label('Kelompok')
                     ->formatStateUsing(fn (string $state) => Str::title($state))
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('insanrole.insan.nama')
                     ->label('Nama Lengkap')
                     ->formatStateUsing(fn (string $state) => Str::title($state))
@@ -82,6 +82,7 @@ class GenerusResource extends Resource implements HasShieldPermissions
                     ->sortable(),
                 TextColumn::make('insanrole.insan.kota_lahir')
                     ->label('Kota Lahir')
+                    ->formatStateUsing(fn(string $state) => Str::title($state))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('insanrole.insan.tgl_lahir')
                     ->label('Tanggal Lahir')
