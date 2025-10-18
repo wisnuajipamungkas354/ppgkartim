@@ -7,12 +7,12 @@ use App\Models\Dapukan;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
-use App\Models\InsanRole;
 use App\Models\Kelompok;
 use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\App;
 
 class DatabaseSeeder extends Seeder
@@ -89,10 +89,10 @@ class DatabaseSeeder extends Seeder
         
         // Dapukan
         Dapukan::insert([
-            ['nm_dapukan' => 'GENERUS'],
-            ['nm_dapukan' => 'MUBALIGH TUGASAN'],
-            ['nm_dapukan' => 'MUBALIGH SETEMPAT'],
-            ['nm_dapukan' => 'PENGURUS'],
+            ['nm_dapukan' => 'GENERUS', 'slug' => Str::slug('GENERUS')],
+            ['nm_dapukan' => 'MUBALIGH TUGASAN', 'slug' => Str::slug('MUBALIGH TUGASAN')],
+            ['nm_dapukan' => 'MUBALIGH SETEMPAT', 'slug' => Str::slug('MUBALIGH SETEMPAT')],
+            ['nm_dapukan' => 'PENGURUS', 'slug' => Str::slug('PENGURUS')],
         ]);
 
         // Status
@@ -113,35 +113,32 @@ class DatabaseSeeder extends Seeder
             'jk' => 'L',
             'kota_lahir' => 'Brebes',
             'tgl_lahir' => '2002-03-05',
+            'gol_dar' => 'A',
             'usia' => 23,
-            'no_hp' => '085889634432',
+            'no_hp' => '+6285889634432',
             'pendidikan_terakhir' => 'sma-smk',
-            'jurusan' => 'Teknik Komputer & Jaringan'
+            'jurusan' => 'Teknik Komputer & Jaringan',
+            'perkawinan' => 'LAJANG',
+            'dapukan' => [Str::slug('GENERUS')],
+            'siap_nikah' => 'BELUM',
+            'nm_ayah' => 'Sutarso',
+            'nm_ibu' => 'Nuning Handayani',
+            'minat_id' => 6,
+            'detail_minat' => 'Ngoding & Servis Hardware',
         ];
 
         $insan = Insan::create($insanSatu);
-        $insanRole = InsanRole::create([
-            'insan_id' => $insan->id,
-            'dapukan_id' => 1,
-        ]);
 
         Generus::create([
-            'insan_role_id' => $insanRole->id,
-            'nis' => 123456,
+            'insan_id' => $insan->id,
             'jenis_data' => 'MM',
             'kategori' => 'PRA_NIKAH',
-            'gol_dar' => 'A',
             'kelas_ppg_id' => 14,
             'status_id' => 6,
             'detail_status' => [
                 'program_studi' => 'Sistem Informasi',
                 'universitas' => 'Universitas Bina Sarana Informatika Cikarang'
             ],
-            'siap_nikah' => 'BELUM',
-            'nm_ayah' => 'Sutarso',
-            'nm_ibu' => 'Nuning Handayani',
-            'minat_id' => 6,
-            'detail_minat' => 'Ngoding & Servis Hardware',
         ]);
     }
 }

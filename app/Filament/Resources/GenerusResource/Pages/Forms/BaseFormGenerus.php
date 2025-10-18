@@ -43,7 +43,7 @@ class BaseFormGenerus
                 ]),
             Step::make('Data Diri')
                 ->schema(fn(Get $get) => GenerusForm::getForms($get)),
-                Step::make('Sambung')
+            Step::make('Sambung')
                 ->schema([
                     Select::make('daerah_id')
                         ->label('Daerah')
@@ -110,6 +110,7 @@ class BaseFormGenerus
                         ->label('Sebutkan nama minat bakat, Contoh: Sepak Bola')
                         ->required(fn(Get $get) => $get('kategori') == 'PRA_NIKAH'),
             ])
+            ->visible(fn(Get $get) => !$get('kategori') == null && !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
         ];
     }
 }

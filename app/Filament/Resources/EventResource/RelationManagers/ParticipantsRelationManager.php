@@ -6,8 +6,7 @@ use App\Filament\Imports\EventParticipantImporter;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\Generus;
-use App\Models\MubalighSetempat;
-use App\Models\MubalighTugasan;
+use App\Models\Mubaligh;
 use App\Traits\HandlesActiveRolePermission;
 use App\Traits\HandlesPermissionRelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
@@ -124,8 +123,8 @@ class ParticipantsRelationManager extends RelationManager implements HasShieldPe
                             ->options(function (callable $get) {
                                 return match ($get('source')) {
                                     'generus' => Generus::all(),
-                                    'mt'      => MubalighTugasan::pluck('nama', 'id'),
-                                    'ms'      => MubalighSetempat::pluck('nama', 'id'),
+                                    'mt'      => Mubaligh::pluck('nama', 'id'),
+                                    'ms'      => Mubaligh::pluck('nama', 'id'),
                                     default  => [],
                                 };
                             })
@@ -138,8 +137,8 @@ class ParticipantsRelationManager extends RelationManager implements HasShieldPe
                 
                         $collection = match ($source) {
                             'generus' => Generus::all(),
-                            'mt'      => MubalighTugasan::whereIn('id', $ids)->get(),
-                            'ms'      => MubalighSetempat::whereIn('id', $ids)->get(),
+                            'mt'      => Mubaligh::whereIn('id', $ids)->get(),
+                            'ms'      => Mubaligh::whereIn('id', $ids)->get(),
                             default   => collect(),
                         };
                 

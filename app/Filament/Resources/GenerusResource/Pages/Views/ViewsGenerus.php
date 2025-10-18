@@ -4,7 +4,7 @@ namespace App\Filament\Resources\GenerusResource\Pages\Views;
 
 use App\Models\Dapukan;
 use App\Models\Generus;
-use App\Models\InsanRole;
+use App\Models\Insan;
 use App\Models\Status;
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,7 +25,7 @@ class ViewsGenerus
             'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status.nm_sekolah', 'detail_status.kelas_di_sekolah', 'kelas_ppg'
         ],
         'PRA_REMAJA' => [
-            'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status.nm_sekolah', 'detail_status.kelas_di_sekolah', 'kelas_ppg'
+            'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status.nm_sekolah', 'detail_status.kelas_di_sekolah', 'kelas_ppg', 'minat', 'detail_minat',
         ],
         'REMAJA' => [
             'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'no_hp', 'pendidikan_terakhir', 'jurusan',
@@ -43,32 +43,32 @@ class ViewsGenerus
     {
         $listColumns = self::$categoryFields[strtoupper($generus->kategori)] ?? [];
 
-        $isMubaligh = InsanRole::where('insan_id', $generus->insanRole->insan_id)->whereHas('dapukan', fn(Builder $query) => $query->whereIn('nm_dapukan', ['MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT']))->first()->dapukan->nm_dapukan ?? 'BUKAN';
+        $isMubaligh = Insan::where('id', $generus->insan_id)->whereIn('nm_dapukan', ['MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'])->first()->dapukan->nm_dapukan ?? 'BUKAN';
         
         $listAllColumns = [
             'nis' => TextEntry::make('nis')->label('Nomor Induk'),
-            'nama' => TextEntry::make('insanRole.insan.nama')
+            'nama' => TextEntry::make('insan.nama')
                 ->label('Nama Lengkap')
                 ->formatStateUsing(fn (?string $state) => Str::title($state)),
-            'jk' => TextEntry::make('insanRole.insan.jk')
+            'jk' => TextEntry::make('insan.jk')
                 ->label('Jenis Kelamin')
                 ->formatStateUsing(fn (?string $state) => $state === 'L' ? 'Laki-laki' : 'Perempuan'),
-            'kota_lahir' => TextEntry::make('insanRole.insan.kota_lahir')
+            'kota_lahir' => TextEntry::make('insan.kota_lahir')
                 ->label('Kota Lahir')
                 ->formatStateUsing(fn (?string $state) => Str::title($state)),
-            'tgl_lahir' => TextEntry::make('insanRole.insan.tgl_lahir')
+            'tgl_lahir' => TextEntry::make('insan.tgl_lahir')
                 ->label('Tanggal Lahir')
                 ->date('d/m/Y'),
-            'usia' => TextEntry::make('insanRole.insan.usia')
+            'usia' => TextEntry::make('insan.usia')
                 ->label('Usia')
                 ->formatStateUsing(fn (?string $state) => $state ? $state . ' tahun' : '-'),
             'gol_dar' => TextEntry::make('gol_dar')
                 ->label('Golongan Darah')
                 ->formatStateUsing(fn (?string $state) => $state ?? '-'),
-            'pendidikan_terakhir' => TextEntry::make('insanRole.insan.pendidikan_terakhir')
+            'pendidikan_terakhir' => TextEntry::make('insan.pendidikan_terakhir')
                 ->label('Pendidikan Terakhir')
                 ->formatStateUsing(fn (?string $state) => Status::where('slug', $state)->value('nm_status')),
-            'jurusan' => TextEntry::make('insanRole.insan.jurusan')
+            'jurusan' => TextEntry::make('insan.jurusan')
                 ->label('Jurusan/Program Studi')
                 ->formatStateUsing(fn (?string $state) => $state ? Str::title($state) : '-'),
             'status' => TextEntry::make('status.nm_status')
@@ -110,7 +110,7 @@ class ViewsGenerus
                 ->hidden(fn() => $isMubaligh == 'MUBALIGH TUGASAN'),
 
             // Kolom untuk Mubaligh
-            'mubaligh_status' => TextEntry::make('insanRole.insan.id')
+            'mubaligh_status' => TextEntry::make('insan.id')
                 ->label('Mubaligh')
                 ->badge()
                 ->formatStateUsing(fn (string $state) => $state = $isMubaligh)
@@ -123,27 +123,27 @@ class ViewsGenerus
                     default => 'gray'
                 };}),
             
-            'mubaligh_data' => TextEntry::make('insanRole')
+            'mubaligh_data' => TextEntry::make('dapukan')
                 ->label('Data Mubaligh')
                 ->formatStateUsing(function (Model $record) {
-                    $insanRole = $record->insanRole;
-                    if ($insanRole->dapukan->nm_dapukan === 'MUBALIGH TUGASAN') {
-                        $mt = $insanRole->mubalighTugasan;
+                    $insan = $record->insan;
+                    if ($insan->dapukan->nm_dapukan === 'MUBALIGH TUGASAN') {
+                        $mt = $insan->mubalighTugasan;
                         return $mt ? "Tingkatan: {$mt->tingkatan_tugas}, Asal Pondok: {$mt->asal_pondok}, Tugas ke-{$mt->tugasan_ke}" : '-';
-                    } elseif ($insanRole->dapukan->nm_dapukan === 'MUBALIGH SETEMPAT') {
-                        $ms = $insanRole->mubalighSetempat;
+                    } elseif ($insan->dapukan->nm_dapukan === 'MUBALIGH SETEMPAT') {
+                        $ms = $insan->mubalighSetempat;
                         return $ms ? "Asal Pondok: {$ms->asal_pondok}, Total Tugas: {$ms->jml_tugas} kali, Lama Tugas: {$ms->lama_tugas}" : '-';
                     }
                     return '-';
                 }),
 
             // Kolom-kolom lainnya
-            'no_hp' => TextEntry::make('insanRole.insan.no_hp')
+            'no_hp' => TextEntry::make('insan.no_hp')
                 ->label('No HP/WhatsApp')
                 ->formatStateUsing(fn (?string $state) => $state ?? '-'),
-            'kelas_ppg' => TextEntry::make('kelasPpg.nm_kelas')
+            'kelas_ppg' => TextEntry::make('kelasPpg')
                 ->label('Kelas Di PPG')
-                ->formatStateUsing(fn (?string $state) => $state ? Str::title($state) : '-')
+                ->formatStateUsing(fn (Model $record) => $record->kelasPpg->nm_kelas ? $record->kelasPpg->nm_kelas : '(-)')
                 ->hidden(fn() => $isMubaligh == 'MUBALIGH TUGASAN'),
             'minat' => TextEntry::make('minat.nm_minat')
                 ->label('Bidang Minat/Bakat')

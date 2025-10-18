@@ -18,7 +18,7 @@ class PpgSensusBar extends ChartWidget
 
     protected function getData(): array
     {
-        $generus = Generus::query()->with('insanRole.insan.desa')->whereHas('insanRole.insan.daerah', fn(Builder $q) => $q->where('daerah_id', auth()->user()->daerah_id))->get();
+        $generus = Generus::query()->with('insan.desa')->whereHas('insan.daerah', fn(Builder $q) => $q->where('daerah_id', auth()->user()->daerah_id))->get();
         $labels = Desa::query()->where('daerah_id', auth()->user()->daerah_id)->get(['id', 'nm_desa']);
         
         $kategoriList = ['PAUD', 'CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH'];
@@ -37,7 +37,7 @@ class PpgSensusBar extends ChartWidget
 
             foreach ($kategoriList as $kategori) {
                 $jumlah = Generus::where('kategori', $kategori)
-                    ->whereHas('insanRole.insan.desa', function ($q) use ($label) {
+                    ->whereHas('insan.desa', function ($q) use ($label) {
                         $q->where('id', $label->id);
                     })->count();
         

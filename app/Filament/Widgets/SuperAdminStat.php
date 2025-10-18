@@ -19,19 +19,19 @@ class SuperAdminStat extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Daerah', Daerah::count())
+            Stat::make('Daerah', Daerah::count())
                 ->chart([1,1,1])
                 ->chartColor('gray'),
-            Stat::make('Total Desa', Desa::count())
+            Stat::make('Desa', Desa::count())
                 ->chart([1,1,1])
                 ->chartColor('info'),
-            Stat::make('Total Kelompok', Kelompok::count())
+            Stat::make('Kelompok', Kelompok::count())
                 ->chart([1,1,1])
                 ->chartColor('success'),
-            Stat::make('Total User', User::count())
+            Stat::make('User', User::count())
                 ->chart([1,1,1])
                 ->chartColor('danger'),
-            Stat::make('Total Generus', Generus::count())
+            Stat::make('Generus', Generus::count())
                 ->chart([1,1,1])
                 ->chartColor('warning'),
         ];

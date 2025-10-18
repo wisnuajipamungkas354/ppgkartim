@@ -5,9 +5,7 @@ namespace App\Filament\Resources\GenerusResource\Pages;
 use App\Filament\Resources\GenerusResource;
 use App\Filament\Resources\GenerusResource\Pages\Forms\BaseFormGenerus;
 use App\Models\Insan;
-use App\Models\InsanRole;
-use App\Models\MubalighSetempat;
-use App\Models\MubalighTugasan;
+use App\Models\Mubaligh;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -39,7 +37,7 @@ class EditGenerus extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $insan = InsanRole::with('insan')->find($data['insan_role_id'])?->insan;
+        $insan = Insan::find($data['insan_id'])?->insan;
         if (!$insan) {
             return $data; // atau bisa throw exception kalau perlu
         }
@@ -53,9 +51,9 @@ class EditGenerus extends EditRecord
         $mubalighSetempat = [];
         foreach($insan->insanRole as $role => $dapukan){
             if($insan->insanRole[$role]->dapukan->nm_dapukan == 'MUBALIGH TUGASAN') {
-                $mubalighTugasan = MubalighTugasan::where('insan_role_id', $insan->insanRole[$role]->id)->first();
+                $mubalighTugasan = Mubaligh::where('insan_role_id', $insan->insanRole[$role]->id)->first();
             } elseif($insan->insanRole[$role]->dapukan->nm_dapukan == 'MUBALIGH SETEMPAT') {
-                $mubalighSetempat = MubalighSetempat::where('insan_role_id', $insan->insanRole[$role]->id)->first();
+                $mubalighSetempat = Mubaligh::where('insan_role_id', $insan->insanRole[$role]->id)->first();
             }
         }
         $mubalighData = [];
@@ -144,8 +142,8 @@ class EditGenerus extends EditRecord
 
             // Hapus data Mubaligh yang tidak relevan (jika jenis Mubaligh berubah)
             if ($data['mubaligh'] === 'MT') {
-                MubalighSetempat::where('insan_role_id', $insanRoleId)->delete();
-                MubalighTugasan::updateOrCreate(
+                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
+                Mubaligh::updateOrCreate(
                     ['insan_role_id' => $insanRoleId],
                     [
                         'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,
@@ -155,8 +153,8 @@ class EditGenerus extends EditRecord
                     ]
                 );
             } elseif ($data['mubaligh'] === 'MS') {
-                MubalighTugasan::where('insan_role_id', $insanRoleId)->delete();
-                MubalighSetempat::updateOrCreate(
+                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
+                Mubaligh::updateOrCreate(
                     ['insan_role_id' => $insanRoleId],
                     [
                         'asal_pondok' => $data['asal_pondok'] ?? null,
@@ -165,8 +163,8 @@ class EditGenerus extends EditRecord
                     ]
                 );
             } else { // Jika bukan Mubaligh
-                MubalighTugasan::where('insan_role_id', $insanRoleId)->delete();
-                MubalighSetempat::where('insan_role_id', $insanRoleId)->delete();
+                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
+                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
             }
         }
 

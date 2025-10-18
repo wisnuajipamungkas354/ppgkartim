@@ -10,8 +10,8 @@ use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Kelompok;
 use App\Models\Generus;
-use App\Models\Insan;
 use App\Models\Status;
+use App\Models\Insan;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -65,26 +65,26 @@ class GenerusResource extends Resource implements HasShieldPermissions
             ->columns([
                 TextColumn::make('nis')
                     ->label('NIS'),
-                TextColumn::make('insanrole.insan.desa.nm_desa')
+                TextColumn::make('insan.desa.nm_desa')
                     ->label('Desa')
                     ->formatStateUsing(fn (string $state) => Str::title($state))
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('insanrole.insan.kelompok.nm_kelompok')
+                TextColumn::make('insan.kelompok.nm_kelompok')
                     ->label('Kelompok')
                     ->formatStateUsing(fn (string $state) => Str::title($state))
                     ->toggleable(isToggledHiddenByDefault: false),
-                TextColumn::make('insanrole.insan.nama')
+                TextColumn::make('insan.nama')
                     ->label('Nama Lengkap')
                     ->formatStateUsing(fn (string $state) => Str::title($state))
                     ->searchable(),
-                TextColumn::make('insanrole.insan.jk')
+                TextColumn::make('insan.jk')
                     ->label('L/P')
                     ->sortable(),
-                TextColumn::make('insanrole.insan.kota_lahir')
+                TextColumn::make('insan.kota_lahir')
                     ->label('Kota Lahir')
                     ->formatStateUsing(fn(string $state) => Str::title($state))
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('insanrole.insan.tgl_lahir')
+                TextColumn::make('insan.tgl_lahir')
                     ->label('Tanggal Lahir')
                     ->date('d/m/Y')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -92,12 +92,14 @@ class GenerusResource extends Resource implements HasShieldPermissions
                     ->label('Status'),
                 TextColumn::make('detail_status')
                     ->label('Detail Status')
-                    ->limit(30),
-                TextColumn::make('insanrole.insan.usia')
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('insan.usia')
                     ->label('Usia')
                     ->sortable(),
-                TextColumn::make('insanrole.insan.no_hp')
-                    ->label('No HP'),
+                TextColumn::make('insan.no_hp')
+                    ->label('No HP')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
@@ -129,7 +131,7 @@ class GenerusResource extends Resource implements HasShieldPermissions
                         Forms\Components\Select::make('desa_id')
                             ->label('Nama Desa')
                             ->options(function (Generus $record) {
-                                return Desa::query()->where('daerah_id', $record->insanRole->insan->daerah_id)->pluck('nm_desa', 'id');
+                                return Desa::query()->where('daerah_id', $record->insan->daerah_id)->pluck('nm_desa', 'id');
                             })
                             ->preload()
                             ->live()
@@ -149,8 +151,12 @@ class GenerusResource extends Resource implements HasShieldPermissions
                     ->modalCancelActionLabel('Batal')
                     ->action(function (array $data, Generus $record) {
                         $record->riwayat_delete = $data['keterangan'];
-
-                        $record->delete();
+                        
+                        if($data['keterangan'] == 'Data Duplikat') {
+                            Insan::destroy($record->insan->id);
+                        } else {
+                            $record->delete();
+                        }
 
                         Notification::make()
                             ->success()

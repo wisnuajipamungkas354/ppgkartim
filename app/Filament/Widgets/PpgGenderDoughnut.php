@@ -18,8 +18,8 @@ class PpgGenderDoughnut extends ChartWidget
     protected function getData(): array
     {
         $data = [];
-        $data[0] = Generus::query()->whereHas('insanRole.insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
-        $data[1] = Generus::query()->whereHas('insanRole.insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
+        $data[0] = Generus::query()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
+        $data[1] = Generus::query()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
 
         return [
             'datasets' => [

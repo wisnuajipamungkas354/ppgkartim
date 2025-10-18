@@ -9,12 +9,10 @@ use App\Models\Dapukan;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
-use App\Models\InsanRole;
 use App\Models\Kelompok;
-use App\Models\MubalighSetempat;
-use App\Models\MubalighTugasan;
 use App\Models\Status;
 use App\Forms\Components\TutorialForm;
+use App\Models\Mubaligh;
 use Carbon\Carbon;
 use Livewire\Component;
 use Filament\Forms\Components\TextInput;
@@ -64,7 +62,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                     Wizard\Step::make('Data Diri')
                         ->afterValidation(function () {
                             $data = $this->data;
-                            $validated = Insan::query()->whereHas('insanRole.insan', fn(Builder $query) => $query->where('nama', $data['nama']))->where('jk', $data['jk'])->where('tgl_lahir', $data['tgl_lahir'])->first();
+                            $validated = Insan::query()->where('nama', $data['nama'])->where('jk', $data['jk'])->where('tgl_lahir', $data['tgl_lahir'])->first();
                             if ($validated) {
                                 redirect('/registrasi-generus-form');
 
@@ -170,10 +168,21 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'bidang_usaha', 'nm_usaha', 'keahlian', 'nm_sekolah',
                 'peminatan_sekolah', 'kelas_di_sekolah',
             ];
+            $detailSiapNikah = ['tinggi_badan', 'berat_badan', 'kriteria_pasangan'];
+
             $detailStatusData = [];
+            $detailSiapNikahData = [];
+
             foreach ($detailStatusKeys as $key) {
                 if (isset($data[$key])) {
                     $detailStatusData[$key] = $data[$key];
+                    unset($data[$key]);
+                }
+            }
+
+            foreach ($detailSiapNikah as $key) {
+                if(isset($data[$key])) {
+                    $detailSiapNikahData[$key] = $data[$key];
                     unset($data[$key]);
                 }
             }
@@ -199,37 +208,35 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'jk' => $data['jk'],
                 'kota_lahir' => $data['kota_lahir'],
                 'tgl_lahir' => $data['tgl_lahir'],
+                'gol_dar' => $data['gol_dar'] ?? null,
                 'usia' => $data['usia'],
                 'no_hp' => $data['no_hp'] ?? null,
                 'pendidikan_terakhir' => $data['pendidikan_terakhir'] ?? null,
                 'jurusan' => $data['jurusan'] ?? null,
+                'nm_ayah' => $data['nm_ayah'] ?? null,
+                'nm_ibu' => $data['nm_ibu'] ?? null,
+                'no_hp_wali' => $data['no_hp_wali'] ?? null,
+                'minat_id' => $data['minat_id'][0] ?? null,
+                'detail_minat' => $data['detail_minat'] ?? null,
+                'siap_nikah' => $data['siap_nikah'] ?? null,
+                'detail_siap_nikah' => $detailSiapNikahData ?? null,
             ]);
 
-            // Step 9: Simpan Insan Role
-            $insanRoleGenerus = InsanRole::create([
-                'insan_id' => $insan->id,
-                'dapukan_id' => $dapukanGenerus,
-            ]);
             $insanRoleMubaligh = '';
             
             // Step 10: Simpan Data Mubaligh jika ada
             if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
-                $insanRoleMubaligh = InsanRole::create([
-                    'insan_id' => $insan->id,
-                    'dapukan_id' => $dapukanMubaligh,
-                ]);
-
                 if ($data['mubaligh'] === 'MT') {
-                    MubalighTugasan::create([
-                        'insan_role_id' => $insanRoleMubaligh->id,
+                    Mubaligh::create([
+                        'insan_role_id' => $insan->id,
                         'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,
                         'asal_pondok' => $data['asal_pondok'] ?? null,
                         'tugasan_ke' => $data['tugasan_ke'] ?? null,
                         'tgl_mulai_tugas' => $data['tgl_mulai_tugas'] ?? null,
                     ]);
                 } elseif ($data['mubaligh'] === 'MS') {
-                    MubalighSetempat::create([
-                        'insan_role_id' => $insanRoleMubaligh->id,
+                    Mubaligh::create([
+                        'insan_role_id' => $insan->id,
                         'asal_pondok' => $data['asal_pondok'] ?? null,
                         'jml_tugas' => $data['jml_tugas'] ?? null,
                         'lama_tugas' => $data['lama_tugas'] ?? null,
@@ -240,20 +247,13 @@ class RegistrasiGenerusForm extends Component implements HasForms
 
             // Step 11: Simpan Generus Record
             Generus::create([
-                'insan_role_id' => $insanRoleGenerus->id,
+                'insan_role_id' => $insan->id,
                 'nis' => $data['nis'] ?? null,
                 'jenis_data' => $data['jenis_data'],
                 'kategori' => $data['kategori'],
-                'gol_dar' => $data['gol_dar'] ?? null,
                 'kelas_ppg_id' => $data['kelas_ppg_id'] ?? null,
                 'status_id' => $data['status_id'] ?? null,
                 'detail_status' => $detailStatusData,
-                'nm_ayah' => $data['nm_ayah'] ?? null,
-                'nm_ibu' => $data['nm_ibu'] ?? null,
-                'no_hp_wali' => $data['no_hp_wali'] ?? null,
-                'minat_id' => $data['minat_id'][0] ?? null,
-                'detail_minat' => $data['detail_minat'] ?? null,
-                'siap_nikah' => $data['siap_nikah'] ?? null,
                 'is_verified' => $data['is_verified'],
                 'riwayat_update' => $data['riwayat_update'],
             ]);

@@ -24,7 +24,8 @@ class ListGeneruses extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->label('Tambah Data')
-                ->icon('heroicon-o-plus'),
+                ->icon('heroicon-o-plus')
+                ->successNotificationMessage('Data berhasil ditambahkan'),
         ];
     }
 

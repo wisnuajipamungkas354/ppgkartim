@@ -7,8 +7,7 @@ use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
-use App\Models\MubalighTugasan;
-use App\Models\MubalighSetempat;
+use App\Models\Mubaligh;
 use App\Models\Kelompok;
 use App\Traits\HandlesPermissionPage;
 use Carbon\Carbon;
@@ -47,23 +46,23 @@ class Registrasi extends Page implements HasTable
         return $table
             ->query(Generus::query()->where('is_verified', false))
             ->columns([
-                TextColumn::make('insanrole.insan.desa.nm_desa')
+                TextColumn::make('insan.desa.nm_desa')
                     ->label('Desa')
                     ->formatStateUsing(fn (string $state) => Str::title($state)),
-                TextColumn::make('insanrole.insan.kelompok.nm_kelompok')
+                TextColumn::make('insan.kelompok.nm_kelompok')
                     ->label('Kelompok')
                     ->formatStateUsing(fn (string $state) => Str::title($state)),
-                TextColumn::make('insanrole.insan.nama')
+                TextColumn::make('insan.nama')
                     ->label('Nama Lengkap')
                     ->formatStateUsing(fn (string $state) => Str::title($state))
                     ->searchable(),
-                TextColumn::make('insanrole.insan.jk')
+                TextColumn::make('insan.jk')
                     ->label('L/P')
                     ->sortable(),
-                TextColumn::make('insanrole.insan.kota_lahir')
+                TextColumn::make('insan.kota_lahir')
                     ->label('Kota Lahir')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('insanrole.insan.tgl_lahir')
+                TextColumn::make('insan.tgl_lahir')
                     ->label('Tanggal Lahir')
                     ->date('d/m/Y')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -141,8 +140,8 @@ class Registrasi extends Page implements HasTable
                     ])
                     ->fillForm(function (Generus $record): array {
                         $mts = '';
-                        $isMT = MubalighTugasan::where('insan_role_id', $record->insanRole->id)->first();
-                        $isMs = MubalighSetempat::where('insan_role_id', $record->insanRole->id)->first();
+                        $isMT = Mubaligh::where('insan_id', $record->insan->id)->first();
+                        $isMs = Mubaligh::where('insan_id', $record->insan->id)->first();
                         if($isMT) {
                             $mts = 'MT';
                         } elseif($isMs) {
@@ -152,21 +151,26 @@ class Registrasi extends Page implements HasTable
                         }
 
                         return [
-                            'daerah_id' => $record->insanRole->insan->daerah_id,
-                            'desa_id' => $record->insanRole->insan->desa_id,
-                            'kelompok_id' => $record->insanRole->insan->kelompok_id,
-                            'nama' => $record->insanRole->insan->nama,
-                            'jk' => $record->insanRole->insan->jk,
-                            'kota_lahir' => $record->insanRole->insan->kota_lahir,
-                            'tgl_lahir' => $record->insanRole->insan->tgl_lahir,
-                            'no_hp' => $record->insanRole->insan->no_hp,
-                            'pendidikan_terakhir' => $record->insanRole->insan->pendidikan_terakhir,
-                            'jurusan' => $record->insanRole->insan->jurusan,
-                            'insan_role_id' => $record->insanRole->id,
+                            'daerah_id' => $record->insan->daerah_id,
+                            'desa_id' => $record->insan->desa_id,
+                            'kelompok_id' => $record->insan->kelompok_id,
+                            'nama' => $record->insan->nama,
+                            'jk' => $record->insan->jk,
+                            'kota_lahir' => $record->insan->kota_lahir,
+                            'tgl_lahir' => $record->insan->tgl_lahir,
+                            'gol_dar' => $record->insan->gol_dar,
+                            'no_hp' => $record->insan->no_hp,
+                            'pendidikan_terakhir' => $record->insan->pendidikan_terakhir,
+                            'jurusan' => $record->insan->jurusan,
+                            'nm_ayah' => $record->insan->nm_ayah,
+                            'nm_ibu' => $record->insan->nm_ibu,
+                            'no_hp_wali' => $record->insan->no_hp_wali,
+                            'minat_id' => $record->insan->minat_id,
+                            'detail_minat' => $record->insan->detail_minat,
+                            'siap_nikah' => $record->insan->siap_nikah,
                             'nis' => $record->nis,
                             'jenis_data' => $record->jenis_data,
                             'kategori' => $record->kategori,
-                            'gol_dar' => $record->gol_dar,
                             'kelas_ppg_id' => $record->kelas_ppg_id,
                             'mubaligh' => $mts, 
                             'tingkatan_tugas' => $record->detail_status['tingkatan_tugas'] ?? null, 
@@ -186,12 +190,6 @@ class Registrasi extends Page implements HasTable
                             'nm_sekolah' => $record->detail_status['nm_sekolah'] ?? null,
                             'kelas_di_sekolah' => $record->detail_status['kelas_di_sekolah'] ?? null,
                             'peminatan_sekolah' => $record->detail_status['peminatan_sekolah'] ?? null,
-                            'nm_ayah' => $record->nm_ayah,
-                            'nm_ibu' => $record->nm_ibu,
-                            'no_hp_wali' => $record->no_hp_wali,
-                            'minat_id' => $record->minat_id,
-                            'detail_minat' => $record->detail_minat,
-                            'siap_nikah' => $record->siap_nikah,
                             'is_verified' => $record->is_verified,
                             'riwayat_update' => $record->riwayat_update,
                         ];
@@ -202,7 +200,7 @@ class Registrasi extends Page implements HasTable
                         $data['riwayat_update'] = 'APPROVED';
                         $data['is_verified'] = true;
                         
-                        $insan = Insan::find($record->insanRole->insan->id);
+                        $insan = Insan::find($record->insan->id);
                         
                         $insan->update($data);
                         $record->update($data);
@@ -220,7 +218,7 @@ class Registrasi extends Page implements HasTable
                     ->label('Reject')
                     ->icon('heroicon-m-trash')
                     ->before(function (Generus $record) {
-                        $insan = Insan::find($record->insanRole->insan->id);
+                        $insan = Insan::find($record->insan->id);
                         $insan->forceDelete();
                     })
                     ->successNotification(

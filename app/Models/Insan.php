@@ -10,13 +10,29 @@ class Insan extends Model
     use SoftDeletes;
     
     protected $guarded = ['id'];
-
+    
     protected $casts = [
         'url_foto' => 'array',
+        'dapukan' => 'array',
+        'detail_siap_nikah' => 'array',
+        'detail_minat' => 'array',
     ];
 
-    public function insanRole() {
-        return $this->hasMany(InsanRole::class);
+    protected static function booted()
+    {
+        static::creating(function($insan) {
+            $insan->nama = strtoupper($insan->nama);
+            $insan->kota_lahir = strtoupper($insan->kota_lahir);
+            $insan->nm_ayah = strtoupper($insan->nm_ayah);
+            $insan->nm_ibu = strtoupper($insan->nm_ibu);
+        });
+
+        static::updating(function($insan) {
+            $insan->nama = strtoupper($insan->nama);
+            $insan->kota_lahir = strtoupper($insan->kota_lahir);
+            $insan->nm_ayah = strtoupper($insan->nm_ayah);
+            $insan->nm_ibu = strtoupper($insan->nm_ibu);
+        });
     }
 
     public function kelompok()
@@ -32,5 +48,20 @@ class Insan extends Model
     public function daerah() 
     { 
         return $this->belongsTo(Daerah::class); 
+    }
+
+    public function minat()
+    {
+        return $this->belongsTo(Minat::class);
+    }
+
+    public function generus()
+    {
+        return $this->hasOne(Generus::class);
+    }
+
+    public function mubaligh()
+    {
+        return $this->hasOne(Mubaligh::class);
     }
 }

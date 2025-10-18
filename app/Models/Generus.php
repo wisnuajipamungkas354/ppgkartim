@@ -15,6 +15,7 @@ class Generus extends Model
     protected $casts = [
         'detail_status' => 'array',
         'detail_minat' => 'array',
+        'detail_siap_nikah' => 'array',
     ];
 
     protected static function booted()
@@ -37,8 +38,8 @@ class Generus extends Model
         });
     }
 
-    public function insanRole() {
-        return $this->belongsTo(InsanRole::class);
+    public function insan() {
+        return $this->belongsTo(Insan::class);
     }
 
     public function kelasPpg() {

@@ -20,8 +20,8 @@ class CountGenerusTable extends BaseWidget
     protected function getStats(): array
     {
         $total = $this->getPageTableQuery()->count();
-        $l = $this->getPageTableQuery()->whereHas('insanRole', fn(Builder $query) => $query->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L')))->count();
-        $p = $this->getPageTableQuery()->whereHas('insanRole', fn(Builder $query) => $query->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P')))->count();
+        $l = $this->getPageTableQuery()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
+        $p = $this->getPageTableQuery()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
 
         return [
             Stat::make('Total', $total)

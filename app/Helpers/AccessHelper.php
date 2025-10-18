@@ -24,6 +24,9 @@ class AccessHelper
         return in_array(self::getActiveRoleName(), ['pjp_desa', 'mudamudi_desa']);
     }
 
+    /**
+     * Mengecek apakah yang login memiliki role daerah
+     */
     public static function isDaerah(): bool 
     {
         return in_array(self::getActiveRoleName(), ['phppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik']);

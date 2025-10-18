@@ -16,8 +16,8 @@ class GenerusForm
         'PAUD' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah'],
         'CABERAWIT' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah'],
         'PRA_REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah'],
-        'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas',],
-        'PRA_NIKAH' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'pendidikan_terakhir', 'jurusan', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas', 'status_id', 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan', 'bidang_usaha', 'nm_usaha', 'keahlian', 'no_hp', 'siap_nikah'],
+        'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas', 'konfirmasi_kesiapan_tugas'],
+        'PRA_NIKAH' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'pendidikan_terakhir', 'jurusan', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas','konfirmasi_kesiapan_tugas', 'status_id', 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan', 'bidang_usaha', 'nm_usaha', 'keahlian', 'no_hp', 'siap_nikah', 'tinggi_badan', 'berat_badan', 'kriteria_pasangan'],
     ];
 
     protected static array $categoryOptions = [
@@ -118,7 +118,24 @@ class GenerusForm
                 ->label('Siap Nikah')
                 ->options(['BELUM' => 'Belum Siap', 'SIAP' => 'Siap Nikah'])
                 ->descriptions(['BELUM' => 'Belum siap menikah', 'SIAP' => 'Siap Nikah berarti siap untuk dilancarkan, dicarikan, dan ditaaruf/dikenalkan oleh Pengurus PNKB'])
+                ->live()
                 ->required(),
+            'tinggi_badan' => Forms\Components\TextInput::make('tinggi_badan')
+                ->label('Tinggi Badan')
+                ->numeric()
+                ->placeholder('Masukkan tinggi badanmu (Hanya dapat dilihat oleh Tim PNKB)')
+                ->suffix('cm')
+                ->visible(fn(Get $get) => $get('siap_nikah') == 'SIAP'),
+            'berat_badan' => Forms\Components\TextInput::make('berat_badan')
+                ->label('Berat Badan')
+                ->placeholder('Masukkan berat badanmu (Hanya dapat dilihat oleh Tim PNKB)')
+                ->suffix('kg')
+                ->visible(fn(Get $get) => $get('siap_nikah') == 'SIAP'),
+            'kriteria_pasangan' => Forms\Components\TextArea::make('kriteria_pasangan')
+                ->label('Tuliskan Kriteria Pasangan yang Kamu Inginkan!')
+                ->placeholder('Datamu bersifat rahasia, hanya dapat dilihat oleh Tim PNKB')
+                ->required()
+                ->visible(fn(Get $get) => $get('siap_nikah') == 'SIAP'),
             'mubaligh' => Forms\Components\Radio::make('mubaligh')
                 ->label('Apakah Anda Seorang Mubaligh ?')
                 ->options(['MT' => 'Ya, Mubaligh Tugasan (MT)', 'MS' => 'Ya, Mubaligh Setempat (MS)', 'BUKAN' => 'Bukan Mubaligh'])
@@ -171,12 +188,22 @@ class GenerusForm
             'lama_tugas' => Forms\Components\Select::make('lama_tugas')
                 ->label('Berapa total tahun kamu melaksanakan tugas ?')
                 ->options([
+                    'Belum pernah tugas' => 'Belum pernah tugas',
                     'Dibawah 1 tahun' => 'Kurang dari 1 tahun',
                     '1 - 2 tahun' => '1 - 2 tahun',
                     '2 - 3 tahun' => '2 - 3 tahun',
                     '3 - 4 tahun' => '3 - 4 tahun',
                     '4 - 5 tahun' => '4 - 5 tahun',
                     '5 tahun ke atas' => '5 tahun ke atas',
+                ])
+                ->required()
+                ->visible(fn(Get $get) => $get('mubaligh') == 'MS'),
+            'konfirmasi_kesiapan_tugas' => Forms\Components\Select::make('konfirmasi_kesiapan_tugas')
+                ->label('Apakah kamu siap untuk melaksanakan tugas lagi?')
+                ->options([
+                    'Secepatnya' => 'Ya, secepatnya',
+                    'Santai' => 'Ya, namun santai',
+                    'Tidak' => 'Tidak, saya tidak ada rencana untuk tugas lagi',
                 ])
                 ->required()
                 ->visible(fn(Get $get) => $get('mubaligh') == 'MS'),
@@ -204,12 +231,12 @@ class GenerusForm
                 ->required(),
             'program_studi' => Forms\Components\TextInput::make('program_studi')
                 ->label('Program Studi')
-                ->placeholder('Nama Program Studi')
+                ->placeholder('Masukkan Nama Program Studi')
                 ->required()
                 ->visible(fn(Get $get) => in_array(Status::find($get('status_id'))?->slug, ['d3','s1-d4','s2','s3','kuliah-kerja']) ?? false),
             'universitas' => Forms\Components\TextInput::make('universitas')
-                ->label('Universitas')
-                ->placeholder('Nama Universitas')
+                ->label('Nama Perguruan Tinggi')
+                ->placeholder('Masukkan Nama Perguruan Tinggi')
                 ->required()
                 ->visible(fn(Get $get) => in_array(Status::find($get('status_id'))?->slug, ['s1-d4','s2','s3','kuliah-kerja']) ?? false),
             'jabatan' => Forms\Components\TextInput::make('jabatan')
