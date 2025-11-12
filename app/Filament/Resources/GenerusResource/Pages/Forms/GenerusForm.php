@@ -11,11 +11,10 @@ use Illuminate\Support\Str;
 
 class GenerusForm
 {
-    // ... (unchanged code for $categoryFields and $categoryOptions) ...
     protected static array $categoryFields = [
-        'PAUD' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah'],
-        'CABERAWIT' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah'],
-        'PRA_REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah'],
+        'PAUD' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'is_sekolah_jm'],
+        'CABERAWIT' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah', 'is_sekolah_jm'],
+        'PRA_REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah', 'is_sekolah_jm'],
         'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas', 'konfirmasi_kesiapan_tugas'],
         'PRA_NIKAH' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'pendidikan_terakhir', 'jurusan', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas','konfirmasi_kesiapan_tugas', 'status_id', 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan', 'bidang_usaha', 'nm_usaha', 'keahlian', 'no_hp', 'siap_nikah', 'tinggi_badan', 'berat_badan', 'kriteria_pasangan'],
     ];
@@ -221,6 +220,8 @@ class GenerusForm
                 ->label('Nama Sekolah')
                 ->placeholder($options['placeholderSekolah'] ?? '')
                 ->required(),
+            'is_sekolah_jm' => Forms\Components\CheckBox::make('is_sekolah_jm')
+                ->label("Sekolah tersebut adalah Sekolah Jama'ah"),
             'peminatan_sekolah' => Forms\Components\TextInput::make('peminatan_sekolah')
                 ->label('Peminatan/Jurusan Di Sekolah')
                 ->placeholder('Contoh: IPA, Teknik Komputer & Jaringan, dll')

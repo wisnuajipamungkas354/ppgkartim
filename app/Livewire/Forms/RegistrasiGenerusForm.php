@@ -64,8 +64,6 @@ class RegistrasiGenerusForm extends Component implements HasForms
                             $data = $this->data;
                             $validated = Insan::query()->where('nama', $data['nama'])->where('jk', $data['jk'])->where('tgl_lahir', $data['tgl_lahir'])->first();
                             if ($validated) {
-                                redirect('/registrasi-generus-form');
-
                                 Notification::make('failed_notification')
                                 ->title('Data sudah ada di database!')
                                 ->body('Datamu sudah tercatat didatabase, silahkan menghubungi admin jika ada perubahan data yaa!')
@@ -74,7 +72,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                                 ->seconds(10)
                                 ->send();
 
-                                throw new Halt();
+                                // throw new Halt();
                             }
                         })
                         ->schema(fn(Get $get) => GenerusForm::getForms($get)),
@@ -159,14 +157,14 @@ class RegistrasiGenerusForm extends Component implements HasForms
             $data['usia'] = Carbon::parse($data['tgl_lahir'])->age ?? null;
 
             // Step 5: Data Terverifikasi
-            $data['is_verified'] = true;
-            $data['riwayat_update'] = 'FORM REGISTRASI';
+            $data['is_verified'] = false;
+            $data['riwayat_update'] = 'DITAMBAHKAN VIA FORM REGISTRASI';
 
             // Step 6: Pisahkan dan kumpulkan data detail status
             $detailStatusKeys = [
                 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan',
                 'bidang_usaha', 'nm_usaha', 'keahlian', 'nm_sekolah',
-                'peminatan_sekolah', 'kelas_di_sekolah',
+                'peminatan_sekolah', 'kelas_di_sekolah', 'is_sekolah_jm'
             ];
             $detailSiapNikah = ['tinggi_badan', 'berat_badan', 'kriteria_pasangan'];
 
@@ -188,13 +186,13 @@ class RegistrasiGenerusForm extends Component implements HasForms
             }
             
             // Step 7: Menentukan Dapukan 
-            $dapukanGenerus = Dapukan::where('nm_dapukan', 'GENERUS')->value('id');
+            $dapukanGenerus = Dapukan::where('nm_dapukan', 'GENERUS')->value('slug');
             $dapukanMubaligh = null; 
             if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
                 if ($data['mubaligh'] === 'MT') {
-                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH TUGASAN')->value('id');
+                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH TUGASAN')->value('slug');
                 } elseif ($data['mubaligh'] === 'MS') {
-                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('id');
+                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('slug');
                 }
             }
 
@@ -213,6 +211,10 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'no_hp' => $data['no_hp'] ?? null,
                 'pendidikan_terakhir' => $data['pendidikan_terakhir'] ?? null,
                 'jurusan' => $data['jurusan'] ?? null,
+                'dapukan' => [
+                    $dapukanGenerus
+                ],
+                'perkawinan' => 'LAJANG',
                 'nm_ayah' => $data['nm_ayah'] ?? null,
                 'nm_ibu' => $data['nm_ibu'] ?? null,
                 'no_hp_wali' => $data['no_hp_wali'] ?? null,
@@ -221,8 +223,6 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'siap_nikah' => $data['siap_nikah'] ?? null,
                 'detail_siap_nikah' => $detailSiapNikahData ?? null,
             ]);
-
-            $insanRoleMubaligh = '';
             
             // Step 10: Simpan Data Mubaligh jika ada
             if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
@@ -247,7 +247,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
 
             // Step 11: Simpan Generus Record
             Generus::create([
-                'insan_role_id' => $insan->id,
+                'insan_id' => $insan->id,
                 'nis' => $data['nis'] ?? null,
                 'jenis_data' => $data['jenis_data'],
                 'kategori' => $data['kategori'],

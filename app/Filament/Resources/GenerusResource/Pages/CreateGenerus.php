@@ -83,6 +83,9 @@ class CreateGenerus extends CreateRecord
                 'no_hp' => $result['no_hp'] ?? null,
                 'pendidikan_terakhir' => $result['pendidikan_terakhir'] ?? null,
                 'jurusan' => $result['jurusan'] ?? null,
+                'dapukan' => [
+                    $dapukanGenerus
+                ],
                 'perkawinan' => 'LAJANG',
                 'nm_ayah' => $result['nm_ayah'] ?? null,
                 'nm_ibu' => $result['nm_ibu'] ?? null,
@@ -92,8 +95,6 @@ class CreateGenerus extends CreateRecord
                 'siap_nikah' => $result['siap_nikah'] ?? null,
                 'detail_siap_nikah' => $result['detail_siap_nikah'] ?? null,
             ]);
-
-            $insanRoleMubaligh = '';
             
             // Step 10: Simpan Data Mubaligh jika ada
             if (isset($result['mubaligh']) && $result['mubaligh'] !== 'BUKAN') {

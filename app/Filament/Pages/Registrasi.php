@@ -168,6 +168,7 @@ class Registrasi extends Page implements HasTable
                             'minat_id' => $record->insan->minat_id,
                             'detail_minat' => $record->insan->detail_minat,
                             'siap_nikah' => $record->insan->siap_nikah,
+                            
                             'nis' => $record->nis,
                             'jenis_data' => $record->jenis_data,
                             'kategori' => $record->kategori,
