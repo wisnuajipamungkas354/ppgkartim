@@ -9,6 +9,7 @@ use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\Mubaligh;
 use App\Models\Kelompok;
+use App\Models\Minat;
 use App\Traits\HandlesPermissionPage;
 use Carbon\Carbon;
 use Filament\Forms\Components\Fieldset;
@@ -91,7 +92,8 @@ class Registrasi extends Page implements HasTable
                                                 'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
                                             ])
                                     ->disabled()
-                                    ]),
+                                    ])
+                                    ,
                         Fieldset::make('Sambung')
                             ->schema([
                                 Select::make('daerah_id')
@@ -131,25 +133,20 @@ class Registrasi extends Page implements HasTable
                              ]),
                         FieldSet::make('Minat & Bakat')
                              ->schema([
-                                Select::make('minat_id')
+                                Select::make('minat_bakat')
                                     ->label('Kategori Minat Bakat')
-                                    ->relationship('minat', 'nm_minat'),
-                                TextInput::make('detail_minat')
-                                    ->label('Sebutkan nama minat bakat'),
+                                    ->options(fn() => Minat::all()->pluck('nm_minat', 'slug'))
+                                    ->multiple(),
                              ])
+                             ->visible(fn(Get $get) => !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
                     ])
                     ->fillForm(function (Generus $record): array {
-                        $mts = '';
-                        $isMT = Mubaligh::where('insan_id', $record->insan->id)->first();
-                        $isMs = Mubaligh::where('insan_id', $record->insan->id)->first();
-                        if($isMT) {
-                            $mts = 'MT';
-                        } elseif($isMs) {
-                            $mts = 'MS';
-                        } else {
-                            $mts = 'BUKAN';
+                        
+                        $dataMS = [];
+                        if($record->insan->is_mubaligh) {
+                            $dataMS = Mubaligh::where('insan_id', $record->insan->id)->first();
                         }
-
+                        
                         return [
                             'daerah_id' => $record->insan->daerah_id,
                             'desa_id' => $record->insan->desa_id,
@@ -165,21 +162,18 @@ class Registrasi extends Page implements HasTable
                             'nm_ayah' => $record->insan->nm_ayah,
                             'nm_ibu' => $record->insan->nm_ibu,
                             'no_hp_wali' => $record->insan->no_hp_wali,
-                            'minat_id' => $record->insan->minat_id,
-                            'detail_minat' => $record->insan->detail_minat,
+                            'minat_bakat' => $record->insan->minat_bakat,
                             'siap_nikah' => $record->insan->siap_nikah,
                             
                             'nis' => $record->nis,
                             'jenis_data' => $record->jenis_data,
                             'kategori' => $record->kategori,
                             'kelas_ppg_id' => $record->kelas_ppg_id,
-                            'mubaligh' => $mts, 
-                            'tingkatan_tugas' => $record->detail_status['tingkatan_tugas'] ?? null, 
-                            'tgl_mulai_tugas' => $record->detail_status['tgl_mulai_tugas'] ?? null, 
-                            'asal_pondok' => $record->detail_status['asal_pondok'] ?? null, 
-                            'tugasan_ke' => $record->detail_status['tugasan_ke'] ?? null, 
-                            'jml_tugas' => $record->detail_status['jml_tugas'] ?? null, 
-                            'lama_tugas' => $record->detail_status['lama_tugas'] ?? null, 
+                            'mubaligh' => $record->insan->is_mubaligh ? 'MS' : 'BUKAN', 
+                            'asal_pondok' => $dataMS->asal_pondok ?? null, 
+                            'jml_tugas' => $dataMS->jml_tugas ?? null, 
+                            'lama_tugas' => $dataMS->lama_tugas ?? null, 
+                            'konfirmasi_kesiapan_tugas' => $dataMS->konfirmasi_kesiapan_tugas ?? null,
                             'status_id' => $record->status_id,
                             'program_studi' => $record->detail_status['program_studi'] ?? null, 
                             'universitas' => $record->detail_status['universitas'] ?? null, 
@@ -191,6 +185,7 @@ class Registrasi extends Page implements HasTable
                             'nm_sekolah' => $record->detail_status['nm_sekolah'] ?? null,
                             'kelas_di_sekolah' => $record->detail_status['kelas_di_sekolah'] ?? null,
                             'peminatan_sekolah' => $record->detail_status['peminatan_sekolah'] ?? null,
+                            'is_sekolah_jm' => $record->detail_status['is_sekolah_jm'] ?? null,
                             'is_verified' => $record->is_verified,
                             'riwayat_update' => $record->riwayat_update,
                         ];

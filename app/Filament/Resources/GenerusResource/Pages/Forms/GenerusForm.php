@@ -14,9 +14,9 @@ class GenerusForm
     protected static array $categoryFields = [
         'PAUD' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'is_sekolah_jm'],
         'CABERAWIT' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah', 'is_sekolah_jm'],
-        'PRA_REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah', 'is_sekolah_jm'],
-        'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas', 'konfirmasi_kesiapan_tugas'],
-        'PRA_NIKAH' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'pendidikan_terakhir', 'jurusan', 'mubaligh', 'tingkatan_tugas', 'tgl_mulai_tugas', 'asal_pondok', 'tugasan_ke', 'jml_tugas', 'lama_tugas','konfirmasi_kesiapan_tugas', 'status_id', 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan', 'bidang_usaha', 'nm_usaha', 'keahlian', 'no_hp', 'siap_nikah', 'tinggi_badan', 'berat_badan', 'kriteria_pasangan'],
+        'PRA_REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'kelas_di_sekolah', 'nm_sekolah', 'is_sekolah_jm', 'mubaligh', 'asal_pondok', 'jml_tugas', 'lama_tugas', 'konfirmasi_kesiapan_tugas'],
+        'REMAJA' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'nm_sekolah', 'kelas_di_sekolah', 'peminatan_sekolah', 'no_hp', 'mubaligh', 'tingkatan_tugas', 'asal_pondok', 'jml_tugas', 'lama_tugas', 'konfirmasi_kesiapan_tugas'],
+        'PRA_NIKAH' => ['nama', 'jk', 'kota_lahir', 'tgl_lahir', 'gol_dar', 'pendidikan_terakhir', 'jurusan', 'mubaligh', 'asal_pondok', 'jml_tugas', 'lama_tugas', 'konfirmasi_kesiapan_tugas', 'status_id', 'program_studi', 'universitas', 'jabatan', 'nm_perusahaan', 'bidang_usaha', 'nm_usaha', 'keahlian', 'no_hp', 'siap_nikah', 'tinggi_badan', 'berat_badan', 'kriteria_pasangan'],
     ];
 
     protected static array $categoryOptions = [
@@ -119,25 +119,9 @@ class GenerusForm
                 ->descriptions(['BELUM' => 'Belum siap menikah', 'SIAP' => 'Siap Nikah berarti siap untuk dilancarkan, dicarikan, dan ditaaruf/dikenalkan oleh Pengurus PNKB'])
                 ->live()
                 ->required(),
-            'tinggi_badan' => Forms\Components\TextInput::make('tinggi_badan')
-                ->label('Tinggi Badan')
-                ->numeric()
-                ->placeholder('Masukkan tinggi badanmu (Hanya dapat dilihat oleh Tim PNKB)')
-                ->suffix('cm')
-                ->visible(fn(Get $get) => $get('siap_nikah') == 'SIAP'),
-            'berat_badan' => Forms\Components\TextInput::make('berat_badan')
-                ->label('Berat Badan')
-                ->placeholder('Masukkan berat badanmu (Hanya dapat dilihat oleh Tim PNKB)')
-                ->suffix('kg')
-                ->visible(fn(Get $get) => $get('siap_nikah') == 'SIAP'),
-            'kriteria_pasangan' => Forms\Components\TextArea::make('kriteria_pasangan')
-                ->label('Tuliskan Kriteria Pasangan yang Kamu Inginkan!')
-                ->placeholder('Datamu bersifat rahasia, hanya dapat dilihat oleh Tim PNKB')
-                ->required()
-                ->visible(fn(Get $get) => $get('siap_nikah') == 'SIAP'),
             'mubaligh' => Forms\Components\Radio::make('mubaligh')
                 ->label('Apakah Anda Seorang Mubaligh ?')
-                ->options(['MT' => 'Ya, Mubaligh Tugasan (MT)', 'MS' => 'Ya, Mubaligh Setempat (MS)', 'BUKAN' => 'Bukan Mubaligh'])
+                ->options(['MS' => 'Ya, Mubaligh Setempat (MS)', 'BUKAN' => 'Bukan Mubaligh'])
                 ->live()
                 ->afterStateUpdated(fn(Get $get) => null)
                 ->required(),
@@ -164,7 +148,7 @@ class GenerusForm
                 ->label('Asal Pondok')
                 ->placeholder('Masukkan nama pondok, Contoh : Ponpes Baitul Ulya')
                 ->required()
-                ->visible(fn(Get $get) => in_array($get('mubaligh'), ['MT', 'MS']) ?? false), // Only visible when Mubaligh is selected
+                ->visible(fn(Get $get) => $get('mubaligh') == 'MS'), // Only visible when Mubaligh is selected
             'tugasan_ke' => Forms\Components\TextInput::make('tugasan_ke')
                 ->label('Saat ini tugasan yang ke berapa ?')
                 ->numeric()

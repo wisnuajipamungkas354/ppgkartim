@@ -41,13 +41,13 @@ class ViewGenerus extends ViewRecord
         ->schema([
             Section::make('Sambung')
             ->schema([
-                TextEntry::make('insanRole.insan.daerah.nm_daerah')
+                TextEntry::make('insan.daerah.nm_daerah')
                     ->label('Daerah')
                     ->formatStateUsing(fn(string $state) => Str::title($state)),
-                TextEntry::make('insanRole.insan.desa.nm_desa')
+                TextEntry::make('insan.desa.nm_desa')
                     ->label('Desa')
                     ->formatStateUsing(fn(string $state) => Str::title($state)),
-                TextEntry::make('insanRole.insan.kelompok.nm_kelompok')
+                TextEntry::make('insan.kelompok.nm_kelompok')
                     ->label('Kelompok')
                     ->formatStateUsing(fn(string $state) => Str::title($state)),
             ])
@@ -65,13 +65,13 @@ class ViewGenerus extends ViewRecord
             ->columnSpan(4),
             Section::make('Orang Tua')
                     ->schema([
-                        TextEntry::make('nm_ayah')
+                        TextEntry::make('insan.nm_ayah')
                             ->label('Nama Ayah')
                             ->formatStateUsing(fn(string $state) => $state ? Str::title($state) : '-'),
-                        TextEntry::make('nm_ibu')
+                        TextEntry::make('insan.nm_ibu')
                             ->label('Nama Ibu')
                             ->formatStateUsing(fn(string $state) => $state ? Str::title($state) : '-'),
-                        TextEntry::make('no_hp_wali')
+                        TextEntry::make('insan.no_hp_wali')
                             ->label('Nomor HP Orang Tua'),
                         
                     ])

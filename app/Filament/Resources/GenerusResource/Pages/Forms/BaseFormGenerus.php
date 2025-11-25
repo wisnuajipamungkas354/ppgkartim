@@ -6,11 +6,15 @@ use App\Helpers\AccessHelper;
 use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Kelompok;
+use App\Models\Minat;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Illuminate\Support\HtmlString;
 
 class BaseFormGenerus
 {
@@ -102,15 +106,17 @@ class BaseFormGenerus
                 ]),
             Step::make('Minat & Bakat')
                 ->schema([
-                    Select::make('minat_id')
-                        ->label('Kategori Minat Bakat')
-                        ->relationship('minat', 'nm_minat')
+                    Select::make('minat_bakat')
+                        ->label('Minat & Bakat')
+                        ->options(fn() => Minat::all()->pluck('nm_minat', 'slug'))
+                        ->searchable()
+                        ->multiple()
                         ->required(fn(Get $get) => $get('kategori') == 'PRA_NIKAH'),
-                    TextInput::make('detail_minat')
-                        ->label('Sebutkan nama minat bakat, Contoh: Sepak Bola')
-                        ->required(fn(Get $get) => $get('kategori') == 'PRA_NIKAH'),
-            ])
-            ->visible(fn(Get $get) => !$get('kategori') == null && !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
+                    TextInput::make('bakat_lainnya')
+                        ->label('Minat & Bakat Lainnya (Jika tidak ada dalam list)')
+                        ->placeholder('Masukkan disini')
+                ])
+                ->visible(fn(Get $get) => !$get('kategori') == null && !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
         ];
     }
 }

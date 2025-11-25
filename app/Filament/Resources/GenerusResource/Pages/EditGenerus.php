@@ -4,6 +4,7 @@ namespace App\Filament\Resources\GenerusResource\Pages;
 
 use App\Filament\Resources\GenerusResource;
 use App\Filament\Resources\GenerusResource\Pages\Forms\BaseFormGenerus;
+use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\Mubaligh;
 use Carbon\Carbon;
@@ -37,136 +38,73 @@ class EditGenerus extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $insan = Insan::find($data['insan_id'])?->insan;
-        if (!$insan) {
-            return $data; // atau bisa throw exception kalau perlu
+        $record = Generus::query()->with('insan')->where('id', $data['id'])->first();
+
+        $dataMS = [];
+        if($record->insan->is_mubaligh) {
+            $dataMS = Mubaligh::where('insan_id', $record->insan->id)->first();
         }
-
-        $insanData = $insan->only([
-            'url_foto', 'daerah_id', 'desa_id', 'kelompok_id', 'nama', 'jk',
-            'kota_lahir', 'tgl_lahir', 'no_hp', 'pendidikan_terakhir', 'jurusan',
-        ]);
-
-        $mubalighTugasan = [];
-        $mubalighSetempat = [];
-        foreach($insan->insanRole as $role => $dapukan){
-            if($insan->insanRole[$role]->dapukan->nm_dapukan == 'MUBALIGH TUGASAN') {
-                $mubalighTugasan = Mubaligh::where('insan_role_id', $insan->insanRole[$role]->id)->first();
-            } elseif($insan->insanRole[$role]->dapukan->nm_dapukan == 'MUBALIGH SETEMPAT') {
-                $mubalighSetempat = Mubaligh::where('insan_role_id', $insan->insanRole[$role]->id)->first();
-            }
-        }
-        $mubalighData = [];
-
-        if ($mubalighTugasan) {
-            $mubalighData = [
-                'mubaligh' => 'MT',
-                'tingkatan_tugas' => $mubalighTugasan->tingkatan_tugas,
-                'asal_pondok' => $mubalighTugasan->asal_pondok,
-                'tugasan_ke' => $mubalighTugasan->tugasan_ke,
-                'tgl_mulai_tugas' => $mubalighTugasan->tgl_mulai_tugas,
-            ];
-        } elseif ($mubalighSetempat) {
-            $mubalighData = [
-                'mubaligh' => 'MS',
-                'asal_pondok' => $mubalighSetempat->asal_pondok,
-                'jml_tugas' => $mubalighSetempat->jml_tugas,
-                'lama_tugas' => $mubalighSetempat->lama_tugas,
-            ];
-        } else {
-            $mubalighData['mubaligh'] = 'BUKAN';
-        }
-
-        // Mengeluarkan nilai detail status
-        $detailStatus = $data['detail_status'];
 
         // Menggabungkan semua data yang diperlukan
-        return array_merge($data, $insanData, $mubalighData, $detailStatus, $insan->only([
-            'url_foto', 'daerah_id', 'desa_id', 'kelompok_id', 'nama', 'jk',
-            'kota_lahir', 'tgl_lahir', 'no_hp', 'pendidikan_terakhir', 'jurusan',
-        ]));
+        return [
+            'daerah_id' => $record->insan->daerah_id,
+            'desa_id' => $record->insan->desa_id,
+            'kelompok_id' => $record->insan->kelompok_id,
+            'nama' => $record->insan->nama,
+            'jk' => $record->insan->jk,
+            'kota_lahir' => $record->insan->kota_lahir,
+            'tgl_lahir' => $record->insan->tgl_lahir,
+            'gol_dar' => $record->insan->gol_dar,
+            'no_hp' => $record->insan->no_hp,
+            'pendidikan_terakhir' => $record->insan->pendidikan_terakhir,
+            'jurusan' => $record->insan->jurusan,
+            'nm_ayah' => $record->insan->nm_ayah,
+            'nm_ibu' => $record->insan->nm_ibu,
+            'no_hp_wali' => $record->insan->no_hp_wali,
+            'minat_bakat' => $record->insan->minat_bakat,
+            'siap_nikah' => $record->insan->siap_nikah,
+            
+            'nis' => $record->nis,
+            'jenis_data' => $record->jenis_data,
+            'kategori' => $record->kategori,
+            'kelas_ppg_id' => $record->kelas_ppg_id,
+            'mubaligh' => $record->insan->is_mubaligh ? 'MS' : 'BUKAN', 
+            'asal_pondok' => $dataMS->asal_pondok ?? null, 
+            'jml_tugas' => $dataMS->jml_tugas ?? null, 
+            'lama_tugas' => $dataMS->lama_tugas ?? null, 
+            'konfirmasi_kesiapan_tugas' => $dataMS->konfirmasi_kesiapan_tugas ?? null,
+            'status_id' => $record->status_id,
+            'program_studi' => $record->detail_status['program_studi'] ?? null, 
+            'universitas' => $record->detail_status['universitas'] ?? null, 
+            'jabatan' => $record->detail_status['jabatan'] ?? null, 
+            'nm_perusahaan' => $record->detail_status['nm_perusahaan'] ?? null, 
+            'bidang_usaha' => $record->detail_status['bidang_usaha'] ?? null, 
+            'nm_usaha' => $record->detail_status['nm_usaha'] ?? null, 
+            'keahlian' => $record->detail_status['keahlian'] ?? null,
+            'nm_sekolah' => $record->detail_status['nm_sekolah'] ?? null,
+            'kelas_di_sekolah' => $record->detail_status['kelas_di_sekolah'] ?? null,
+            'peminatan_sekolah' => $record->detail_status['peminatan_sekolah'] ?? null,
+            'is_sekolah_jm' => $record->detail_status['is_sekolah_jm'] ?? null,
+            'is_verified' => $record->is_verified,
+            'riwayat_update' => $record->riwayat_update,
+        ];
     }
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         // Step 1: Update data Insan
-        $insan = $record->insanRole->insan;
-        $insanData = [
-            'nama' => $data['nama'],
-            'jk' => $data['jk'],
-            'kota_lahir' => $data['kota_lahir'],
-            'tgl_lahir' => $data['tgl_lahir'],
-            'no_hp' => $data['no_hp'] ?? null,
-            'pendidikan_terakhir' => $data['pendidikan_terakhir'] ?? null,
-            'jurusan' => $data['jurusan'] ?? null,
-            'usia' => Carbon::parse($data['tgl_lahir'])->age ?? null,
-        ];
-        $insan->update($insanData);
-
-        // Step 2: Pisahkan dan kumpulkan data detail status
-        $detailStatusKeys = [
-            'program_studi', 'universitas', 'jabatan', 'nm_perusahaan',
-            'bidang_usaha', 'nm_usaha', 'keahlian', 'nm_sekolah',
-            'peminatan_sekolah', 'kelas_di_sekolah',
-        ];
-
-        $detailStatusData = [];
-        foreach ($detailStatusKeys as $key) {
-            if (isset($data[$key])) {
-                $detailStatusData[$key] = $data[$key];
-                unset($data[$key]);
-            }
-        }
-
-        // Step 3: Update data Generus
-        $generusData = [
-            'jenis_data' => in_array($data['kategori'], ['PAUD', 'CABERAWIT']) ? 'CBRWT' : 'MM',
-            'kategori' => $data['kategori'],
-            'gol_dar' => $data['gol_dar'] ?? null,
-            'kelas_ppg_id' => $data['kelas_ppg_id'] ?? null,
-            'status_id' => $data['status_id'] ?? null,
-            'detail_status' => $detailStatusData,
-            'nm_ayah' => $data['nm_ayah'] ?? null,
-            'nm_ibu' => $data['nm_ibu'] ?? null,
-            'no_hp_wali' => $data['no_hp_wali'] ?? null,
-            'minat_id' => $data['minat_id'] ?? null,
-            'detail_minat' => $data['detail_minat'] ?? null,
-            'siap_nikah' => $data['siap_nikah'] ?? null,
-            'riwayat_update' => 'DIEDIT OLEH ADMIN',
-        ];
-        $record->update($generusData);
-
-        // Step 4: Update data Mubaligh jika ada
-        if (isset($data['mubaligh']) && $data['mubaligh'] != 'BUKAN') {
-            $insanRoleId = $record->insan_role_id;
-
-            // Hapus data Mubaligh yang tidak relevan (jika jenis Mubaligh berubah)
-            if ($data['mubaligh'] === 'MT') {
-                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
-                Mubaligh::updateOrCreate(
-                    ['insan_role_id' => $insanRoleId],
-                    [
-                        'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,
-                        'asal_pondok' => $data['asal_pondok'] ?? null,
-                        'tugasan_ke' => $data['tugasan_ke'] ?? null,
-                        'tgl_mulai_tugas' => $data['tgl_mulai_tugas'] ?? null,
-                    ]
-                );
-            } elseif ($data['mubaligh'] === 'MS') {
-                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
-                Mubaligh::updateOrCreate(
-                    ['insan_role_id' => $insanRoleId],
-                    [
+        $insan = Insan::find($record->insan->id);
+        if($data['mubaligh'] == 'MS') {
+            Mubaligh::updateOrCreate([
+                        'insan_id' => $record->insan->id,
                         'asal_pondok' => $data['asal_pondok'] ?? null,
                         'jml_tugas' => $data['jml_tugas'] ?? null,
                         'lama_tugas' => $data['lama_tugas'] ?? null,
-                    ]
-                );
-            } else { // Jika bukan Mubaligh
-                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
-                Mubaligh::where('insan_role_id', $insanRoleId)->delete();
-            }
+                        'konfirmasi_kesiapan_tugas' => $data['konfirmasi_kesiapan_tugas'] ?? null
+                    ]);
         }
+        $insan->update($data);
+        $record->update($data);
 
         return $record;
     }

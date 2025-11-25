@@ -41,8 +41,8 @@ return new class extends Migration
             $table->string('nm_ibu')->nullable();
             $table->string('no_hp_wali', 15)->nullable();
             // Minat Bakat
-            $table->foreignId('minat_id')->nullable()->constrained();
-            $table->json('detail_minat')->nullable();
+            $table->json('minat_bakat')->nullable();
+            $table->boolean('is_mubaligh')->default(false); // Apakah seorang mubaligh atau bukan (MT/MS)
             $table->timestamps();
             $table->softDeletes();
         });

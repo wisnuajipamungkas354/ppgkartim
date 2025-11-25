@@ -12,6 +12,7 @@ use App\Models\Insan;
 use App\Models\Kelompok;
 use App\Models\Status;
 use App\Forms\Components\TutorialForm;
+use App\Models\Minat;
 use App\Models\Mubaligh;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -29,10 +31,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\GenerusResource\Traits\ValidateGenerusForm;
+use Illuminate\Support\Str;
 
 class RegistrasiGenerusForm extends Component implements HasForms
 {
-    use InteractsWithForms;
+    use InteractsWithForms, ValidateGenerusForm;
     
     public ?array $data = [];
 
@@ -112,11 +116,15 @@ class RegistrasiGenerusForm extends Component implements HasForms
                         ]),
                     Wizard\Step::make('Minat & Bakat')
                         ->schema([
-                            Forms\Components\Select::make('minat_id')
-                                ->label('Kategori Minat Bakat')
-                                ->relationship('minat', 'nm_minat'),
-                            Forms\Components\TextInput::make('detail_minat')
-                                ->label('Sebutkan nama minat bakat'),
+                            Select::make('minat_bakat')
+                                ->label('Minat & Bakat')
+                                ->options(fn() => Minat::all()->pluck('nm_minat', 'slug'))
+                                ->searchable()
+                                ->multiple()
+                                ->required(fn(Get $get) => $get('kategori') == 'PRA_NIKAH'),
+                            TextInput::make('bakat_lainnya')
+                                ->label('Minat & Bakat Lainnya (Jika tidak ada dalam list)')
+                                ->placeholder('Masukkan disini')
                         ])
                         ->visible(fn(Get $get) => !$get('kategori') == null && !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
                 ])
@@ -138,124 +146,74 @@ class RegistrasiGenerusForm extends Component implements HasForms
     {
         try {
             // Step 1
-            $data = $this->form->getState();
-            
-            // Step 2: Jenis Data
-            $data['jenis_data'] = in_array($data['kategori'], ['PAUD', 'CABERAWIT']) ? 'CBRWT' : 'MM';
+            $rawData = $this->form->getState();
+            $result = $this->validateInput($rawData, 'REGISTRASI');
 
-            // Step 3: Status
-            $statusMap = [
-                'PAUD' => 'paudtk',
-                'CABERAWIT' => 'sd',
-                'PRA_REMAJA' => 'smp',
-                'REMAJA' => 'sma-smk',
-            ];
-            $slug = $statusMap[$data['kategori']] ?? null;
-            $data['status_id'] = $slug ? Status::where('slug', $slug)->value('id') : ($data['mubaligh'] == 'MT' ? Status::where('slug', 'mt')->value('id') : null);
+            if(isset($result['bakat_lainnya']) && $result['bakat_lainnya'] !== null ) {
+                $namaMinat = Str::camel($result['bakat_lainnya']);
+                $slug = Str::slug($namaMinat);
 
-            // Step 4: Usia
-            $data['usia'] = Carbon::parse($data['tgl_lahir'])->age ?? null;
+                Minat::create([
+                    'nm_minat' => $namaMinat,
+                    'slug' => $slug
+                ]);
 
-            // Step 5: Data Terverifikasi
-            $data['is_verified'] = false;
-            $data['riwayat_update'] = 'DITAMBAHKAN VIA FORM REGISTRASI';
-
-            // Step 6: Pisahkan dan kumpulkan data detail status
-            $detailStatusKeys = [
-                'program_studi', 'universitas', 'jabatan', 'nm_perusahaan',
-                'bidang_usaha', 'nm_usaha', 'keahlian', 'nm_sekolah',
-                'peminatan_sekolah', 'kelas_di_sekolah', 'is_sekolah_jm'
-            ];
-            $detailSiapNikah = ['tinggi_badan', 'berat_badan', 'kriteria_pasangan'];
-
-            $detailStatusData = [];
-            $detailSiapNikahData = [];
-
-            foreach ($detailStatusKeys as $key) {
-                if (isset($data[$key])) {
-                    $detailStatusData[$key] = $data[$key];
-                    unset($data[$key]);
-                }
-            }
-
-            foreach ($detailSiapNikah as $key) {
-                if(isset($data[$key])) {
-                    $detailSiapNikahData[$key] = $data[$key];
-                    unset($data[$key]);
-                }
-            }
-            
-            // Step 7: Menentukan Dapukan 
-            $dapukanGenerus = Dapukan::where('nm_dapukan', 'GENERUS')->value('slug');
-            $dapukanMubaligh = null; 
-            if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
-                if ($data['mubaligh'] === 'MT') {
-                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH TUGASAN')->value('slug');
-                } elseif ($data['mubaligh'] === 'MS') {
-                    $dapukanMubaligh = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('slug');
-                }
+                $data['minat_bakat'][] = $slug;
             }
 
             // Step 8: Simpan Insan
             $insan = Insan::create([
-                'url_foto' => $data['url_foto'] ?? null,
-                'daerah_id' => $data['daerah_id'],
-                'desa_id' => $data['desa_id'],
-                'kelompok_id' => $data['kelompok_id'] ?? null,
-                'nama' => $data['nama'],
-                'jk' => $data['jk'],
-                'kota_lahir' => $data['kota_lahir'],
-                'tgl_lahir' => $data['tgl_lahir'],
-                'gol_dar' => $data['gol_dar'] ?? null,
-                'usia' => $data['usia'],
-                'no_hp' => $data['no_hp'] ?? null,
-                'pendidikan_terakhir' => $data['pendidikan_terakhir'] ?? null,
-                'jurusan' => $data['jurusan'] ?? null,
-                'dapukan' => [
-                    $dapukanGenerus
-                ],
-                'perkawinan' => 'LAJANG',
-                'nm_ayah' => $data['nm_ayah'] ?? null,
-                'nm_ibu' => $data['nm_ibu'] ?? null,
-                'no_hp_wali' => $data['no_hp_wali'] ?? null,
-                'minat_id' => $data['minat_id'][0] ?? null,
-                'detail_minat' => $data['detail_minat'] ?? null,
-                'siap_nikah' => $data['siap_nikah'] ?? null,
-                'detail_siap_nikah' => $detailSiapNikahData ?? null,
+                'url_foto'              => $result['url_foto'] ?? null,
+                'daerah_id'             => $result['daerah_id'],
+                'desa_id'               => $result['desa_id'],
+                'kelompok_id'           => $result['kelompok_id'] ?? null,
+                'nama'                  => $result['nama'],
+                'jk'                    => $result['jk'],
+                'kota_lahir'            => $result['kota_lahir'],
+                'tgl_lahir'             => $result['tgl_lahir'],
+                'gol_dar'               => $result['gol_dar'] ?? null,
+                'usia'                  => $result['usia'],
+                'no_hp'                 => $result['no_hp'] ?? null,
+                'pendidikan_terakhir'   => $result['pendidikan_terakhir'] ?? null,
+                'jurusan'               => $result['jurusan'] ?? null,
+                'dapukan'               => $result['dapukan'],
+                'perkawinan'            => 'LAJANG',
+                'nm_ayah'               => $result['nm_ayah'] ?? null,
+                'nm_ibu'                => $result['nm_ibu'] ?? null,
+                'no_hp_wali'            => $result['no_hp_wali'] ?? null,
+                'minat_bakat'           => $result['minat_bakat'] ?? null,
+                'siap_nikah'            => $result['siap_nikah'] ?? null,
+                'detail_siap_nikah'     => $result['detail_siap_nikah'] ?? null,
+                'is_mubaligh'           => $result['is_mubaligh'],
             ]);
             
             // Step 10: Simpan Data Mubaligh jika ada
-            if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
-                if ($data['mubaligh'] === 'MT') {
+            if (isset($result['mubaligh']) && $result['mubaligh'] !== 'BUKAN') {
+                if ($result['mubaligh'] === 'MS') {
                     Mubaligh::create([
-                        'insan_role_id' => $insan->id,
-                        'tingkatan_tugas' => $data['tingkatan_tugas'] ?? null,
-                        'asal_pondok' => $data['asal_pondok'] ?? null,
-                        'tugasan_ke' => $data['tugasan_ke'] ?? null,
-                        'tgl_mulai_tugas' => $data['tgl_mulai_tugas'] ?? null,
-                    ]);
-                } elseif ($data['mubaligh'] === 'MS') {
-                    Mubaligh::create([
-                        'insan_role_id' => $insan->id,
-                        'asal_pondok' => $data['asal_pondok'] ?? null,
-                        'jml_tugas' => $data['jml_tugas'] ?? null,
-                        'lama_tugas' => $data['lama_tugas'] ?? null,
+                        'insan_id'      => $insan->id,
+                        'kategori'      => 'MS',
+                        'asal_pondok'   => $result['asal_pondok'] ?? null,
+                        'jml_tugas'     => $result['jml_tugas'] ?? null,
+                        'lama_tugas'    => $result['lama_tugas'] ?? null,
+                        'konfirmasi_kesiapan_tugas' => $result['konfirmasi_kesiapan_tugas'] ?? null,
                     ]);
                 }
-                unset($data['mubaligh']);
+                unset($result['mubaligh']);
             }
 
             // Step 11: Simpan Generus Record
             Generus::create([
-                'insan_id' => $insan->id,
-                'nis' => $data['nis'] ?? null,
-                'jenis_data' => $data['jenis_data'],
-                'kategori' => $data['kategori'],
-                'kelas_ppg_id' => $data['kelas_ppg_id'] ?? null,
-                'status_id' => $data['status_id'] ?? null,
-                'detail_status' => $detailStatusData,
-                'is_verified' => $data['is_verified'],
-                'riwayat_update' => $data['riwayat_update'],
+                'insan_id'          => $insan->id,
+                'nis'               => $result['nis'] ?? null,
+                'jenis_data'        => $result['jenis_data'],
+                'kategori'          => $result['kategori'],
+                'kelas_ppg_id'      => $result['kelas_ppg_id'] ?? null,
+                'status_id'         => $result['status_id'] ?? null,
+                'detail_status'     => $result['detail_status'] ?? null,
+                'aktif_mengajar'    => $result['aktif_mengajar'] ?? false,
+                'is_verified'       => $result['is_verified'],
+                'riwayat_update'    => $result['riwayat_update'],
             ]);
 
             redirect('/registrasi-generus-form/');

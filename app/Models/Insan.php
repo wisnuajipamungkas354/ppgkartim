@@ -15,7 +15,7 @@ class Insan extends Model
         'url_foto' => 'array',
         'dapukan' => 'array',
         'detail_siap_nikah' => 'array',
-        'detail_minat' => 'array',
+        'minat_bakat' => 'array',
     ];
 
     protected static function booted()
@@ -48,11 +48,6 @@ class Insan extends Model
     public function daerah() 
     { 
         return $this->belongsTo(Daerah::class); 
-    }
-
-    public function minat()
-    {
-        return $this->belongsTo(Minat::class);
     }
 
     public function generus()

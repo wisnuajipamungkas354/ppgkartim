@@ -33,7 +33,6 @@ return new class extends Migration
             // Kalau MT akan terisi otomatis dikelompok mana dia tugas
 
             $table->boolean('aktif_mengajar')->default(false);
-            $table->boolean('is_mubaligh')->default(false);
             $table->boolean('is_verified')->default(false);
 
             // PINDAH SAMBUNG, MENIKAH, MONDOK, MONDOK & SEKOLAH, MENINGGAL, DLL

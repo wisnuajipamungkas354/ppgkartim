@@ -26,6 +26,7 @@ return new class extends Migration
             $table->integer('jml_tugas')->nullable();
             $table->string('lama_tugas')->nullable();
             $table->boolean('aktif_mengajar')->nullable();
+            $table->string('konfirmasi_kesiapan_tugas')->nullable();
             $table->timestamps();
         });
     }

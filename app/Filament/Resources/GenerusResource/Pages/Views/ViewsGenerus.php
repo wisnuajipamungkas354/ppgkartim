@@ -6,6 +6,7 @@ use App\Models\Dapukan;
 use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\Status;
+use App\Models\Minat;
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -25,11 +26,11 @@ class ViewsGenerus
             'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status.nm_sekolah', 'detail_status.kelas_di_sekolah', 'kelas_ppg'
         ],
         'PRA_REMAJA' => [
-            'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status.nm_sekolah', 'detail_status.kelas_di_sekolah', 'kelas_ppg', 'minat', 'detail_minat',
+            'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'detail_status.nm_sekolah', 'detail_status.kelas_di_sekolah', 'kelas_ppg', 'minat', 'detail_minat', 'mubaligh_status'
         ],
         'REMAJA' => [
-            'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'no_hp', 'pendidikan_terakhir', 'jurusan',
-            'detail_status.nm_sekolah', 'detail_status.peminatan_sekolah', 'detail_status.kelas_di_sekolah',
+            'nis', 'nama', 'jk', 'kota_lahir', 'tgl_lahir', 'usia', 'gol_dar', 'no_hp', 
+            'detail_status.nm_sekolah', 'detail_status.peminatan_sekolah', 'detail_status.kelas_di_sekolah', 'mubaligh_status',
             'minat', 'detail_minat', 'status', 'kelas_ppg'
         ],
         'PRA_NIKAH' => [
@@ -43,7 +44,7 @@ class ViewsGenerus
     {
         $listColumns = self::$categoryFields[strtoupper($generus->kategori)] ?? [];
 
-        $isMubaligh = Insan::where('id', $generus->insan_id)->whereIn('nm_dapukan', ['MUBALIGH TUGASAN', 'MUBALIGH SETEMPAT'])->first()->dapukan->nm_dapukan ?? 'BUKAN';
+        $isMubaligh = Insan::where('id', $generus->insan_id)->where('is_mubaligh', true)->first() ? 'MS' : 'BUKAN';
         
         $listAllColumns = [
             'nis' => TextEntry::make('nis')->label('Nomor Induk'),
@@ -117,9 +118,8 @@ class ViewsGenerus
                 ->color(function (?string $state) use ($isMubaligh) {
                     $state = $isMubaligh;
                     return match ($state) {
-                    'MUBALIGH TUGASAN' => 'success',
-                    'MUBALIGH SETEMPAT' => 'info',
-                    'BUKAN' => 'danger',
+                    'MS' => 'info',
+                    'BUKAN' => 'warning',
                     default => 'gray'
                 };}),
             
@@ -127,10 +127,7 @@ class ViewsGenerus
                 ->label('Data Mubaligh')
                 ->formatStateUsing(function (Model $record) {
                     $insan = $record->insan;
-                    if ($insan->dapukan->nm_dapukan === 'MUBALIGH TUGASAN') {
-                        $mt = $insan->mubalighTugasan;
-                        return $mt ? "Tingkatan: {$mt->tingkatan_tugas}, Asal Pondok: {$mt->asal_pondok}, Tugas ke-{$mt->tugasan_ke}" : '-';
-                    } elseif ($insan->dapukan->nm_dapukan === 'MUBALIGH SETEMPAT') {
+                    if ($insan->dapukan->nm_dapukan === 'MUBALIGH SETEMPAT') {
                         $ms = $insan->mubalighSetempat;
                         return $ms ? "Asal Pondok: {$ms->asal_pondok}, Total Tugas: {$ms->jml_tugas} kali, Lama Tugas: {$ms->lama_tugas}" : '-';
                     }
@@ -145,13 +142,19 @@ class ViewsGenerus
                 ->label('Kelas Di PPG')
                 ->formatStateUsing(fn (Model $record) => $record->kelasPpg->nm_kelas ? $record->kelasPpg->nm_kelas : '(-)')
                 ->hidden(fn() => $isMubaligh == 'MUBALIGH TUGASAN'),
-            'minat' => TextEntry::make('minat.nm_minat')
+            'minat' => TextEntry::make('insan.minat_bakat')
                 ->label('Bidang Minat/Bakat')
-                ->formatStateUsing(fn (?string $state) => $state ? Str::title($state) : '-'),
-            'detail_minat' => TextEntry::make('detail_minat')
-                ->label('Detail Minat/Bakat')
-                ->formatStateUsing(fn (?string $state) => $state ? Str::title($state) : '-'),
-            'siap_nikah' => TextEntry::make('siap_nikah')
+                ->formatStateUsing(function (?string $state) {
+                    $result = '';
+                    $state = explode(', ', $state);
+                    if($state) {
+                        foreach($state as $index => $slug) {
+                            $result = $index == 0 ? Minat::query()->where('slug', $slug)->value('nm_minat') : $result . ', ' . Minat::query()->where('slug', $slug)->value('nm_minat');
+                        }
+                    }
+                    return $result;
+                }),
+            'siap_nikah' => TextEntry::make('insan.siap_nikah')
                 ->label('Siap Nikah')
                 ->badge()
                 ->color(fn (?string $state): string => match ($state) {
@@ -159,7 +162,6 @@ class ViewsGenerus
                     'BELUM' => 'danger',
                     default => 'gray',
                 })
-                ->formatStateUsing(fn (?string $state) => Str::title($state)),
         ];
 
         return collect($listColumns)
