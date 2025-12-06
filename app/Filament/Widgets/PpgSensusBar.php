@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Widgets\Ppg;
 
 use App\Models\Desa;
 use App\Models\Generus;
@@ -18,8 +18,8 @@ class PpgSensusBar extends ChartWidget
 
     protected function getData(): array
     {
-        $generus = Generus::query()->with('insan.desa')->whereHas('insan.daerah', fn(Builder $q) => $q->where('daerah_id', auth()->user()->daerah_id))->get();
-        $labels = Desa::query()->where('daerah_id', auth()->user()->daerah_id)->get(['id', 'nm_desa']);
+        $generus = Generus::query()->with('insan.desa')->get();
+        $labels = Desa::query()->get(['id', 'nm_desa']);
         
         $kategoriList = ['PAUD', 'CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH'];
         $colors = [

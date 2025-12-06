@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Widgets\Ppg;
 
 use App\Models\Desa;
 use App\Models\Generus;
@@ -16,6 +16,11 @@ class PpgStats extends BaseWidget
 
     protected static ?int $sort = 1;
 
+    protected function getColumns(): int
+    {
+        return 4;
+    }
+
     protected function getStats(): array
     {
         return [
@@ -25,6 +30,12 @@ class PpgStats extends BaseWidget
             Stat::make('Total Kelompok', Kelompok::count())
                 ->chart([1,1,1])
                 ->chartColor('success'),            
+            Stat::make('Total Generus', Generus::count())
+                ->chart([1,1,1])
+                ->chartColor('danger'),
+            Stat::make('Total Generus', Generus::count())
+                ->chart([1,1,1])
+                ->chartColor('danger'),
             Stat::make('Total Generus', Generus::count())
                 ->chart([1,1,1])
                 ->chartColor('danger'),

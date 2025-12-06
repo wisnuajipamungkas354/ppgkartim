@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Filament\Widgets\Ppg;
+namespace App\Filament\Widgets;
 
 use App\Models\Generus;
 use App\Traits\HandlesPermissionWidget;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
-class PpgGenderDoughnut extends ChartWidget
+class GenderDoughnut extends ChartWidget
 {
     use HandlesPermissionWidget;
-    
+
     protected static ?int $sort = 2;
 
     protected static ?string $heading = 'Jenis Kelamin';
@@ -18,8 +18,8 @@ class PpgGenderDoughnut extends ChartWidget
     protected function getData(): array
     {
         $data = [];
-        $data[0] = Generus::query()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
-        $data[1] = Generus::query()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
+        $data[0] = Generus::owned()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
+        $data[1] = Generus::owned()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
 
         return [
             'datasets' => [

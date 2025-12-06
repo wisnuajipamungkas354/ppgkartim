@@ -67,7 +67,7 @@ class BaseFormGenerus
                                 if(auth()->user()->hasRole(['super_admin'])) {
                                     return Desa::query()->where('daerah_id', $get('daerah_id'))->pluck('nm_desa', 'id');
                                 } else {
-                                    return Desa::query()->where('daerah_id', auth()->user()->daerah_id)->pluck('nm_desa', 'id');
+                                    return Desa::query()->pluck('nm_desa', 'id');
                                 }
                             }
                         })

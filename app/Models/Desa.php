@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\AccessHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class Desa extends Model
@@ -28,5 +29,15 @@ class Desa extends Model
 
     public function insan() {
         return $this->hasMany(Insan::class);
+    }
+
+    // Local Scope
+    public function scopeOwned($query)
+    {
+        if(AccessHelper::isSuperAdmin()) $query;
+        elseif(AccessHelper::isDaerah()) $query->where('daerah_id', auth()->user()->daerah_id);
+        elseif(AccessHelper::isDesa()) $query->where('id', auth()->user()->desa_id);
+        
+        return $query;
     }
 }

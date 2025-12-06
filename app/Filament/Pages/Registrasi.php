@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\ForceDeleteAction;
+use App\Helpers\AccessHelper;
 
 class Registrasi extends Page implements HasTable
 {
@@ -45,7 +46,7 @@ class Registrasi extends Page implements HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Generus::query()->where('is_verified', false))
+            ->query(Generus::owned()->where('is_verified', false))
             ->columns([
                 TextColumn::make('insan.desa.nm_desa')
                     ->label('Desa')
@@ -102,7 +103,8 @@ class Registrasi extends Page implements HasTable
                                     ->afterStateUpdated(fn (Set $set) => $set('desa_id', null))
                                     ->required()
                                     ->live()
-                                    ->preload(),
+                                    ->preload()
+                                    ->visible(fn() => AccessHelper::isSuperAdmin()),
                                 Select::make('desa_id')
                                     ->label('Desa')
                                     ->options(fn(Get $get) => Desa::query()->where('daerah_id', $get('daerah_id'))->pluck('nm_desa', 'id'))
@@ -229,6 +231,6 @@ class Registrasi extends Page implements HasTable
 
     public static function getNavigationBadge(): ?string
     {
-        return Generus::where('is_verified', false)->count();
+        return Generus::owned()->where('is_verified', false)->count();
     }
 }

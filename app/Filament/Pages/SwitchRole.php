@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Helpers\AccessHelper;
+use App\Models\Generus;
 use App\Models\Role;
 use App\Traits\HandlesPermissionPage;
 use Filament\Notifications\Notification;

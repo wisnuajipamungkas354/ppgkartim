@@ -83,6 +83,11 @@ class KelompokResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->owned();
+    }
+
     public static function getPages(): array
     {
         return [

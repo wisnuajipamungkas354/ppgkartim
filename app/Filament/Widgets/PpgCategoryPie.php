@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Widgets\Ppg;
 
 use App\Models\Generus;
 use App\Traits\HandlesPermissionWidget;

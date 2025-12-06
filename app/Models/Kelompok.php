@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\AccessHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class Kelompok extends Model
@@ -30,5 +31,16 @@ class Kelompok extends Model
 
     public function insan() {
         return $this->hasMany(Insan::class);
+    }
+
+    // Local Scope
+    public function scopeOwned($query)
+    {
+        if(AccessHelper::isSuperAdmin()) $query;
+        elseif(AccessHelper::isDaerah()) $query->whereHas('desa', fn($q) => $q->where('daerah_id', auth()->user()->daerah_id));
+        elseif(AccessHelper::isDesa()) $query->where('desa_id', auth()->user()->desa_id);
+        elseif(AccessHelper::isKelompok()) $query->where('id', auth()->user()->kelompok_id);
+        
+        return $query;
     }
 }

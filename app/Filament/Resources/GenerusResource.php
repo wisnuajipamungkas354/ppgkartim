@@ -175,7 +175,7 @@ class GenerusResource extends Resource implements HasShieldPermissions
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return parent::getEloquentQuery()->owned()
             ->where('is_verified', true)
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
