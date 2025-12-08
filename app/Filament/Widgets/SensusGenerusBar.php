@@ -87,6 +87,7 @@ class SensusGenerusBar extends ChartWidget
                                 return $q->where('nm_kelompok', $kelompok);
                             })
                             ->where('kategori', $category)
+                            ->where('is_verified', 1)
                             ->count();
                     }),
                     'backgroundColor' => $colors[$i]
