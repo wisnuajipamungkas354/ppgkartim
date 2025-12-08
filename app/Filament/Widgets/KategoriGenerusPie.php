@@ -18,7 +18,7 @@ class KategoriGenerusPie extends ChartWidget
 
     protected function getData(): array
     {
-        $generus = Generus::owned()->get();
+        $generus = Generus::owned()->where('is_verified', 1)->get();
         $data = [];
         $labels = [];
         $bgColors = [];

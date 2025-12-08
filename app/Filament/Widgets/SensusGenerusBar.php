@@ -68,6 +68,7 @@ class SensusGenerusBar extends ChartWidget
                                 return $q->where('nm_desa', $desa);
                             })
                             ->where('kategori', $category)
+                            ->where('is_verified', 1)
                             ->count();
                     }),
                     'backgroundColor' => $colors[$i] // warna random stabil
