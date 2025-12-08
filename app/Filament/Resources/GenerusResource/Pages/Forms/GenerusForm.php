@@ -204,7 +204,7 @@ class GenerusForm
                 ->label('Nama Sekolah')
                 ->placeholder($options['placeholderSekolah'] ?? '')
                 ->required(),
-            'is_sekolah_jm' => Forms\Components\CheckBox::make('is_sekolah_jm')
+            'is_sekolah_jm' => Forms\Components\Checkbox::make('is_sekolah_jm')
                 ->label("Sekolah tersebut adalah Sekolah Jama'ah"),
             'peminatan_sekolah' => Forms\Components\TextInput::make('peminatan_sekolah')
                 ->label('Peminatan/Jurusan Di Sekolah')
