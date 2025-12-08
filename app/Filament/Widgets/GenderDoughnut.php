@@ -12,14 +12,15 @@ class GenderDoughnut extends ChartWidget
     use HandlesPermissionWidget;
 
     protected static ?int $sort = 2;
+    protected static ?string $maxHeight = '20rem';
 
     protected static ?string $heading = 'Jenis Kelamin';
 
     protected function getData(): array
     {
         $data = [];
-        $data[0] = Generus::owned()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
-        $data[1] = Generus::owned()->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
+        $data[0] = Generus::owned()->where('is_verified', 1)->whereHas('insan', fn(Builder $query) => $query->where('jk', 'L'))->count();
+        $data[1] = Generus::owned()->where('is_verified', 1)->whereHas('insan', fn(Builder $query) => $query->where('jk', 'P'))->count();
 
         return [
             'datasets' => [

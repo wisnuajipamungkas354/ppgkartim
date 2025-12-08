@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Helpers\AccessHelper;
 use App\Models\Desa;
 use App\Models\Generus;
+use App\Models\Kelompok;
 use App\Traits\HandlesPermissionWidget;
 use Filament\Widgets\ChartWidget;
 
@@ -12,32 +13,37 @@ class SensusGenerusBar extends ChartWidget
 {
     use HandlesPermissionWidget;
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 5;
+    protected static ?string $maxHeight = '18rem';
+
     protected static ?string $heading = 'Sensus Generus';
     protected int | string | array $columnSpan = 'full';
 
     protected function getData(): array
     {
-        $generus = Generus::owned();
-        $labels = [];
+        $categories = [];
+        $wilayahList = [];
         $colors = [];
 
-        if(AccessHelper::isDaerah()) {
-            $generus = $generus->with('insan.desa')->get();
-
-        } elseif(AccessHelper::isDesa()) {
-            $generus = $generus->with('insan.kelompok')->get();
-        }
+        /** 
+         * $datasets = [
+        *       [
+        *           label   => 'PAUD' / 'CABERAWIT' / 'PRA REMAJA' / 'REMAJA' / 'PRA NIKAH',
+        *           data    => dataPerdesa/Kelompok
+        *           backgroundColor => $colors[$i % count($colors)],
+        *       ]
+         * ];
+        */
 
         if(AccessHelper::isMudamudi()) {
-            $labels = ['PRA_REMAJA', 'REMAJA', 'PRA_NIKAH'];
+            $categories = ['PRA_REMAJA', 'REMAJA', 'PRA_NIKAH'];
             $colors = [
                 'rgb(255, 205, 86)',
                 'rgb(75, 192, 192)',
                 'rgb(153, 102, 255)',
             ];
         } else {
-            $labels = ['PAUD', 'CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH'];
+            $categories = ['PAUD', 'CABERAWIT', 'PRA_REMAJA', 'REMAJA', 'PRA_NIKAH'];
             $colors = [
                 'rgb(54, 162, 235)',
                 'rgb(255, 99, 132)',
@@ -45,31 +51,50 @@ class SensusGenerusBar extends ChartWidget
                 'rgb(75, 192, 192)',
                 'rgb(153, 102, 255)',
             ];
-        } 
+        }
 
         $datasets = [];
-        
-        // foreach ($labels as $i => $label) {
-        //     $dataPerKategori = [];
 
-        //     foreach ($kategoriList as $kategori) {
-        //         $jumlah = Generus::where('kategori', $kategori)
-        //             ->whereHas('insan.desa', function ($q) use ($label) {
-        //                 $q->where('id', $label->id);
-        //             })->count();
-        
-        //         $dataPerKategori[] = $jumlah;
-        //     }
+        if(AccessHelper::isDaerah()) {
+            $wilayahList = Desa::owned()->pluck('nm_desa');
+            
+            foreach ($categories as $i => $category) {
+                $label = str_replace('_', ' ', $category);
 
-        //     $datasets[] = [
-        //         'label' => $label->nm_desa,
-        //         'data' => $dataPerKategori,
-        //         'backgroundColor' => $colors[$i % count($colors)],
-        //     ];    
-        // }
+                $datasets[] = [
+                    'label' => $label,
+                    'data' => $wilayahList->map(function ($desa) use ($category) {
+                            return Generus::with('insan.desa')->whereHas('insan.desa', function($q) use ($desa) {
+                                return $q->where('nm_desa', $desa);
+                            })
+                            ->where('kategori', $category)
+                            ->count();
+                    }),
+                    'backgroundColor' => $colors[$i] // warna random stabil
+                ];
+            }
+        } elseif(AccessHelper::isDesa()) {
+            $wilayahList = Kelompok::owned()->pluck('nm_kelompok');
+            
+            foreach ($categories as $i => $category) {
+                $label = str_replace('_', ' ', $category);
+
+                $datasets[] = [
+                    'label' => $label,
+                    'data' => $wilayahList->map(function ($kelompok) use ($category) {
+                            return Generus::with('insan.kelompok')->whereHas('insan.kelompok', function($q) use ($kelompok) {
+                                return $q->where('nm_kelompok', $kelompok);
+                            })
+                            ->where('kategori', $category)
+                            ->count();
+                    }),
+                    'backgroundColor' => $colors[$i]
+                ];
+            }
+        }
 
         return [
-            'labels' => $labels,
+            'labels' => $wilayahList,
             'datasets' => $datasets,
         ];          
     }

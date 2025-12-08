@@ -75,14 +75,13 @@ trait ValidateGenerusForm {
         
         // Step 7: Menentukan Dapukan
         $data['dapukan'][] = Dapukan::where('nm_dapukan', 'GENERUS')->value('slug');
-        $data['is_mubaligh'] = $data['mubaligh'] == 'MS' ? true : false;
+        $data['is_mubaligh'] = isset($data['mubaligh']) && $data['mubaligh'] == 'MS' ? true : false;
 
         if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
             if ($data['mubaligh'] === 'MS') {
                 $data['dapukan'][] = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('slug');
             }
         }
-
         
         return $data;
   }

@@ -147,6 +147,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
         try {
             // Step 1
             $rawData = $this->form->getState();
+
             $result = $this->validateInput($rawData, 'REGISTRASI');
 
             if(isset($result['bakat_lainnya']) && $result['bakat_lainnya'] !== null ) {
@@ -160,7 +161,6 @@ class RegistrasiGenerusForm extends Component implements HasForms
 
                 $data['minat_bakat'][] = $slug;
             }
-
             // Step 8: Simpan Insan
             $insan = Insan::create([
                 'url_foto'              => $result['url_foto'] ?? null,

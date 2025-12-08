@@ -12,6 +12,7 @@ class KategoriGenerusPie extends ChartWidget
     use HandlesPermissionWidget;
 
     protected static ?int $sort = 3;
+    protected static ?string $maxHeight = '20rem';
 
     protected static ?string $heading = 'Kategori';
 
