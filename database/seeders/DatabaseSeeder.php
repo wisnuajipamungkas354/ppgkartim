@@ -105,40 +105,40 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Individu / Insan
-        $insanSatu = [
-            'daerah_id' => 1,
-            'desa_id' => 1,
-            'kelompok_id' => 1,
-            'nama' => 'Wisnu Aji Pamungkas',
-            'jk' => 'L',
-            'kota_lahir' => 'Brebes',
-            'tgl_lahir' => '2002-03-05',
-            'gol_dar' => 'A',
-            'usia' => 23,
-            'no_hp' => '+6285889634432',
-            'pendidikan_terakhir' => 'sma-smk',
-            'jurusan' => 'Teknik Komputer & Jaringan',
-            'perkawinan' => 'LAJANG',
-            'dapukan' => [Str::slug('GENERUS')],
-            'siap_nikah' => 'BELUM',
-            'nm_ayah' => 'Sutarso',
-            'nm_ibu' => 'Nuning Handayani',
-            'minat_id' => 6,
-            'detail_minat' => 'Ngoding & Servis Hardware',
-        ];
+        // $insanSatu = [
+        //     'daerah_id' => 1,
+        //     'desa_id' => 1,
+        //     'kelompok_id' => 1,
+        //     'nama' => 'Wisnu Aji Pamungkas',
+        //     'jk' => 'L',
+        //     'kota_lahir' => 'Brebes',
+        //     'tgl_lahir' => '2002-03-05',
+        //     'gol_dar' => 'A',
+        //     'usia' => 23,
+        //     'no_hp' => '+6285889634432',
+        //     'pendidikan_terakhir' => 'sma-smk',
+        //     'jurusan' => 'Teknik Komputer & Jaringan',
+        //     'perkawinan' => 'LAJANG',
+        //     'dapukan' => [Str::slug('GENERUS')],
+        //     'siap_nikah' => 'BELUM',
+        //     'nm_ayah' => 'Sutarso',
+        //     'nm_ibu' => 'Nuning Handayani',
+        //     'minat_id' => 6,
+        //     'detail_minat' => 'Ngoding & Servis Hardware',
+        // ];
 
-        $insan = Insan::create($insanSatu);
+        // $insan = Insan::create($insanSatu);
 
-        Generus::create([
-            'insan_id' => $insan->id,
-            'jenis_data' => 'MM',
-            'kategori' => 'PRA_NIKAH',
-            'kelas_ppg_id' => 14,
-            'status_id' => 6,
-            'detail_status' => [
-                'program_studi' => 'Sistem Informasi',
-                'universitas' => 'Universitas Bina Sarana Informatika Cikarang'
-            ],
-        ]);
+        // Generus::create([
+        //     'insan_id' => $insan->id,
+        //     'jenis_data' => 'MM',
+        //     'kategori' => 'PRA_NIKAH',
+        //     'kelas_ppg_id' => 14,
+        //     'status_id' => 6,
+        //     'detail_status' => [
+        //         'program_studi' => 'Sistem Informasi',
+        //         'universitas' => 'Universitas Bina Sarana Informatika Cikarang'
+        //     ],
+        // ]);
     }
 }
