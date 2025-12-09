@@ -26,6 +26,11 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\GenerusResource\Pages\Forms\GenerusForm;
 use App\Traits\HandlesActiveRolePermission;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GenerusResource extends Resource implements HasShieldPermissions
@@ -102,8 +107,113 @@ class GenerusResource extends Resource implements HasShieldPermissions
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
-            ])
+                SelectFilter::make('insan.desa')
+                    ->label('Desa')
+                    ->relationship('insan.desa', 'nm_desa')
+                    ->multiple(),
+                SelectFilter::make('insan.kelompok')
+                    ->label('Kelompok')
+                    ->relationship('insan.kelompok', 'nm_kelompok')
+                    ->multiple(),
+                SelectFilter::make('insan.is_mubaligh')
+                    ->label('Mubaligh')
+                    ->options([1 => 'Ya', 0 => 'Bukan'])
+                    ->query(function (Builder $query, array $data) {
+                        // Ambil value dengan aman. Jika key tidak ada, return null.
+                        $value = $data['value'] ?? null;
+
+                        // Cek jika value kosong (null atau string kosong), kembalikan query asli
+                        if ($value === null || $value === '') {
+                            return $query;
+                        }
+
+                        // Lakukan query whereHas
+                        return $query->whereHas('insan', function (Builder $query) use ($value) {
+                            $query->where('is_mubaligh', $value);
+                        });
+                    }),
+                SelectFilter::make('status')
+                    ->options(fn () => Status::query()->pluck('nm_status', 'id'))
+                    ->multiple(),
+                SelectFilter::make('siap_nikah')
+                    ->label('Siap Nikah')
+                    ->options(['SIAP' => 'Siap', 'BELUM' => 'Belum'])
+                    ->query(function (Builder $query, array $data) {    
+                        $value = $data['value'] ?? null;
+
+                        if ($value === null || $value === '') {
+                            return $query;
+                        }
+                
+                        return $query->whereHas('insan', function (Builder $query) use ($value) {
+                            $query->where('siap_nikah', $value);
+                        });
+                    }),
+                SelectFilter::make('jk')
+                    ->label('Jenis Kelamin')
+                    ->options(['L' => 'Laki-laki', 'P' => 'Perempuan'])
+                    ->query(function (Builder $query, array $data) {    
+                        $value = $data['value'] ?? null;
+
+                        if ($value === null || $value === '') {
+                            return $query;
+                        }
+                
+                        return $query->whereHas('insan', function (Builder $query) use ($value) {
+                            $query->where('jk', $value);
+                        });
+                    }),
+                Filter::make('range_usia')
+                    ->label('Range Usia')
+                    ->form([
+                        Forms\Components\TextInput::make('start')
+                            ->label('Batas Awal Usia')
+                            ->numeric()
+                            ->placeholder('Masukkan Angka'),
+                        Forms\Components\TextInput::make('until')
+                            ->label('Batas Akhir Usia')
+                            ->numeric()
+                            ->placeholder('Masukkan Angka'),
+                    ])
+                    ->columns(2)
+                    ->columnSpan(2)
+                    ->query(function(Builder $query, array $data) {
+                        if($data['start'] !== null && $data['until'] === null) {
+                            return $query
+                            ->when(
+                                $data['start'], fn(Builder $query, $start) : Builder => $query->whereHas('insan', fn($q) => $q->where('usia', '>=', $start)),
+                            );
+                        } elseif($data['start'] !== null && $data['until'] !== null ) {
+                            return $query
+                            ->when(
+                                $data['start'], fn(Builder $query, $start) : Builder => $query->whereHas('insan', fn($q) => $q->where('usia', '>=', $start)),
+                            )
+                            ->when(
+                                $data['until'], fn(Builder $query, $until) : Builder => $query->whereHas('insan', fn($q) => $q->where('usia', '<=', $until)),
+                            );
+                        }
+
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                
+                        if ($data['start'] ?? null) {
+                            $indicators[] = Indicator::make('Usia ' . $data['start'] . ' thn')->removeField('from');
+                        }
+                
+                        if ($data['until'] ?? null) {
+                            $indicators[] = Indicator::make('Sampai usia ' . $data['until'] . ' thn')->removeField('until');
+                        }
+                
+                        return $indicators;
+                    })
+                ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(2)
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('Detail'),
@@ -176,10 +286,7 @@ class GenerusResource extends Resource implements HasShieldPermissions
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->owned()
-            ->where('is_verified', true)
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+            ->where('is_verified', true);
     }
 
     public static function getPages(): array

@@ -55,7 +55,7 @@ class KelompokResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID'),
+                    ->label('ID Kelompok'),
                 TextColumn::make('nm_kelompok')
                     ->label('Nama Kelompok'),
                 TextColumn::make('alias')

@@ -36,7 +36,6 @@ class DaerahResource extends Resource
     {
         return $form
             ->schema([
-                TextColumn::make('id'),
                 TextInput::make('nm_daerah')
                     ->label('Nama Daerah')
                     ->required(),
@@ -51,7 +50,7 @@ class DaerahResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID'),
+                    ->label('ID Daerah'),
                 TextColumn::make('nm_daerah')
                     ->label('Nama Daerah'),
                 TextColumn::make('alias')
