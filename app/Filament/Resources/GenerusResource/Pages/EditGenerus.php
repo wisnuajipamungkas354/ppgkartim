@@ -4,18 +4,28 @@ namespace App\Filament\Resources\GenerusResource\Pages;
 
 use App\Filament\Resources\GenerusResource;
 use App\Filament\Resources\GenerusResource\Pages\Forms\BaseFormGenerus;
+use App\Filament\Resources\GenerusResource\Pages\Forms\GenerusForm;
+use App\Helpers\AccessHelper;
+use App\Models\Daerah;
+use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
+use App\Models\Kelompok;
+use App\Models\Minat;
 use App\Models\Mubaligh;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 
 class EditGenerus extends EditRecord
 {
-    use EditRecord\Concerns\HasWizard;
-
     protected static string $resource = GenerusResource::class;
 
     protected function getHeaderActions(): array
@@ -31,9 +41,69 @@ class EditGenerus extends EditRecord
         return route('filament.admin.resources.generuses.index');
     }
 
-    public function getSteps(): array
+    public function form(Form $form): Form
     {
-        return BaseFormGenerus::getBaseForm();
+        return $form->schema([
+            Fieldset::make('Jenis Data')
+                ->schema([
+                    Select::make('kategori')
+                        ->label('Kategori Generus')
+                        ->options([
+                                    'PAUD' => 'Paud/TK',
+                                    'CABERAWIT' => 'Caberawit (SD)',
+                                    'PRA_REMAJA' => 'Pra Remaja (SMP)',
+                                    'REMAJA' => 'Remaja (SMA/K)',
+                                    'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
+                                ])
+                        ])
+                        ->live(),
+            Fieldset::make('Sambung')
+                ->schema([
+                    Select::make('daerah_id')
+                        ->label('Daerah')
+                        ->options(fn() => Daerah::query()->pluck('nm_daerah', 'id'))
+                        ->afterStateUpdated(fn (Set $set) => $set('desa_id', null))
+                        ->required()
+                        ->live()
+                        ->preload()
+                        ->visible(fn() => AccessHelper::isSuperAdmin()),
+                    Select::make('desa_id')
+                        ->label('Desa')
+                        ->options(fn(Get $get) => Desa::query()->where('daerah_id', $get('daerah_id'))->pluck('nm_desa', 'id'))
+                        ->required()
+                        ->live()
+                        ->preload(),
+                    Select::make('kelompok_id')
+                        ->label('Kelompok')
+                        ->options(fn(Get $get) => Kelompok::where('desa_id', $get('desa_id'))->pluck('nm_kelompok', 'id'))
+                        ->required()
+                        ->live()
+                        ->preload(),
+                ])
+                ->columns(3),
+            FieldSet::make('Data Diri')
+                ->schema(fn(Get $get) => GenerusForm::getForms($get)),
+            FieldSet::make('Orang Tua')
+                    ->schema([
+                    TextInput::make('nm_ayah')
+                        ->label('Nama Ayah')
+                        ->placeholder('Masukkan nama ayah'),
+                    TextInput::make('nm_ibu')
+                        ->label('Nama Ibu')
+                        ->placeholder('Masukkan nama ibu'),
+                    TextInput::make('no_hp_wali')
+                        ->label('Nomor HP/WhatsApp Orang Tua')
+                        ->placeholder('Masukkan nomor HP/WA'),
+                    ]),
+            FieldSet::make('Minat & Bakat')
+                    ->schema([
+                    Select::make('minat_bakat')
+                        ->label('Kategori Minat Bakat')
+                        ->options(fn() => Minat::all()->pluck('nm_minat', 'slug'))
+                        ->multiple(),
+                    ])
+                    ->visible(fn(Get $get) => !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
+        ]);
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

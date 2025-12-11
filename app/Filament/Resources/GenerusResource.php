@@ -3,27 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GenerusResource\Pages;
-use App\Filament\Resources\GenerusResource\RelationManagers;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use App\Helpers\AccessHelper;
-use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Kelompok;
 use App\Models\Generus;
 use App\Models\Status;
 use App\Models\Insan;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Wizard;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\GenerusResource\Pages\Forms\GenerusForm;
 use App\Traits\HandlesActiveRolePermission;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
@@ -31,7 +24,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GenerusResource extends Resource implements HasShieldPermissions
 {

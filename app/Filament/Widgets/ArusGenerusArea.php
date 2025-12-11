@@ -38,7 +38,7 @@ class ArusGenerusArea extends ChartWidget
             ->values();
 
         // Hitung akumulasi generus sampai bulan tersebut
-        $data = $months->map(function ($month) {
+        $totalGenerus = $months->map(function ($month) {
             return Generus::owned()->where('is_verified', 1)->where('created_at', '<=', $month . '-31')->count();
         });
 
@@ -46,7 +46,7 @@ class ArusGenerusArea extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'Total Generus',
-                    'data' => $data->toArray(),
+                    'data' => $totalGenerus->toArray(),
                     'fill' => true,        // <-- Chart.js area
                     'tension' => 0.4,      // <-- sedikit kurva agar lebih smooth
                 ],
