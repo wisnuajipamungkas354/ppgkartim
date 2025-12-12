@@ -94,7 +94,20 @@ class GenerusForm
                 ->required(),
             'pendidikan_terakhir' => Forms\Components\Select::make('pendidikan_terakhir')
                 ->label('Pendidikan Terakhir')
-                ->options(fn() => Status::query()->whereIn('slug', ['paudtk', 'sd', 'smp', 'sma-smk', 'd3', 's1-d4', 's2', 's3'])->pluck('nm_status', 'slug')->toArray())
+                ->options([
+                    'SD'        => 'SD',
+                    'SMP'       => 'SMP',
+                    'SMA/K'     => 'SMA/K',
+                    'D1'        => 'Diploma 1 (D1)',
+                    'D2'        => 'Diploma 2 (D2)',
+                    'D3'        => 'Diploma 3 (D3)',
+                    'D4 '       => 'Diploma 4 / Sarjana Terapan (D4)',
+                    'S1'        => 'Strata 1 / Sarjana (S1)',
+                    'S2'        => 'Strata 2 / Magister (S2)',
+                    'S3'        => 'Strata 3 / Doktor (S2)',
+                    'PROFESI'   => 'Profesi',
+                    'SPESIALIS' => 'Spesialis'
+                ])
                 ->live()
                 ->afterStateUpdated(fn(Get $get) => null)
                 ->required(),
