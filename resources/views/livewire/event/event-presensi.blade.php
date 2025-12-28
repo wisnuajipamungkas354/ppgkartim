@@ -18,7 +18,10 @@
         <div class="mb-8">
             <input type="text" wire:model.live="rfid_tag" autofocus id="rfid-input"
                 class="w-full p-4 text-xl tracking-widest text-center text-gray-800 placeholder-gray-400 transition duration-300 border-2 border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:border-blue-500"
-                placeholder="Scan RFID..." autocomplete="false"/>
+                placeholder="Scan RFID..." 
+                autocomplete="false" 
+                maxlength="10"
+                />
         </div>
 
         @if($lastParticipant)
