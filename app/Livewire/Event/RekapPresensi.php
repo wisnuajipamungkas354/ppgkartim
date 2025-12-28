@@ -10,6 +10,8 @@ use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -98,6 +100,16 @@ class RekapPresensi extends Component implements HasForms, HasTable
             ->columns($this->getTableColumns())
             ->filters([
                 // 
+            ])
+            ->actions([
+                Action::make('delete')
+                    ->label('Reset')
+                    ->action(fn(EventParticipant $record) => Attendance::where('participant_id', $record->id)->delete())
+                    ->successNotification(
+                        Notification::make()
+                        ->success()
+                        ->title('Berhasil di reset')
+                    )
             ])
             ->poll('5s');
     }

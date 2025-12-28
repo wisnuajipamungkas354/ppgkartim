@@ -6,6 +6,7 @@ use App\Filament\Resources\EventResource\Pages;
 use App\Filament\Resources\EventResource\RelationManagers\ParticipantsRelationManager;
 use App\Helpers\RolePermission;
 use App\Models\Event;
+use App\Models\EventParticipant;
 use App\Traits\HandlesActiveRolePermission;
 use App\Traits\HandlesPermissionRelationManagers;
 use Filament\Forms;
@@ -184,6 +185,35 @@ class EventResource extends Resource
                 ->extraAttributes(fn(Event $record) => ['download' => $record->name])
                 ->icon('heroicon-s-qr-code')
                 ->color('info'),
+                Tables\Actions\Action::make('duplikat')
+                    ->label('Duplikat')
+                    ->action(function(Event $record) {
+                        $newEvent = Event::create([
+                            'user_id' => $record->user_id,
+                            'role_id' => $record->role_id,
+                            'poster_image' => $record->poster_image,
+                            'name' => $record->name,
+                            'place' => $record->place,
+                            'date' => $record->date,
+                            'attendance_method' => $record->attendance_method,
+                            'start_time' => $record->start_time,
+                            'end_time' => $record->end_time,
+                            'column_config' => $record->column_config,
+                            'kode_event' => $record->kode_event,
+                            'is_active' => $record->is_active,
+                        ]);
+
+                        $copiesParticipant = EventParticipant::where('event_id', $record->id)->get();
+
+                        foreach($copiesParticipant as $copy) {
+                            EventParticipant::create([
+                                'event_id' => $newEvent->id,
+                                'rfid_tag' => $copy->rfid_tag,
+                                'data_json' => $copy->data_json,
+                            ]);
+                        }
+                    })
+                    ->successNotification(fn(Notification $notification) => $notification->title('Berhasil di Duplikat')),
                 Tables\Actions\ViewAction::make()
                     ->label('Detail'),
                 Tables\Actions\EditAction::make(),
@@ -211,7 +241,7 @@ class EventResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('role_id', session('active_role_id'));
+        return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('role_id', session('active_role_id'))->orderBy('created_at', 'DESC');
     }
 
     public static function getPages(): array
