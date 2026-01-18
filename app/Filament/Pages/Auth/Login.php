@@ -2,38 +2,46 @@
 
 namespace App\Filament\Pages\Auth;
 
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Pages\Auth\Login as BaseLogin;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Filament\Models\Contracts\FilamentUser;
 
 class Login extends BaseLogin
 {
     public function mount(): void
     {
         parent::mount();
-
-        // Reset session role setiap kali buka halaman login
-        session()->forget('active_role_id');
     }
 
     public function authenticate(): ?LoginResponse
     {
-        $data = $this->form->getState();
-        unset($data['remember']);
-        
-        $auth = Filament::auth();
-        $user = $auth->getProvider()->retrieveByCredentials($data);
+        try {
+            $this->rateLimit(5);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedNotification($exception)?->send();
 
-        if (! $user || ! $auth->getProvider()->validateCredentials($user, $data)) {
-            $this->addError('email', __('filament-panels::pages/auth/login.messages.failed'));
             return null;
         }
         
-        $auth->login($user);
-
+        $data = $this->form->getState();
+        
+        if (! Filament::auth()->attempt($this->getCredentialsFromFormData($data), $data['remember'] ?? false)) {
+            $this->throwFailureValidationException();
+        }
+        
+        $user = Filament::auth()->user();
         // ✅ Simpan role ke session
-        if ($user->roles()->exists()) {
-            session(['active_role_id' => $user->roles->first()->id]);
+        session(['active_role_id' => $user->roles->first()->id]);
+        
+        if (
+            ($user instanceof FilamentUser) &&
+            (! $user->canAccessPanel(Filament::getCurrentPanel()))
+        ) {
+            Filament::auth()->logout();
+
+            $this->throwFailureValidationException();
         }
 
         // ✅ Return ke halaman Filament (dashboard)
