@@ -24,5 +24,27 @@ class RoleSeeder extends Seeder
             ['name' => 'pjp_kelompok', 'guard_name' => 'web'],
             ['name' => 'mudamudi_kelompok', 'guard_name' => 'web'],
         ]);
+
+        $permissions = [
+            'daerahs', 
+            'desas', 
+            'kelompoks', 
+            'dapukans', 
+            'event', 
+            'generus', 
+            'kelas_ppg', 
+            'minats', 
+            'mubalighs', 
+            'roles', 
+            'users', 
+            'Registrasi', 
+            'SwitchRole', 
+            'SuperAdminStat', 
+            'JumlahOverview', 
+            'GenderDoughnut', 
+            'KategoriGenerusPie', 
+            'ArusGenerusArea', 
+            'SensusGenerusBar'
+        ];
     }
 }

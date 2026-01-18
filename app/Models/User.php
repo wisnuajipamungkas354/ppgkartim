@@ -55,4 +55,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return true;
     }
+
+    public function uangKas()
+    {
+        return $this->hasMany(UangKas::class);
+    }
 }
