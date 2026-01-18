@@ -19,4 +19,10 @@ class EditUangKas extends EditRecord
                 ->label('Hapus'),
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
 }

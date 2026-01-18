@@ -144,13 +144,17 @@ class UangKasResource extends Resource
                     ->label('Hapus')
                     ->modalHeading('Hapus Data')
                     ->modalSubmitActionLabel('Hapus')
+                    ->modalDescription('Apakah kamu yakin data kas ini dihapus ?')
                     ->modalCancelActionLabel('Batal')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Belum ada catatan kas')
+            ->emptyStateDescription('Klik Tambah Data untuk menambah catatan keuangan')
+            ->stripped();
     }
 
     public static function getRelations(): array
