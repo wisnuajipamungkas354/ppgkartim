@@ -102,7 +102,8 @@ class GenerusResource extends Resource implements HasShieldPermissions
                 SelectFilter::make('insan.desa')
                     ->label('Desa')
                     ->relationship('insan.desa', 'nm_desa')
-                    ->multiple(),
+                    ->multiple()
+                    ->visible(fn() => \App\Helpers\AccessHelper::isDaerah()),
                 SelectFilter::make('insan.kelompok')
                     ->label('Kelompok')
                     ->relationship('insan.kelompok', 'nm_kelompok')
