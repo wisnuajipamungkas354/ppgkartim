@@ -9,12 +9,33 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Component;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
+use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
     public function mount(): void
     {
         parent::mount();
+    }
+
+    public function getHeading(): string | Htmlable
+    {
+        return new HtmlString("
+            <h1 class='text-2xl font-bold tracking-tight text-gray-950 dark:text-white'>
+                SMART PPG
+            </h1>
+        ");
+    }
+
+    public function getSubheading(): string | Htmlable | null
+    {
+        return new HtmlString('
+            <span class="text-gray-600 dark:text-gray-400">
+                Selamat datang! Silahkan masuk ke akun Anda.
+            </span>
+        ');
     }
 
     protected function getEmailFormComponent(): Component
@@ -58,6 +79,13 @@ class Login extends BaseLogin
 
         // ✅ Return ke halaman Filament (dashboard)
         return app(LoginResponse::class);
+    }
+
+    protected function throwFailureValidationException(): never
+    {
+        throw ValidationException::withMessages([
+            'data.username' => __('filament-panels::pages/auth/login.messages.failed'),
+        ]);
     }
     
     /**
