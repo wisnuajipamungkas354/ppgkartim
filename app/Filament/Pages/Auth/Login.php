@@ -5,6 +5,8 @@ namespace App\Filament\Pages\Auth;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Pages\Auth\Login as BaseLogin;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Component;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Models\Contracts\FilamentUser;
 
@@ -13,6 +15,16 @@ class Login extends BaseLogin
     public function mount(): void
     {
         parent::mount();
+    }
+
+    protected function getEmailFormComponent(): Component
+    {
+        return TextInput::make('username')
+            ->label('Username')
+            ->required()
+            ->autocomplete()
+            ->autofocus()
+            ->extraInputAttributes(['tabindex' => 1]);
     }
 
     public function authenticate(): ?LoginResponse
@@ -46,5 +58,17 @@ class Login extends BaseLogin
 
         // ✅ Return ke halaman Filament (dashboard)
         return app(LoginResponse::class);
+    }
+    
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function getCredentialsFromFormData(array $data): array
+    {
+        return [
+            'username' => $data['username'],
+            'password' => $data['password'],
+        ];
     }
 }
