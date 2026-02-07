@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\GenerusResource\Pages;
 
+use App\Filament\Exports\GenerusExporter;
 use App\Filament\Resources\GenerusResource;
 use App\Filament\Resources\GenerusResource\Widgets\CountGenerusTable;
 use App\Helpers\AccessHelper;
 use App\Models\Generus;
 use Filament\Actions;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
@@ -26,6 +28,14 @@ class ListGeneruses extends ListRecords
                 ->label('Tambah Data')
                 ->icon('heroicon-o-plus')
                 ->successNotificationMessage('Data berhasil ditambahkan'),
+            Actions\ExportAction::make()
+                ->label('Excel')
+                ->exporter(GenerusExporter::class)
+                ->formats([
+                        ExportFormat::Xlsx,
+                ])
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
         ];
     }
 
