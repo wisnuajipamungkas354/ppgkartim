@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\UangKasResource\Pages;
 
+use App\Filament\Exports\UangKasExporter;
 use App\Filament\Resources\UangKasResource;
 use App\Filament\Resources\UangKasResource\Widgets\KasOverview;
 use Filament\Actions;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
@@ -20,6 +22,14 @@ class ListUangKas extends ListRecords
             Actions\CreateAction::make()
                 ->label('Tambah Data')
                 ->icon('heroicon-o-plus'),
+            Actions\ExportAction::make()
+                ->label('Excel')
+                ->exporter(UangKasExporter::class)
+                ->formats([
+                        ExportFormat::Xlsx,
+                ])
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
         ];
     }
 
