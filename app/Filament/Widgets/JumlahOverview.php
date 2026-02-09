@@ -48,7 +48,7 @@ class JumlahOverview extends BaseWidget
             ->map(fn ($field) => self::getCardStats($field))
             ->filter()
             ->values()
-            ->toArray();
+            ->toArray(); 
     }
 
     protected function getCardStats(string $statName): ?Stat
