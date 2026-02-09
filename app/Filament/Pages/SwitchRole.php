@@ -33,7 +33,7 @@ class SwitchRole extends Page
     {
         Session::put('active_role_id', $roleId);
 
-        $roleName = Role::query()->where('id', $roleId)->value('name');
+        $roleName = ucwords(str_replace('_', ' ', Role::query()->where('id', $roleId)->value('name')));
 
         Notification::make()
             ->title('Berhasil!')

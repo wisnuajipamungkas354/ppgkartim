@@ -27,7 +27,7 @@ class BaseFormGenerus
                         ->label('Kategori Generus')
                         ->options(function() {
                             $roleName = AccessHelper::getActiveRoleName();
-                            if(in_array($roleName, ['phppg', 'pjp_desa', 'pjp_kelompok', 'kurikulum', 'super_admin'])) {
+                            if(in_array($roleName, ['ph_ppg', 'pjp_desa', 'pjp_kelompok', 'kurikulum', 'super_admin'])) {
                                 return [
                                     'PAUD' => 'Paud/TK',
                                     'CABERAWIT' => 'Caberawit (SD)',

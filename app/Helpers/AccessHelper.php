@@ -29,7 +29,7 @@ class AccessHelper
      */
     public static function isDaerah(): bool 
     {
-        return in_array(self::getActiveRoleName(), ['phppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik', 'pnkb_daerah']);
+        return in_array(self::getActiveRoleName(), ['ph_ppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik', 'pnkb_daerah']);
     }
 
     public static function isSuperAdmin(): bool 
@@ -44,6 +44,6 @@ class AccessHelper
 
     public static function isPpg(): bool 
     {
-        return in_array(self::getActiveRoleName(), ['phppg', 'kurikulum', 'pjp_desa', 'pjp_kelompok', 'tenaga_pendidik']);
+        return in_array(self::getActiveRoleName(), ['ph_ppg', 'kurikulum', 'pjp_desa', 'pjp_kelompok', 'tenaga_pendidik']);
     }
 }

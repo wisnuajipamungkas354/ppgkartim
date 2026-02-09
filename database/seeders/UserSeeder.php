@@ -22,12 +22,12 @@ class UserSeeder extends Seeder
         //         'username' => 'superadmin123313', 
         // ])->assignRole('super_admin');
 
-        // // Membuat User PPG sekaligus assign role phppg, mudamudi_daerah, kurikulum dan tenaga_pendidik
+        // // Membuat User PPG sekaligus assign role ph_ppg, mudamudi_daerah, kurikulum dan tenaga_pendidik
         // User::factory()->create([
         //     'name' => 'PPG',
         //     'username' => 'ppgkartim313',  
         //     'daerah_id' => 1
-        // ])->assignRole(['phppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik']);
+        // ])->assignRole(['ph_ppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik']);
 
         // // Membuat user tingkat desa sekaligus assign role sebagai pjp_desa & mudamudi_desa
         // $desas = Desa::all();

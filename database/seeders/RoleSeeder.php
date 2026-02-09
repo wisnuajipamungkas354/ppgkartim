@@ -15,7 +15,7 @@ class RoleSeeder extends Seeder
     {
         Role::insert([
             ['name' => 'super_admin', 'guard_name' => 'web'],
-            ['name' => 'phppg', 'guard_name' => 'web'],
+            ['name' => 'ph_ppg', 'guard_name' => 'web'],
             ['name' => 'mudamudi_daerah', 'guard_name' => 'web'],
             ['name' => 'kurikulum', 'guard_name' => 'web'],
             ['name' => 'tenaga_pendidik', 'guard_name' => 'web'],

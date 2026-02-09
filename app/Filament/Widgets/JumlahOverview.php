@@ -34,7 +34,7 @@ class JumlahOverview extends BaseWidget
         elseif(AccessHelper::isPpg()) {
             $roleName = AccessHelper::getActiveRoleName();
 
-            if($roleName == 'phppg') $fields = self::$phPpg;
+            if($roleName == 'ph_ppg') $fields = self::$phPpg;
             elseif($roleName == 'pjp_desa') $fields = self::$pjpDesa;
             elseif($roleName == 'pjp_kelompok') $fields = self::$pjpKelompok;
         } elseif(AccessHelper::isMudamudi()) {
@@ -54,18 +54,18 @@ class JumlahOverview extends BaseWidget
     protected function getCardStats(string $statName): ?Stat
     {
         return match($statName) {
-            'total_daerah'      => Stat::make('Daerah', Daerah::count()),
-            'total_desa'        => Stat::make('Desa', Desa::owned()->count()),
-            'total_kelompok'    => Stat::make('Kelompok', Kelompok::owned()->count()),
-            'total_generus'     => Stat::make('Generus', Generus::owned()->where('is_verified', 1)->count()),
-            'total_caberawit'   => Stat::make('Caberawit', Generus::owned()->where('jenis_data', 'CBRWT')->where('is_verified', 1)->count()),
-            'total_mudamudi'    => Stat::make('Muda-Mudi', Generus::owned()->where('jenis_data', 'MM')->where('is_verified', 1)->count()),
-            'total_pra_remaja'  => Stat::make('Pra Remaja', Generus::owned()->where('kategori', 'PRA_REMAJA')->where('is_verified', 1)->count()),
-            'total_remaja'      => Stat::make('Remaja', Generus::owned()->where('kategori', 'REMAJA')->where('is_verified', 1)->count()),
-            'total_pra_nikah'   => Stat::make('Pra Nikah', Generus::owned()->where('kategori', 'PRA_NIKAH')->where('is_verified', 1)->count()),
-            'total_mt'          => Stat::make('Mubaligh Tugasan', Mubaligh::owned()->where('kategori', 'MT')->count()),
-            'total_ms'          => Stat::make('Mubaligh Setempat', Mubaligh::owned()->where('kategori', 'MS')->count()),
-            'total_user'        => Stat::make('User', User::count()),
+            'total_daerah'      => Stat::make('Daerah', Daerah::count())->chart([1,1,1])->chartColor('success'),
+            'total_desa'        => Stat::make('Desa', Desa::owned()->count())->chart([1,1,1])->chartColor('primary'),
+            'total_kelompok'    => Stat::make('Kelompok', Kelompok::owned()->count())->chart([1,1,1])->chartColor('info'),
+            'total_generus'     => Stat::make('Generus', Generus::owned()->where('is_verified', 1)->count())->chart([1,1,1])->chartColor('success'),
+            'total_caberawit'   => Stat::make('Caberawit', Generus::owned()->where('jenis_data', 'CBRWT')->where('is_verified', 1)->count())->chart([1,1,1])->chartColor('success'),
+            'total_mudamudi'    => Stat::make('Muda-Mudi', Generus::owned()->where('jenis_data', 'MM')->where('is_verified', 1)->count())->chart([1,1,1])->chartColor('success'),
+            'total_pra_remaja'  => Stat::make('Pra Remaja', Generus::owned()->where('kategori', 'PRA_REMAJA')->where('is_verified', 1)->count())->chart([1,1,1])->chartColor('success'),
+            'total_remaja'      => Stat::make('Remaja', Generus::owned()->where('kategori', 'REMAJA')->where('is_verified', 1)->count())->chart([1,1,1])->chartColor('success'),
+            'total_pra_nikah'   => Stat::make('Pra Nikah', Generus::owned()->where('kategori', 'PRA_NIKAH')->where('is_verified', 1)->count())->chart([1,1,1])->chartColor('success'),
+            'total_mt'          => Stat::make('Mubaligh Tugasan', Mubaligh::owned()->where('kategori', 'MT')->count())->chart([1,1,1])->chartColor('danger'),
+            'total_ms'          => Stat::make('Mubaligh Setempat', Mubaligh::owned()->where('kategori', 'MS')->count())->chart([1,1,1])->chartColor('danger'),
+            'total_user'        => Stat::make('User', User::count())->chart([1,1,1])->chartColor('warning'),
         };
     }
 }
