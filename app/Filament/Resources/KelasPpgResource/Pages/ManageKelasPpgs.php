@@ -15,7 +15,7 @@ class ManageKelasPpgs extends ManageRecords
         return [
             Actions\CreateAction::make()
                 ->label('Tambah')
-                ->modalHeading('Tambah Dapukan')
+                ->modalHeading('Tambah Kelas')
                 ->modalCancelActionLabel('Batal')
                 ->createAnother(false)
                 ->modalSubmitActionLabel('Simpan')

@@ -28,8 +28,6 @@ return new class extends Migration
             $table->string('pendidikan_terakhir', 15)->nullable();
             // Khusus Pra Nikah Selain Mahasiswa (SD, SMP, SMA/K, D3, S1/D4, S2, S3)
             $table->string('jurusan')->nullable();
-            // Menyimpan list dapukan individu, isinya berupa nilai slug dari tabel dapukan
-            $table->json('dapukan');
             // Status Pernikahan
             $table->enum('perkawinan', ['LAJANG', 'MENIKAH'])->default('LAJANG');
             $table->enum('siap_nikah', ['SIAP', 'BELUM'])->nullable();
@@ -45,14 +43,6 @@ return new class extends Migration
             $table->boolean('is_mubaligh')->default(false); // Apakah seorang mubaligh atau bukan (MT/MS)
             $table->timestamps();
             $table->softDeletes();
-        });
-
-        // List-list peran jamaah
-        Schema::create('dapukans', function (Blueprint $table) {
-            $table->id();
-            $table->string('nm_dapukan');
-            $table->string('slug');
-            $table->timestamps();
         });
     }
 

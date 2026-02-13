@@ -6,7 +6,6 @@ use App\Filament\Resources\GenerusResource;
 use App\Filament\Resources\GenerusResource\Pages\Forms\BaseFormGenerus;
 use App\Helpers\AccessHelper;
 use App\Models\Desa;
-use App\Models\Dapukan;
 use App\Models\Insan;
 use App\Models\Kelompok;
 use App\Models\Status;

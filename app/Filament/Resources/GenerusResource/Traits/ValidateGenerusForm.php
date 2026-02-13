@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\GenerusResource\Traits;
 
 use App\Helpers\AccessHelper;
-use App\Models\Dapukan;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
@@ -73,16 +72,9 @@ trait ValidateGenerusForm {
             }
         }
         
-        // Step 7: Menentukan Dapukan
-        $data['dapukan'][] = Dapukan::where('nm_dapukan', 'GENERUS')->value('slug');
+        // Step 7: Menentukan Mubaligh Atau Bukan
         $data['is_mubaligh'] = isset($data['mubaligh']) && $data['mubaligh'] == 'MS' ? true : false;
 
-        if (isset($data['mubaligh']) && $data['mubaligh'] !== 'BUKAN') {
-            if ($data['mubaligh'] === 'MS') {
-                $data['dapukan'][] = Dapukan::where('nm_dapukan', 'MUBALIGH SETEMPAT')->value('slug');
-            }
-        }
-        
         return $data;
   }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Daerah;
 use App\Models\Desa;
 use App\Models\Kelompok;
 use App\Models\User;
@@ -17,52 +18,46 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Membuat User Super Admin
-        // User::factory()->create([
-        //         'name' => 'Super Admin', 
-        //         'username' => 'superadmin123313', 
-        // ])->assignRole('super_admin');
+        User::create([
+                'name' => 'Super Admin', 
+                'username' => 'superadmin123313', 
+                'password' => bcrypt('password'),
+                'plain_password' => 'password',
+        ])->assignRole('super_admin');
 
         // // Membuat User PPG sekaligus assign role ph_ppg, mudamudi_daerah, kurikulum dan tenaga_pendidik
-        // User::factory()->create([
-        //     'name' => 'PPG',
-        //     'username' => 'ppgkartim313',  
-        //     'daerah_id' => 1
-        // ])->assignRole(['ph_ppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik']);
+        $daerahs = Daerah::all();
+        foreach($daerahs as $daerah) {
+            $daerah->users()->create([
+                'name' => Str::title($daerah->nm_daerah),
+                'username' => 'ppgkartim313',
+                'password' => bcrypt('password'),
+                'plain_password' => 'password'
+            ])->assignRole(['ph_ppg', 'mudamudi_daerah', 'kurikulum', 'tenaga_pendidik']);
+        }
 
-        // // Membuat user tingkat desa sekaligus assign role sebagai pjp_desa & mudamudi_desa
-        // $desas = Desa::all();
-        // foreach ($desas as $desa) 
-        // {
-        //     $email = Str::of($desa->nm_desa)->replace(' ', '')->lower() . '313';
+        $desas = Desa::all();
+        foreach($desas as $desa) {
+            if($desa->nm_desa !== 'TUNGGAK JATI') $username = Str::of($desa->nm_desa)->replace(' ', '')->lower() . '313';
+            else $username = Str::of(($desa->nm_desa . 'desa'))->replace(' ', '')->lower() . '313';
 
-        //     if($email == 'tunggakjati313') {
-        //         $email = 'tunggakjatidesa313';
-        //     }
+            $desa->users()->create([
+                'name' => Str::title($desa->nm_desa),
+                'username' => $username,
+                'password' => bcrypt('password'),
+                'plain_password' => 'password'
+            ])->assignRole(['pjp_desa', 'mudamudi_desa']);
+        }
 
-        //     User::factory()->create([
-        //         'name' => Str::title($desa->nm_desa),
-        //         'username' => $email,
-        //         'desa_id' => $desa->id,
-        //     ])->assignRole(['pjp_desa', 'mudamudi_desa']);
-        // }
-
-        // // Membuat user tingkat kelompok sekaligus assign role sebagai pjp_kelompok & mudamudi_kelompok
-        // $kelompoks = Kelompok::all();
-        // foreach($kelompoks as $kelompok) 
-        // {
-        //     User::factory()->create([
-        //         'name' => Str::title($kelompok->nm_kelompok),
-        //         'username' => Str::of($kelompok->nm_kelompok)->replace(' ', '')->lower() . '313',
-        //         'kelompok_id' => $kelompok->id,
-        //     ])->assignRole(['pjp_kelompok', 'mudamudi_kelompok']);
-        // }
-
-        $users = User::all();
-        foreach ($users as $user) {
-            $email = $user->email;
-            $username = str_replace("@ppgkartim.com", '313', $email);
-            $user->username = $username;
-            $user->save();
+        $kelompoks = Kelompok::all();
+        foreach($kelompoks as $kelompok) 
+        {
+            $kelompok->users()->create([
+                'name' => Str::title($kelompok->nm_kelompok),
+                'username' => Str::of($kelompok->nm_kelompok)->replace(' ', '')->lower() . '313',
+                'password' => bcrypt('password'),
+                'plain_password' => 'password'
+            ])->assignRole(['pjp_kelompok', 'mudamudi_kelompok']);
         }
     }
 }

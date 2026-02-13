@@ -60,4 +60,36 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(UangKas::class);
     }
+
+    public function userable()
+    {
+        return $this->morph();
+    }
+
+    public function getDaerahIdAttribute()
+    {
+        if ($this->userable_type === Daerah::class) {
+            return $this->userable_id;
+        }
+
+        return null;
+    }
+
+    public function getDesaIdAttribute()
+    {
+        if ($this->userable_type === Desa::class) {
+            return $this->userable_id;
+        }
+
+        return null;
+    }
+
+    public function getKelompokIdAttribute()
+    {
+        if ($this->userable_type === Kelompok::class) {
+            return $this->userable_id;
+        }
+
+        return null;
+    }
 }

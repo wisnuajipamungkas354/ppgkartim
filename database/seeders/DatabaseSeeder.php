@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Daerah;
-use App\Models\Dapukan;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;
@@ -29,16 +28,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $desas = ['KLARI', 'LEMAH MULYA', 'ADIARSA TIMUR', 'TUNGGAK JATI'];
-        foreach($desas as $d) {
+        foreach($desas as $desa) {
             Desa::create([
                 'daerah_id' => $daerah->id,
-                'nm_desa' => $d
+                'nm_desa' => $desa
             ]);
         }
 
         $kelompokKlari = ['CIREJAG', 'BELENDUNG', 'CIBALONGSARI 1', 'CIBALONGSARI 2', 'PANCAWATI', 'KALIMULYA'];
-        $kelompokLm = ['TAMIANG 1', 'TAMIANG 2', 'CKM', 'TIPAR', 'HNH', 'ANGGADITA', 'KARAWANG MEGAH'];
-        $kelompokAtm = ['WIRASABA', 'BABAKAN JATI', 'KARAWANG KOTA 1', 'KARAWANG KOTA 2', 'WADAS'];
+        $kelompokLm = ['TAMIANG 1', 'TAMIANG 2', 'CKM 1', 'CKM 2', 'TIPAR', 'HNH', 'ANGGADITA', 'KARAWANG MEGAH'];
+        $kelompokAtm = ['WIRASABA', 'BABAKAN JATI 1', 'BABAKAN JATI 2', 'KARAWANG KOTA 1', 'KARAWANG KOTA 2', 'WADAS'];
         $kelompokTj = ['TANJUNG BARU BARAT', 'TANJUNG BARU TIMUR', 'TUNGGAK JATI', 'KALANGSURIA', 'PAKIS JAYA'];
 
         // Kelompok-kelompok Desa Klari
@@ -86,14 +85,6 @@ class DatabaseSeeder extends Seeder
                 'is_desa' => $isDesa,
             ]);
         }
-        
-        // Dapukan
-        Dapukan::insert([
-            ['nm_dapukan' => 'GENERUS', 'slug' => Str::slug('GENERUS')],
-            ['nm_dapukan' => 'MUBALIGH TUGASAN', 'slug' => Str::slug('MUBALIGH TUGASAN')],
-            ['nm_dapukan' => 'MUBALIGH SETEMPAT', 'slug' => Str::slug('MUBALIGH SETEMPAT')],
-            ['nm_dapukan' => 'PENGURUS', 'slug' => Str::slug('PENGURUS')],
-        ]);
 
         // Status
         $this->call([

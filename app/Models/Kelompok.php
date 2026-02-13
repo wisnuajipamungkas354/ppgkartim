@@ -25,6 +25,16 @@ class Kelompok extends Model
         });
     }
 
+    public function users()
+    {
+        return $this->morphMany(User::class, 'userable');
+    }
+
+    public function laporanPjps()
+    {
+        return $this->morphMany(LaporanPjp::class, 'reportable');
+    }
+
     public function desa() {
         return $this->belongsTo(Desa::class);
     }
@@ -37,9 +47,9 @@ class Kelompok extends Model
     public function scopeOwned($query)
     {
         if(AccessHelper::isSuperAdmin()) $query;
-        elseif(AccessHelper::isDaerah()) $query->whereHas('desa', fn($q) => $q->where('daerah_id', auth()->user()->daerah_id));
-        elseif(AccessHelper::isDesa()) $query->where('desa_id', auth()->user()->desa_id);
-        elseif(AccessHelper::isKelompok()) $query->where('id', auth()->user()->kelompok_id);
+        elseif(AccessHelper::isDaerah()) $query->whereHas('desa', fn($q) => $q->where('daerah_id', auth('web')->user()->daerah_id));
+        elseif(AccessHelper::isDesa()) $query->where('desa_id', auth('web')->user()->desa_id);
+        elseif(AccessHelper::isKelompok()) $query->where('id', auth('web')->user()->kelompok_id);
         
         return $query;
     }

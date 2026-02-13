@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\GenerusResource\Pages\Views;
 
-use App\Models\Dapukan;
 use App\Models\Generus;
 use App\Models\Insan;
 use App\Models\Status;

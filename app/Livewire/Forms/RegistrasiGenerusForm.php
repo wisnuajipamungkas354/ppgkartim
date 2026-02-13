@@ -5,7 +5,6 @@ namespace App\Livewire\Forms;
 use App\Filament\Resources\GenerusResource\Pages\Forms\GenerusForm;
 use App\Helpers\AccessHelper;
 use App\Models\Daerah;
-use App\Models\Dapukan;
 use App\Models\Desa;
 use App\Models\Generus;
 use App\Models\Insan;

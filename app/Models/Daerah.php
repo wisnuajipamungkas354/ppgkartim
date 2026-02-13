@@ -18,6 +18,11 @@ class Daerah extends Model
         });
     }
 
+    public function users()
+    {
+        return $this->morphMany(User::class, 'userable');
+    }
+
     public function desa() {
         return $this->hasMany(Desa::class);
     }

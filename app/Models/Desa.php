@@ -19,6 +19,16 @@ class Desa extends Model
         });
     }
 
+    public function users()
+    {
+        return $this->morphMany(User::class, 'userable');
+    }
+
+    public function laporanPjps()
+    {
+        return $this->morphMany(LaporanPjp::class, 'reportable');
+    }
+
     public function daerah() {
         return $this->belongsTo(Daerah::class);
     }
@@ -35,8 +45,8 @@ class Desa extends Model
     public function scopeOwned($query)
     {
         if(AccessHelper::isSuperAdmin()) $query;
-        elseif(AccessHelper::isDaerah()) $query->where('daerah_id', auth()->user()->daerah_id);
-        elseif(AccessHelper::isDesa()) $query->where('id', auth()->user()->desa_id);
+        elseif(AccessHelper::isDaerah()) $query->where('daerah_id', auth('web')->user()->daerah_id);
+        elseif(AccessHelper::isDesa()) $query->where('id', auth('web')->user()->desa_id);
         
         return $query;
     }
