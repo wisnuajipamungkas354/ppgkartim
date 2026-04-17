@@ -36,7 +36,7 @@ use Illuminate\Support\Str;
 class RegistrasiGenerusForm extends Component implements HasForms
 {
     use InteractsWithForms, ValidateGenerusForm;
-    
+
     public ?array $data = [];
 
     public function mount()
@@ -52,15 +52,15 @@ class RegistrasiGenerusForm extends Component implements HasForms
                     Wizard\Step::make('Jenis Data')
                         ->schema([
                             Forms\Components\Select::make('kategori')
-                            ->label('Kategori Generus')
-                            ->options([
-                                        'PAUD' => 'Paud/TK',
-                                        'CABERAWIT' => 'Caberawit (SD)',
-                                        'PRA_REMAJA' => 'Pra Remaja (SMP)',
-                                        'REMAJA' => 'Remaja (SMA/K)',
-                                        'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
-                                    ])
-                            ->required()
+                                ->label('Kategori Generus')
+                                ->options([
+                                    'PAUD' => 'Paud/TK',
+                                    'CABERAWIT' => 'Caberawit (SD)',
+                                    'PRA_REMAJA' => 'Pra Remaja (SMP)',
+                                    'REMAJA' => 'Remaja (SMA/K)',
+                                    'PRA_NIKAH' => 'Pra Nikah (Lepas Pelajar)'
+                                ])
+                                ->required()
                         ]),
                     Wizard\Step::make('Data Diri')
                         ->afterValidation(function () {
@@ -68,12 +68,12 @@ class RegistrasiGenerusForm extends Component implements HasForms
                             $validated = Insan::query()->where('nama', $data['nama'])->where('jk', $data['jk'])->where('tgl_lahir', $data['tgl_lahir'])->first();
                             if ($validated) {
                                 Notification::make('failed_notification')
-                                ->title('Data sudah ada di database!')
-                                ->body('Datamu sudah tercatat didatabase, silahkan menghubungi admin jika ada perubahan data yaa!')
-                                ->danger()
-                                ->color('danger')
-                                ->seconds(10)
-                                ->send();
+                                    ->title('Data sudah ada di database!')
+                                    ->body('Datamu sudah tercatat didatabase, silahkan menghubungi admin jika ada perubahan data yaa!')
+                                    ->danger()
+                                    ->color('danger')
+                                    ->seconds(10)
+                                    ->send();
 
                                 // throw new Halt();
                             }
@@ -84,7 +84,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                             Forms\Components\Select::make('daerah_id')
                                 ->label('Daerah')
                                 ->options(fn() => Daerah::query()->pluck('nm_daerah', 'id'))
-                                ->afterStateUpdated(fn (Set $set) => $set('desa_id', null))
+                                ->afterStateUpdated(fn(Set $set) => $set('desa_id', null))
                                 ->required()
                                 ->live()
                                 ->preload(),
@@ -127,8 +127,8 @@ class RegistrasiGenerusForm extends Component implements HasForms
                         ])
                         ->visible(fn(Get $get) => !$get('kategori') == null && !in_array($get('kategori'), ['PAUD', 'CABERAWIT']))
                 ])
-                ->columnSpanFull()
-                ->submitAction((new HtmlString(Blade::render(<<<BLADE
+                    ->columnSpanFull()
+                    ->submitAction((new HtmlString(Blade::render(<<<BLADE
                 <x-filament::button
                     color="success"
                     wire:click="submit"
@@ -141,7 +141,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
             ->model(Generus::class);
     }
 
-    public function submit() 
+    public function submit()
     {
         try {
             // Step 1
@@ -149,7 +149,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
 
             $result = $this->validateInput($rawData, 'REGISTRASI');
 
-            if(isset($result['bakat_lainnya']) && $result['bakat_lainnya'] !== null ) {
+            if (isset($result['bakat_lainnya']) && $result['bakat_lainnya'] !== null) {
                 $namaMinat = Str::camel($result['bakat_lainnya']);
                 $slug = Str::slug($namaMinat);
 
@@ -175,7 +175,6 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'no_hp'                 => $result['no_hp'] ?? null,
                 'pendidikan_terakhir'   => $result['pendidikan_terakhir'] ?? null,
                 'jurusan'               => $result['jurusan'] ?? null,
-                'dapukan'               => $result['dapukan'],
                 'perkawinan'            => 'LAJANG',
                 'nm_ayah'               => $result['nm_ayah'] ?? null,
                 'nm_ibu'                => $result['nm_ibu'] ?? null,
@@ -185,7 +184,7 @@ class RegistrasiGenerusForm extends Component implements HasForms
                 'detail_siap_nikah'     => $result['detail_siap_nikah'] ?? null,
                 'is_mubaligh'           => $result['is_mubaligh'],
             ]);
-            
+
             // Step 10: Simpan Data Mubaligh jika ada
             if (isset($result['mubaligh']) && $result['mubaligh'] !== 'BUKAN') {
                 if ($result['mubaligh'] === 'MS') {
