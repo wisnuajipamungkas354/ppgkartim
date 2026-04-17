@@ -53,8 +53,8 @@ class Desa extends Model
     public function scopeOwned($query)
     {
         if (AccessHelper::isSuperAdmin()) $query;
-        elseif (AccessHelper::isDaerah()) $query->where('daerah_id', auth('web')->user()->daerah->id);
-        elseif (AccessHelper::isDesa()) $query->where('id', auth('web')->user()->desa->id);
+        elseif (AccessHelper::isDaerah()) $query->where('daerah_id', auth('web')->user()->userable_id);
+        elseif (AccessHelper::isDesa()) $query->where('id', auth('web')->user()->userable_id);
 
         return $query;
     }

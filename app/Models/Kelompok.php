@@ -49,9 +49,9 @@ class Kelompok extends Model
     public function scopeOwned($query)
     {
         if (AccessHelper::isSuperAdmin()) $query;
-        elseif (AccessHelper::isDaerah()) $query->whereHas('desa', fn($q) => $q->where('daerah_id', auth('web')->user()->daerah->id));
-        elseif (AccessHelper::isDesa()) $query->where('desa_id', auth('web')->user()->desa->id);
-        elseif (AccessHelper::isKelompok()) $query->where('id', auth('web')->user()->kelompok->id);
+        elseif (AccessHelper::isDaerah()) $query->whereHas('desa', fn($q) => $q->where('daerah_id', auth('web')->user()->userable_id));
+        elseif (AccessHelper::isDesa()) $query->where('desa_id', auth('web')->user()->userable_id);
+        elseif (AccessHelper::isKelompok()) $query->where('id', auth('web')->user()->userable_id);
 
         return $query;
     }
