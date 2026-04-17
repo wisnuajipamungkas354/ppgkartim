@@ -34,28 +34,25 @@ class Desa extends Model
         return $this->morphMany(PjpSchedule::class, 'scheduleable');
     }
 
-    public function daerah()
-    {
+    public function daerah() {
         return $this->belongsTo(Daerah::class);
     }
 
-    public function kelompok()
-    {
+    public function kelompok() {
         return $this->hasMany(Kelompok::class);
     }
 
-    public function insan()
-    {
+    public function insan() {
         return $this->hasMany(Insan::class);
     }
 
     // Local Scope
     public function scopeOwned($query)
     {
-        if (AccessHelper::isSuperAdmin()) $query;
-        elseif (AccessHelper::isDaerah()) $query->where('daerah_id', auth('web')->user()->getDaerahIdAttribute());
-        elseif (AccessHelper::isDesa()) $query->where('id', auth('web')->user()->getDesaIdAttribute());
-
+        if(AccessHelper::isSuperAdmin()) $query;
+        elseif(AccessHelper::isDaerah()) $query->where('daerah_id', auth('web')->user()->daerah_id);
+        elseif(AccessHelper::isDesa()) $query->where('id', auth('web')->user()->desa_id);
+        
         return $query;
     }
 }
