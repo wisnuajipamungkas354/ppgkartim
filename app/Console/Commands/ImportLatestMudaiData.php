@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\Insan;
 use App\Models\Generus;
+use Illuminate\Support\Str;
 
 class ImportLatestMudaiData extends Command
 {
@@ -30,8 +31,9 @@ class ImportLatestMudaiData extends Command
     public function handle()
     {
         $response = Http::withHeaders([
-            'X-API-KEY' => env('MIGRATION_KEY_SECRET')
-        ])->get(env('MIGRATION_API_URL') . '/api/import-data');
+            'X-API-KEY' => 'Wisnu123',
+            'User-Agent' => 'Laravel-Migration-Script'
+        ])->get('https://ppgkartim.com/api/import-data');
 
         if (!$response->successful()) {
             $this->error('Gagal ambil data');
@@ -40,31 +42,34 @@ class ImportLatestMudaiData extends Command
 
         $mudaiList = $response->json()['data'];
 
-        // foreach ($mudaiList as $mudai) {
+        foreach ($mudaiList as $mudai) {
 
-        //     // Cek supaya tidak duplicate
-        //     $exists = Insan::where('nik', $mudai['nik'])->first();
-        //     if ($exists) {
-        //         $this->info("Skip: {$mudai['nama']}");
-        //         continue;
-        //     }
+            $nama = Str::upper($mudai['nama']);
+            $tglLahir = $mudai['tgl_lahir'];
 
-        //     // Insert ke tabel insans dulu
-        //     $insan = Insan::create([
-        //         'nama' => $mudai['nama'],
-        //         'nik' => $mudai['nik'],
-        //         'tanggal_lahir' => $mudai['tanggal_lahir'],
-        //         'jenis_kelamin' => $mudai['jenis_kelamin'],
-        //     ]);
+            // Cek supaya tidak duplicate
+            $exists = Insan::where('nama',  $nama)->where('tgl_lahir', $tglLahir)->first();
+            if ($exists) {
+                $this->info("Skip: {$mudai['nama']}");
+                continue;
+            }
 
-        //     // Insert ke generuses
-        //     Generus::create([
-        //         'insan_id' => $insan->id,
-        //         'status' => 'aktif',
-        //     ]);
+            // Insert ke tabel insans dulu
+            $insan = Insan::create([
+                'nama' => $mudai['nama'],
+                'jk' => $mudai['jk'],
+                'tanggal_lahir' => $mudai['tanggal_lahir'],
+                'jenis_kelamin' => $mudai['jenis_kelamin'],
+            ]);
 
-        //     $this->info("Import: {$mudai['nama']}");
-        // }
+            // Insert ke generuses
+            Generus::create([
+                'insan_id' => $insan->id,
+                'status' => 'aktif',
+            ]);
+
+            $this->info("Import: {$mudai['nama']}");
+        }
 
         $this->info('Selesai migrasi.');
     }

@@ -23,6 +23,11 @@ class Daerah extends Model
         return $this->morphMany(User::class, 'userable');
     }
 
+    public function pjpSchedules()
+    {
+        return $this->morphMany(PjpSchedule::class, 'scheduleable');
+    }
+
     public function desa() {
         return $this->hasMany(Desa::class);
     }

@@ -32,7 +32,7 @@ class Kelompok extends Model
 
     public function laporanPjps()
     {
-        return $this->morphMany(LaporanPjp::class, 'reportable');
+        return $this->morphMany(PjpReport::class, 'reportable');
     }
 
     public function desa() {

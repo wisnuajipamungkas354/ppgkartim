@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\LaporanPjpResource\Pages;
+namespace App\Filament\Resources\PjpReportResource\Pages;
 
-use App\Filament\Resources\LaporanPjpResource;
+use App\Filament\Resources\PjpReportResource;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Js;
 
-class CreateLaporanPjp extends CreateRecord
+class CreatePjpReport extends CreateRecord
 {
-    protected static string $resource = LaporanPjpResource::class;
+    protected static string $resource = PjpReportResource::class;
 
     protected static bool $canCreateAnother = false;
 

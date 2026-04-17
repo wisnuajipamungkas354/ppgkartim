@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Helpers\RolePermission;
+use App\Models\PjpSchedule;
+use App\Observers\PjpScheduleObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, string $ability) {
             return RolePermission::can($ability);
         });
+
+        PjpSchedule::observe(PjpScheduleObserver::class);
     }
 }

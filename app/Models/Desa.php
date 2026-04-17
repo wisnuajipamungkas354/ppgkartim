@@ -24,9 +24,14 @@ class Desa extends Model
         return $this->morphMany(User::class, 'userable');
     }
 
-    public function laporanPjps()
+    public function pjpReports()
     {
-        return $this->morphMany(LaporanPjp::class, 'reportable');
+        return $this->morphMany(PjpReport::class, 'reportable');
+    }
+
+    public function pjpSchedules()
+    {
+        return $this->morphMany(PjpSchedule::class, 'scheduleable');
     }
 
     public function daerah() {

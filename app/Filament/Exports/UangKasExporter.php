@@ -23,10 +23,10 @@ class UangKasExporter extends Exporter
 
         return [
             (new Options)
-            ->setColumnWidthForRange(40, 1, 12),
+                ->setColumnWidthForRange(40, 1, 12),
         ];
     }
-    
+
     public function getXlsxHeaderCellStyle(): ?Style
     {
         return (new Style())
@@ -55,10 +55,12 @@ class UangKasExporter extends Exporter
                 ->label('Tanggal Transaksi'),
             ExportColumn::make('nm_penginput')
                 ->label('Nama Penginput'),
-            ExportColumn::make('jenis_kas')
-                ->label('Jenis Kas'),
-            ExportColumn::make('nominal')
-                ->label('Nominal'),
+            ExportColumn::make('pemasukan')
+                ->label('Pemasukan')
+                ->formatStateUsing(fn($state, UangKas $record) => $record->jenis_kas == 'PEMASUKAN' ? $record->nominal : ''),
+            ExportColumn::make('pengeluaran')
+                ->label('Pengeluaran')
+                ->formatStateUsing(fn($state, UangKas $record) => $record->jenis_kas == 'PENGELUARAN' ? $record->nominal : ''),
             ExportColumn::make('keterangan')
                 ->label('Keterangan'),
         ];
