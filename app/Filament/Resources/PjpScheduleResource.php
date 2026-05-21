@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PjpScheduleResource\Pages;
 use App\Filament\Resources\PjpScheduleResource\RelationManagers;
+use App\Helpers\AccessHelper;
 use App\Models\PjpSchedule;
 use App\Traits\HandlesActiveRolePermission;
 use Filament\Forms;
@@ -53,8 +54,8 @@ class PjpScheduleResource extends Resource
                                 11 => 'November',
                                 12 => 'Desember',
                             ])
-                            ->default(now()->month)
-                            ->required(),
+                            ->required()
+                            ->disabled(fn() => !AccessHelper::isDaerah()),
 
                         Select::make('tahun')
                             ->options(
@@ -62,8 +63,112 @@ class PjpScheduleResource extends Resource
                                     ->mapWithKeys(fn($year) => [$year => $year])
                             )
                             ->default(now()->year)
-                            ->required(),
+                            ->required()
+                            ->disabled(fn() => !AccessHelper::isDaerah()),
                     ])->columns(2),
+
+                Section::make('PJP Kelompok')
+                    ->schema([
+                        DatePicker::make('deadline_laporan')
+                            ->required()
+                            ->disabled()
+                            ->hidden(fn() => AccessHelper::isDaerah()),
+                        DatePicker::make('deadline_kelompok')
+                            ->required()
+                            ->hidden(fn() => !AccessHelper::isDaerah()),
+                        Repeater::make('musyawaroh_rutin')
+                            ->label('Musyawaroh Rutin')
+                            ->simple(
+                                TextInput::make('judul_musyawaroh')
+                                    ->required()
+                                    ->label('Judul Musyawarah'),
+                            )
+                            ->default(function () {
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+
+                                return $latest?->musyawaroh_rutin ?? [ 
+                                    'Musyawarah 5 Unsur',
+                                    'Musyawarah PJP, Muda/i dan Keputrian Kelompok',
+                                    'Musyawarah Muda/i Kelompok',
+                                ];
+                            })
+                            ->addActionLabel('Tambah Musyawarah')
+                            ->deletable()
+                            ->hidden(fn() => AccessHelper::isDaerah())
+                            ->columnSpanFull(),
+                        Repeater::make('musyawaroh_kelompok')
+                            ->label('Musyawaroh Rutin')
+                            ->simple(
+                                TextInput::make('judul_musyawaroh')
+                                    ->required()
+                                    ->label('Judul Musyawarah'),
+                            )
+                            ->default(function () {
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+
+                                return $latest->musyawaroh_rutin ?? [ 
+                                    'Musyawarah 5 Unsur',
+                                    'Musyawarah PJP, Muda/i dan Keputrian Kelompok',
+                                    'Musyawarah Muda/i Kelompok',
+                                ];
+                            })
+                            ->addActionLabel('Tambah Musyawarah')
+                            ->collapsible()
+                            ->hidden(fn() => !AccessHelper::isDaerah())
+                            ->columnSpanFull(),
+                        Repeater::make('kegiatan_rutin')
+                            ->label('Kegiatan Rutin')
+                            ->simple(
+                                TextInput::make('nm_kegiatan')
+                                    ->required()
+                                    ->label('Nama Kegiatan'),
+                            )
+                            ->default(function () {
+                                if (request()->routeIs('*.edit')) {
+                                    return null;
+                                }
+
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+
+                                return $latest?->kegiatan_rutin ?? [
+                                    'Pengajian Paud/TK',
+                                    'Pengajian Caberawit (SD Kelas 1-6)',
+                                    'Pengajian Pra Remaja (SMP)',
+                                    'Pengajian Remaja (SMA)',
+                                    'Pengajian Muda/i (Umum)',
+                                ];
+                            })
+                            ->addActionLabel('Tambah Kegiatan')
+                            ->collapsible()
+                            ->columnSpanFull()
+                            ->hidden(fn() => AccessHelper::isDaerah()),
+                        Repeater::make('kegiatan_kelompok')
+                            ->label('Kegiatan Rutin')
+                            ->simple(
+                                TextInput::make('nm_kegiatan')
+                                    ->required()
+                                    ->label('Nama Kegiatan'),
+                            )
+                            ->default(function () {
+                                if (request()->routeIs('*.edit')) {
+                                    return null;
+                                }
+
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+
+                                return $latest?->kegiatan_rutin ?? [
+                                    'Pengajian Paud/TK',
+                                    'Pengajian Caberawit (SD Kelas 1-6)',
+                                    'Pengajian Pra Remaja (SMP)',
+                                    'Pengajian Remaja (SMA)',
+                                    'Pengajian Muda/i (Umum)',
+                                ];
+                            })
+                            ->addActionLabel('Tambah Kegiatan')
+                            ->collapsible()
+                            ->columnSpanFull()
+                            ->hidden(fn() => !AccessHelper::isDaerah()),
+                    ]),
 
                 Section::make('PJP Desa')
                     ->schema([
@@ -71,26 +176,31 @@ class PjpScheduleResource extends Resource
                             ->required(),
                         Repeater::make('musyawaroh_desa')
                             ->label('Musyawaroh Rutin')
-                            ->schema([
+                            ->simple(
                                 TextInput::make('judul_musyawaroh')
                                     ->required()
                                     ->label('Judul Musyawarah'),
-                            ])
+                            )
                             ->default(function () {
                                 $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
 
-                                return $latest?->musyawaroh_rutin ?? [];
+                                return $latest?->musyawaroh_rutin ?? [
+                                    'Musyawarah PJP, Muda/i dan Keputrian Desa',
+                                    'Musyawarah Muda/i Desa',
+                                    'Laporan PJP Kelompok ke PJP Desa',
+                                ];
                             })
                             ->addActionLabel('Tambah Musyawarah')
                             ->collapsible()
+                            ->hidden(fn() => !AccessHelper::isDaerah())
                             ->columnSpanFull(),
                         Repeater::make('kegiatan_desa')
                             ->label('Kegiatan Rutin')
-                            ->schema([
+                            ->simple(
                                 TextInput::make('nm_kegiatan')
                                     ->required()
                                     ->label('Nama Kegiatan'),
-                            ])
+                            )
                             ->default(function () {
                                 if (request()->routeIs('*.edit')) {
                                     return null;
@@ -98,53 +208,16 @@ class PjpScheduleResource extends Resource
 
                                 $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
 
-                                return $latest?->kegiatan_rutin ?? [];
+                                return $latest?->kegiatan_rutin ?? [
+                                    'Pengajian Muda/i Desa',
+                                ];
                             })
                             ->addActionLabel('Tambah Kegiatan')
                             ->collapsible()
                             ->columnSpanFull(),
 
-                    ]),
-
-                Section::make('PJP Kelompok')
-                    ->schema([
-                        DatePicker::make('deadline_kelompok')
-                            ->required(),
-                        Repeater::make('musyawaroh_kelompok')
-                            ->label('Musyawaroh Rutin')
-                            ->schema([
-                                TextInput::make('judul_musyawaroh')
-                                    ->required()
-                                    ->label('Judul Musyawarah'),
-                            ])
-                            ->default(function () {
-                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
-
-                                return $latest?->musyawaroh_rutin ?? [];
-                            })
-                            ->addActionLabel('Tambah Musyawarah')
-                            ->collapsible()
-                            ->columnSpanFull(),
-                        Repeater::make('kegiatan_kelompok')
-                            ->label('Kegiatan Rutin')
-                            ->schema([
-                                TextInput::make('nm_kegiatan')
-                                    ->required()
-                                    ->label('Nama Kegiatan'),
-                            ])
-                            ->default(function () {
-                                if (request()->routeIs('*.edit')) {
-                                    return null;
-                                }
-
-                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
-
-                                return $latest?->kegiatan_rutin ?? [];
-                            })
-                            ->addActionLabel('Tambah Kegiatan')
-                            ->collapsible()
-                            ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->visible(fn() => AccessHelper::isDaerah()),
             ]);
     }
 
@@ -224,6 +297,13 @@ class PjpScheduleResource extends Resource
                         return redirect()->away($url);
                     }),
                 Tables\Actions\EditAction::make()
+                    ->label('Edit')
+                    ->modalHeading('Edit Jadwal Laporan PJP')
+                    ->modalSubmitActionLabel('Simpan Perubahan')
+                    ->action(function (array $data, PjpSchedule $pjpSchedule) {
+                        $data['status'] = 'DIBUKA';
+                        $pjpSchedule->update($data);
+                    })
                     ->hidden(fn($record) => $record->is_closed === 1),
                 Tables\Actions\DeleteAction::make()
                     ->label('Hapus')

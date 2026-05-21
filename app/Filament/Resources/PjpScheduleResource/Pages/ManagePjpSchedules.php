@@ -23,7 +23,7 @@ class ManagePjpSchedules extends ManageRecords
                 ->modalHeading('Buat Jadwal Laporan PJP')
                 ->action(function (array $data, PjpSchedule $pjpSchedule) {
                     $user = auth('web')->user();
-
+                    
                     $scheduleDaerah = [
                         'scheduleable_type' => $user->userable_type,
                         'scheduleable_id' => $user->userable_id,

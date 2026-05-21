@@ -10,6 +10,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Helpers\AccessHelper;
 use App\Models\Daerah;
 use App\Models\Mubaligh;
+use App\Models\UangKas;
 use App\Models\User;
 use App\Traits\HandlesPermissionWidget;
 
@@ -25,6 +26,13 @@ class JumlahOverview extends BaseWidget
     protected static array $pjpKelompok     = ['total_generus', 'total_caberawit', 'total_mudamudi', 'total_mt', 'total_ms'];
     protected static array $mudamudiDaerah  = ['total_desa', 'total_kelompok', 'total_mudamudi',  'total_pra_remaja', 'total_remaja', 'total_pra_nikah'];
     protected static array $mudamudiDesa    = ['total_kelompok', 'total_mudamudi',  'total_pra_remaja', 'total_remaja', 'total_pra_nikah'];
+
+    protected function getSisaKas(): string 
+    {
+        
+
+        return '';
+    }
 
     protected function getStats(): array
     {
@@ -66,6 +74,7 @@ class JumlahOverview extends BaseWidget
             'total_mt'          => Stat::make('Mubaligh Tugasan', Mubaligh::owned()->where('kategori', 'MT')->count())->chart([1,1,1])->chartColor('danger'),
             'total_ms'          => Stat::make('Mubaligh Setempat', Mubaligh::owned()->where('kategori', 'MS')->count())->chart([1,1,1])->chartColor('danger'),
             'total_user'        => Stat::make('User', User::count())->chart([1,1,1])->chartColor('warning'),
+            'total_kas'         => Stat::make('Kas', UangKas::count())
         };
     }
 }
