@@ -87,7 +87,7 @@ class PjpReportResource extends Resource
                                     $defaultData = [];
                                     foreach ($settings['kegiatan_rutin'] as $index => $setting) {
                                         $defaultData[$index]['jenis_kegiatan'] = 'RUTIN';
-                                        $defaultData[$index]['nm_kegiatan'] = $setting['nm_kegiatan'];
+                                        $defaultData[$index]['nm_kegiatan'] = $setting;
                                     }
 
                                     $component->state($defaultData);
@@ -170,7 +170,12 @@ class PjpReportResource extends Resource
                                 if (empty($state)) {
                                     $settings = PjpSchedule::find($record->pjp_schedule_id);
 
-                                    $component->state($settings['musyawaroh_rutin']);
+                                    $defaultData = [];
+                                    foreach ($settings['musyawaroh_rutin'] as $index => $setting) {
+                                        $defaultData[$index]['judul_musyawaroh'] = $setting;
+                                    }
+                                    
+                                    $component->state($defaultData);
                                 }
                             })
                             ->mutateDehydratedStateUsing(function (array $state) {
