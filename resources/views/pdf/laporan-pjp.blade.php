@@ -52,12 +52,12 @@
     <table class="kop-surat">
         <tr>
             <td class="kop-logo">
-                <img src="{{ url('images/logo.png') }}" alt="Logo PPG" onerror="this.src='https://via.placeholder.com/80x80?text=LOGO+PPG'">
+                <img src="{{ $logoImg }}">
             </td>
             <td class="kop-text">
                 <div class="kop-title-text">Penggerak Pembina Generus (PPG)<br>Karawang Timur</div>
                 <div class="kop-contact">
-                    Email: ppgkarawangtimr@gmail.com | Instagram: @ppg_kartim<br>
+                    Email: ppgkarawangtimur@gmail.com | Instagram: @ppg_kartim<br>
                     Website: www.ppgkartim.org | WhatsApp: 0812-3456-7890
                 </div>
             </td>
@@ -67,7 +67,7 @@
 
     <div class="text-center">
         <div class="title">LAPORAN PJP KLARI</div>
-        <div class="subtitle">Bulan: {{ $bulan ?? '........ 2026' }}</div>
+        <div class="subtitle">Bulan: {{ $bulanTahun }}</div>
     </div>
 
     <div class="section-title">I. KEGIATAN</div>
@@ -83,11 +83,11 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($kegiatan_rutin as $index => $rutin)
+            @forelse($kegiatanRutin as $index => $rutin)
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
-                <td>{{ $rutin->nama_kegiatan }}</td>
-                <td class="center">{{ $rutin->jumlah_terlaksana }}</td>
+                <td>{{ $rutin->nm_kegiatan }}</td>
+                <td class="center">{{ $rutin->jml_terlaksana }}</td>
                 <td>{{ $rutin->keterangan }}</td>
             </tr>
             @empty
@@ -109,11 +109,11 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($kegiatan_khusus as $index => $khusus)
+            @forelse($kegiatanKhusus as $index => $khusus)
             <tr>
                 <td class="center">{{ $index+1; }}</td>
                 <td class="center">{{ \Carbon\Carbon::parse($khusus->tanggal)->format('d M Y') }}</td>
-                <td>{{ $khusus->nama_kegiatan }}</td>
+                <td>{{ $khusus->nm_kegiatan }}</td>
                 <td>{{ $khusus->materi }}</td>
                 <td class="center">{{ $khusus->peserta }} Org</td>
                 <td class="center text-bold">
@@ -139,11 +139,11 @@
         </thead>
         <tbody>
             @php 
-                $kategori_sensus = ['paud' => 'Paud/TK', 'cbr' => 'Caberawit (CBR)', 'pra_remaja' => 'Pra Remaja', 'remaja' => 'Remaja', 'pra_nikah' => 'Pra Nikah'];
+                $kategoriSensus = ['paud' => 'Paud/TK', 'cbr' => 'Caberawit (CBR)', 'pra_remaja' => 'Pra Remaja', 'remaja' => 'Remaja', 'pra_nikah' => 'Pra Nikah'];
                 $total_l = 0; $total_p = 0; $no = 1;
             @endphp
 
-            @foreach($kategori_sensus as $key => $label)
+            @foreach($kategoriSensus as $key => $label)
                 @php
                     $l = $sensus[$key]['l'] ?? 0;
                     $p = $sensus[$key]['p'] ?? 0;
@@ -184,12 +184,12 @@
         </thead>
         <tbody>
             @php 
-                $kategori_mutasi = ['pindah' => 'Pindah', 'menikah' => 'Menikah', 'meninggal' => 'Meninggal', 'amar_maruf' => "Amar Ma'ruf"];
-                $total_kolom = ['paud' => 0, 'cbr' => 0, 'pra_remaja' => 0, 'remaja' => 0, 'pra_nikah' => 0];
+                $kategoriMutasi = ['pindah' => 'Pindah', 'menikah' => 'Menikah', 'meninggal' => 'Meninggal', 'amar_maruf' => "Amar Ma'ruf"];
+                $totalKolom = ['paud' => 0, 'cbr' => 0, 'pra_remaja' => 0, 'remaja' => 0, 'pra_nikah' => 0];
                 $no = 1;
             @endphp
 
-            @foreach($kategori_mutasi as $key => $label)
+            @foreach($kategoriMutasi as $key => $label)
                 @php
                     $pd = $arus[$key]['paud'] ?? 0;
                     $cb = $arus[$key]['cbr'] ?? 0;
@@ -197,12 +197,11 @@
                     $rm = $arus[$key]['remaja'] ?? 0;
                     $pn = $arus[$key]['pra_nikah'] ?? 0;
                     $jml_baris = $pd + $cb + $pr + $rm + $pn;
-
-                    $total_kolom['paud'] += $pd;
-                    $total_kolom['cbr'] += $cb;
-                    $total_kolom['pra_remaja'] += $pr;
-                    $total_kolom['remaja'] += $rm;
-                    $total_kolom['pra_nikah'] += $pn;
+                    $totalKolom['paud'] += $pd;
+                    $totalKolom['cbr'] += $cb;
+                    $totalKolom['pra_remaja'] += $pr;
+                    $totalKolom['remaja'] += $rm;
+                    $totalKolom['pra_nikah'] += $pn;
                 @endphp
                 <tr>
                     <td class="center">{{ $no++ }}</td>
@@ -217,12 +216,12 @@
             @endforeach
             <tr class="row-total">
                 <td colspan="2" class="center">TOTAL</td>
-                <td class="center">{{ $total_kolom['paud'] }}</td>
-                <td class="center">{{ $total_kolom['cbr'] }}</td>
-                <td class="center">{{ $total_kolom['pra_remaja'] }}</td>
-                <td class="center">{{ $total_kolom['remaja'] }}</td>
-                <td class="center">{{ $total_kolom['pra_nikah'] }}</td>
-                <td class="center">{{ array_sum($total_kolom) }}</td>
+                <td class="center">{{ $totalKolom['paud'] }}</td>
+                <td class="center">{{ $totalKolom['cbr'] }}</td>
+                <td class="center">{{ $totalKolom['pra_remaja'] }}</td>
+                <td class="center">{{ $totalKolom['remaja'] }}</td>
+                <td class="center">{{ $totalKolom['pra_nikah'] }}</td>
+                <td class="center">{{ array_sum($totalKolom) }}</td>
             </tr>
         </tbody>
     </table>
@@ -268,8 +267,8 @@
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
                 <td>{{ $musy->judul_musyawaroh }}</td>
-                <td class="center">{{ $musy->status }}</td>
-                <td class="center">{{ \Carbon\Carbon::parse($musy->tanggal)->format('d M Y') }}</td>
+            <td class="center">{{ $musy->tanggal !== null ? 'Terlaksana' : 'Belum Terlaksana' }}</td>
+                <td class="center">{{ $musy->tanggal ? \Carbon\Carbon::parse($musy->tanggal)->format('d M Y') : '-' }}</td>
                 <td>{{ $musy->keterangan }}</td>
                 <td class="center text-bold">
                     {{ !empty($musy->dokumentasi) ? 'Lampiran V-'.($index + 1) : '-' }}
@@ -305,12 +304,12 @@
         <div class="subtitle">Laporan PJP Klari - {{ $bulan ?? 'Bulan Ini' }}</div>
     </div>
 
-    @if(!empty($kegiatan_khusus) && count($kegiatan_khusus) > 0)
+    @if(!empty($kegiatanKhusus) && count($kegiatanKhusus) > 0)
         <div class="sub-section-title" style="border-bottom:1px solid #000; padding-left:0; font-size: 11px;">B. DOKUMENTASI KEGIATAN KHUSUS</div>
-        @foreach($kegiatan_khusus as $index => $khusus)
+        @foreach($kegiatanKhusus as $index => $khusus)
             @if(!empty($khusus->dokumentasi))
                 <div class="lampiran-section">
-                    <div class="lampiran-title">Lampiran I.B-{{ $index + 1 }} : {{ $khusus->nama_kegiatan }} ({{ \Carbon\Carbon::parse($khusus->tanggal)->format('d M Y') }})</div>
+                    <div class="lampiran-title">Lampiran I.B-{{ $index + 1 }} : {{ $khusus->nm_kegiatan }} ({{ \Carbon\Carbon::parse($khusus->tanggal)->format('d M Y') }})</div>
                     <table class="gallery-table">
                         <tr>
                         @foreach($khusus->dokumentasi as $foto)

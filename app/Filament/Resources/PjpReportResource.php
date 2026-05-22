@@ -236,7 +236,7 @@ class PjpReportResource extends Resource
                 Tables\Actions\Action::make('cetak_laporan')
                     ->label('PDF')
                     ->icon('heroicon-o-printer')
-                    ->url(fn() => route('cetak.pjp')) // Panggil nama route
+                    ->url(fn(PjpReport $record) => route('cetak.pjp', $record->id)) // Panggil nama route
                     ->openUrlInNewTab()
             ])
             ->bulkActions([
