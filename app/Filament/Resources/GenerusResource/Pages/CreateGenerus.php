@@ -71,87 +71,72 @@ class CreateGenerus extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        try {
-            $result = $this->validateInput($data, 'ADMIN');
-            
-            if(isset($result['bakat_lainnya']) && $result['bakat_lainnya'] !== null ) {
-                $namaMinat = Str::camel($result['bakat_lainnya']);
-                $slug = Str::slug($namaMinat);
+        $result = $this->validateInput($data, 'ADMIN');
+        
+        if(isset($result['bakat_lainnya']) && $result['bakat_lainnya'] !== null ) {
+            $namaMinat = Str::camel($result['bakat_lainnya']);
+            $slug = Str::slug($namaMinat);
 
-                Minat::create([
-                    'nm_minat' => $namaMinat,
-                    'slug' => $slug
-                ]);
-
-                $data['minat_bakat'][] = $slug;
-            }
-
-            // Step 8: Simpan Insan
-            $insan = Insan::create([
-                'url_foto'              => $result['url_foto'] ?? null,
-                'daerah_id'             => $result['daerah_id'],
-                'desa_id'               => $result['desa_id'],
-                'kelompok_id'           => $result['kelompok_id'] ?? null,
-                'nama'                  => $result['nama'],
-                'jk'                    => $result['jk'],
-                'kota_lahir'            => $result['kota_lahir'],
-                'tgl_lahir'             => $result['tgl_lahir'],
-                'gol_dar'               => $result['gol_dar'] ?? null,
-                'usia'                  => $result['usia'],
-                'no_hp'                 => $result['no_hp'] ?? null,
-                'pendidikan_terakhir'   => $result['pendidikan_terakhir'] ?? null,
-                'jurusan'               => $result['jurusan'] ?? null,
-                'dapukan'               => $result['dapukan'],
-                'perkawinan'            => 'LAJANG',
-                'nm_ayah'               => $result['nm_ayah'] ?? null,
-                'nm_ibu'                => $result['nm_ibu'] ?? null,
-                'no_hp_wali'            => $result['no_hp_wali'] ?? null,
-                'minat_bakat'           => $result['minat_bakat'] ?? null,
-                'siap_nikah'            => $result['siap_nikah'] ?? null,
-                'detail_siap_nikah'     => $result['detail_siap_nikah'] ?? null,
-                'is_mubaligh'           => $result['is_mubaligh'],
-            ]);
-            
-            // Step 10: Simpan Data Mubaligh jika ada
-            if (isset($result['mubaligh']) && $result['mubaligh'] !== 'BUKAN') {
-                if ($result['mubaligh'] === 'MS') {
-                    Mubaligh::create([
-                        'insan_id'      => $insan->id,
-                        'kategori'      => 'MS',
-                        'asal_pondok'   => $result['asal_pondok'] ?? null,
-                        'jml_tugas'     => $result['jml_tugas'] ?? null,
-                        'lama_tugas'    => $result['lama_tugas'] ?? null,
-                        'konfirmasi_kesiapan_tugas' => $result['konfirmasi_kesiapan_tugas'] ?? null,
-                    ]);
-                }
-                unset($result['mubaligh']);
-            }
-
-            // Step 11: Simpan Generus Record
-            return static::getModel()::create([
-                'insan_id'          => $insan->id,
-                'nis'               => $result['nis'] ?? null,
-                'jenis_data'        => $result['jenis_data'],
-                'kategori'          => $result['kategori'],
-                'kelas_ppg_id'      => $result['kelas_ppg_id'] ?? null,
-                'status_id'         => $result['status_id'] ?? null,
-                'detail_status'     => $result['detail_status'] ?? null,
-                'aktif_mengajar'    => $result['aktif_mengajar'] ?? false,
-                'is_verified'       => $result['is_verified'],
-                'riwayat_update'    => $result['riwayat_update'],
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Gagal simpan data generus: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
+            Minat::create([
+                'nm_minat' => $namaMinat,
+                'slug' => $slug
             ]);
 
-            Notification::make('failed')
-                ->title('Gagal')
-                ->danger()
-                ->body('Terjadi kesalahan dalam menyimpan data, harap laporkan ini ke Super Admin')
-                ->send();
-
-            throw new \Exception("Gagal menyimpan record", 500);
+            $data['minat_bakat'][] = $slug;
         }
+
+        // Step 8: Simpan Insan
+        $insan = Insan::create([
+            'url_foto'              => $result['url_foto'] ?? null,
+            'daerah_id'             => $result['daerah_id'],
+            'desa_id'               => $result['desa_id'],
+            'kelompok_id'           => $result['kelompok_id'] ?? null,
+            'nama'                  => $result['nama'],
+            'jk'                    => $result['jk'],
+            'kota_lahir'            => $result['kota_lahir'],
+            'tgl_lahir'             => $result['tgl_lahir'],
+            'gol_dar'               => $result['gol_dar'] ?? null,
+            'usia'                  => $result['usia'],
+            'no_hp'                 => $result['no_hp'] ?? null,
+            'pendidikan_terakhir'   => $result['pendidikan_terakhir'] ?? null,
+            'jurusan'               => $result['jurusan'] ?? null,
+            'perkawinan'            => 'LAJANG',
+            'nm_ayah'               => $result['nm_ayah'] ?? null,
+            'nm_ibu'                => $result['nm_ibu'] ?? null,
+            'no_hp_wali'            => $result['no_hp_wali'] ?? null,
+            'minat_bakat'           => $result['minat_bakat'] ?? null,
+            'siap_nikah'            => $result['siap_nikah'] ?? null,
+            'detail_siap_nikah'     => $result['detail_siap_nikah'] ?? null,
+            'is_mubaligh'           => $result['is_mubaligh'],
+        ]);
+        
+        // Step 10: Simpan Data Mubaligh jika ada
+        if (isset($result['mubaligh']) && $result['mubaligh'] !== 'BUKAN') {
+            if ($result['mubaligh'] === 'MS') {
+                Mubaligh::create([
+                    'insan_id'      => $insan->id,
+                    'kategori'      => 'MS',
+                    'asal_pondok'   => $result['asal_pondok'] ?? null,
+                    'jml_tugas'     => $result['jml_tugas'] ?? null,
+                    'lama_tugas'    => $result['lama_tugas'] ?? null,
+                    'konfirmasi_kesiapan_tugas' => $result['konfirmasi_kesiapan_tugas'] ?? null,
+                ]);
+            }
+            unset($result['mubaligh']);
+        }
+
+        // Step 11: Simpan Generus Record
+        return static::getModel()::create([
+            'insan_id'          => $insan->id,
+            'nis'               => $result['nis'] ?? null,
+            'jenis_data'        => $result['jenis_data'],
+            'kategori'          => $result['kategori'],
+            'kelas_ppg_id'      => $result['kelas_ppg_id'] ?? null,
+            'status_id'         => $result['status_id'] ?? null,
+            'detail_status'     => $result['detail_status'] ?? null,
+            'aktif_mengajar'    => $result['aktif_mengajar'] ?? false,
+            'is_verified'       => $result['is_verified'],
+            'riwayat_update'    => $result['riwayat_update'],
+        ]);
     }
 }
