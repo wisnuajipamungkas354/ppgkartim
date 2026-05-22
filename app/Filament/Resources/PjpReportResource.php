@@ -238,6 +238,7 @@ class PjpReportResource extends Resource
                     ->icon('heroicon-o-printer')
                     ->url(fn(PjpReport $record) => route('cetak.pjp', $record->id)) // Panggil nama route
                     ->openUrlInNewTab()
+                    ->hidden(fn(PjpReport $record) => $record->status !== 'SELESAI'), // Sembunyikan jika belum selesai
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
