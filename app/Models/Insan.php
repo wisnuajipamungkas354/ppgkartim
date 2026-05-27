@@ -61,4 +61,9 @@ class Insan extends Model
     {
         return $this->hasOne(Mubaligh::class);
     }
+
+    public function pengurus()
+    {
+        return $this->hasMany(Pengurus::class);
+    }
 }

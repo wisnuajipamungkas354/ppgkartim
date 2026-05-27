@@ -12,4 +12,9 @@ class Pengurus extends Model
     {
         return $this->morphTo();
     }
+
+    public function insan()
+    {
+        return $this->belongsTo(Insan::class);
+    }
 }
