@@ -19,6 +19,11 @@ class Desa extends Model
         });
     }
 
+    public function pengurus()
+    {
+        return $this->morphMany(Pengurus::class, 'dapukanable');
+    }
+
     public function users()
     {
         return $this->morphMany(User::class, 'userable');
