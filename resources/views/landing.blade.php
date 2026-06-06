@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="PPG Karawang Timur - Portal Data Generasi Unggul. Sistem pendataan dan pengelolaan generus berbasis digital untuk komunitas Karawang Timur.">
     <title>PPG Karawang Timur — Portal Data Generasi Unggul</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -118,7 +119,8 @@
         @media(min-width:640px){.sensus-grid{grid-template-columns:repeat(5,1fr)}}
         .sensus-card{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);border-radius:var(--r-md);padding:20px 14px;text-align:center;transition:all .3s}
         .sensus-card:hover{background:rgba(255,255,255,.14);transform:translateY(-3px)}
-        .sensus-card-icon{font-size:32px;margin-bottom:10px}
+        .sensus-card-icon{display:flex;align-items:center;justify-content:center;height:48px;margin-bottom:14px;color:var(--em-300)}
+        .sensus-card-icon svg{width:36px;height:36px;stroke-width:1.5px}
         .sensus-card-num{font-size:28px;font-weight:800;color:var(--white);line-height:1}
         .sensus-card-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.55);margin-top:5px}
 
@@ -369,14 +371,20 @@
         </div>
 
         @php
-            $sensusIcons  = ['PAUD'=>'🌱','CABERAWIT'=>'📚','PRA_REMAJA'=>'🎒','REMAJA'=>'🌟','PRA_NIKAH'=>'💎'];
+            $sensusIcons = [
+                'PAUD'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+                'CABERAWIT'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',
+                'PRA_REMAJA' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 22v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"/><path d="M8 10h8"/></svg>',
+                'REMAJA'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+                'PRA_NIKAH'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            ];
             $delayClasses = ['reveal-d1','reveal-d2','reveal-d3','reveal-d4','reveal-d5'];
             $i = 0;
         @endphp
         <div class="sensus-grid">
             @foreach($totals as $key => $val)
             <div class="sensus-card reveal {{ $delayClasses[$i] }}">
-                <div class="sensus-card-icon">{{ $sensusIcons[$key] }}</div>
+                <div class="sensus-card-icon">{!! $sensusIcons[$key] !!}</div>
                 <div class="sensus-card-num count-up" data-target="{{ $val['total'] }}">0</div>
                 <div class="sensus-card-label">{{ $val['label'] }}</div>
             </div>
