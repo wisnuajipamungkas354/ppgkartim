@@ -1,23 +1,23 @@
 <?php
 
 use App\Http\Controllers\ExportPdfController;
+use App\Http\Controllers\LandingController;
 use App\Livewire\Counter;
 use App\Livewire\Event\EventPresensi;
 use App\Livewire\Event\PilihEvent;
 use App\Livewire\Event\RekapPresensi;
 use App\Livewire\Forms\ListRegistrasiForms;
 use App\Livewire\Forms\RegistrasiGenerusForm;
-use App\Livewire\LandingPage;
-use App\Models\Event;
 use App\Models\PjpReport;
-use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 
+// Landing Page (publik)
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/api/chart-data', [LandingController::class, 'chartData'])->name('api.chart-data');
+Route::get('/api/detail-generus', [LandingController::class, 'detailGenerus'])->name('api.detail-generus');
+
+// Registrasi & Event (publik)
 Route::get('/counter', Counter::class);
-Route::get('/', function() {
-  return view('livewire.test');
-});
 Route::get('/registrasi-form', ListRegistrasiForms::class);
 Route::get('/registrasi-generus-form', RegistrasiGenerusForm::class);
 Route::get('/events', PilihEvent::class)->name('events');
