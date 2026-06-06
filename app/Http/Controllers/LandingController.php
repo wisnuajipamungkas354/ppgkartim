@@ -43,7 +43,7 @@ class LandingController extends Controller
         $type = $request->input('type'); // 'desa' | 'kelompok'
         $id   = $request->input('id');
 
-        $query = Generus::query()->withoutGlobalScopes();
+        $query = Generus::query()->withoutGlobalScopes()->whereNull('generuses.deleted_at');
 
         if ($type === 'desa' && $id) {
             $query->whereHas('insan', fn($q) => $q->where('desa_id', $id));
@@ -77,7 +77,7 @@ class LandingController extends Controller
         $id       = $request->input('id');
         $kategori = $request->input('kategori');
 
-        $query = Generus::withoutGlobalScopes()->with('insan:id,nama,jk');
+        $query = Generus::withoutGlobalScopes()->whereNull('generuses.deleted_at')->with('insan:id,nama,jk');
 
         if ($type === 'desa' && $id) {
             $query->whereHas('insan', fn($q) => $q->where('desa_id', $id));
@@ -104,7 +104,7 @@ class LandingController extends Controller
      */
     private function getTotals(): array
     {
-        $counts = Generus::withoutGlobalScopes()
+        $counts = Generus::withoutGlobalScopes()->whereNull('generuses.deleted_at')
             ->selectRaw('kategori, COUNT(*) as total')
             ->groupBy('kategori')
             ->pluck('total', 'kategori');
