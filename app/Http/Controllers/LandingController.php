@@ -77,7 +77,7 @@ class LandingController extends Controller
         $id       = $request->input('id');
         $kategori = $request->input('kategori');
 
-        $query = Generus::withoutGlobalScopes()->whereNull('generuses.deleted_at')->with('insan:id,nama,jk');
+        $query = Generus::withoutGlobalScopes()->whereNull('generuses.deleted_at')->with('insan:id,nama,jk')->where('is_verified', true);
 
         if ($type === 'desa' && $id) {
             $query->whereHas('insan', fn($q) => $q->where('desa_id', $id));
