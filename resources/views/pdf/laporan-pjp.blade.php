@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan PJP Klari - {{ $bulan ?? 'Bulan Ini' }}</title>
+    <title>Laporan PJP {{ $namaLaporan }} - {{ $bulanTahun }}</title>
     <style>
         /* Reset & Base Styles */
         body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 9.5px; color: #333; line-height: 1.3; margin: 0; padding: 0; }
@@ -66,7 +66,7 @@
     </table>
 
     <div class="text-center">
-        <div class="title">LAPORAN PJP KLARI</div>
+        <div class="title">LAPORAN PJP {{ strtoupper($namaLaporan) }}</div>
         <div class="subtitle">Bulan: {{ $bulanTahun }}</div>
     </div>
 
@@ -362,7 +362,7 @@
 
         <div class="text-center">
             <div class="title" style="text-decoration: none;">LAMPIRAN DOKUMENTASI</div>
-            <div class="subtitle">Laporan PJP Klari - {{ $bulan ?? 'Bulan Ini' }}</div>
+            <div class="subtitle">Laporan PJP {{ $namaLaporan }} - {{ $bulanTahun }}</div>
         </div>
 
         @if($hasDokumentasiKhusus)

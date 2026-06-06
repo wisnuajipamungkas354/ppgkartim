@@ -49,6 +49,7 @@ class ExportPdfController extends Controller
         $logoImg = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
         $isKelompok = $getData->reportable_type === 'App\Models\Kelompok';
         $reportableId = $getData->reportable_id;
+        $namaLaporan = $isKelompok ? $getData->reportable->nm_kelompok : $getData->reportable->nm_desa;
 
         $generusCounts = \App\Models\Generus::whereHas('insan', function($q) use ($isKelompok, $reportableId) {
             if ($isKelompok) {
@@ -94,7 +95,7 @@ class ExportPdfController extends Controller
 
         $kepengurusan = PjpPengurusReport::query()->where('pjp_report_id', $id)->get();
 
-        $pdf = Pdf::loadView('pdf.laporan-pjp', compact('logoImg', 'bulanTahun', 'kegiatanRutin', 'kegiatanKhusus', 'musyawaroh', 'arus', 'kepengurusan', 'sensus', 'isKelompok'))
+        $pdf = Pdf::loadView('pdf.laporan-pjp', compact('logoImg', 'bulanTahun', 'kegiatanRutin', 'kegiatanKhusus', 'musyawaroh', 'arus', 'kepengurusan', 'sensus', 'isKelompok', 'namaLaporan'))
             ->setPaper('A4', 'portrait');
 
         return $pdf->stream("Laporan PJP {$getData->pjpSchedule->bulan}_{$getData->pjpSchedule->tahun}.pdf");
