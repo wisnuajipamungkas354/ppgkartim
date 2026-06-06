@@ -57,8 +57,8 @@
             <td class="kop-text">
                 <div class="kop-title-text">Penggerak Pembina Generus (PPG)<br>Karawang Timur</div>
                 <div class="kop-contact">
-                    Email: ppgkarawangtimur@gmail.com | Instagram: @ppg_kartim<br>
-                    Website: www.ppgkartim.org | WhatsApp: 0812-3456-7890
+                    Email: ppgkarawangtimur@gmail.com | Instagram: @ppgkarawangtimur<br>
+                    Website: www.ppgkartim.com | WhatsApp: +62 878-8320-0634
                 </div>
             </td>
             <td class="kop-empty"></td>
