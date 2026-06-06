@@ -76,26 +76,6 @@ class PjpScheduleResource extends Resource
                         DatePicker::make('deadline_kelompok')
                             ->required()
                             ->hidden(fn() => !AccessHelper::isDaerah()),
-                        Repeater::make('musyawaroh_rutin')
-                            ->label('Musyawaroh Rutin')
-                            ->simple(
-                                TextInput::make('judul_musyawaroh')
-                                    ->required()
-                                    ->label('Judul Musyawarah'),
-                            )
-                            ->default(function () {
-                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
-
-                                return $latest?->musyawaroh_rutin ?? [ 
-                                    'Musyawarah 5 Unsur',
-                                    'Musyawarah PJP, Muda/i dan Keputrian Kelompok',
-                                    'Musyawarah Muda/i Kelompok',
-                                ];
-                            })
-                            ->addActionLabel('Tambah Musyawarah')
-                            ->deletable()
-                            ->hidden(fn() => AccessHelper::isDaerah())
-                            ->columnSpanFull(),
                         Repeater::make('musyawaroh_kelompok')
                             ->label('Musyawaroh Rutin')
                             ->simple(
@@ -105,8 +85,9 @@ class PjpScheduleResource extends Resource
                             )
                             ->default(function () {
                                 $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
 
-                                return $latest->musyawaroh_rutin ?? [ 
+                                return $newData['list_laporan']['musyawaroh_kelompok'] ?? [
                                     'Musyawarah 5 Unsur',
                                     'Musyawarah PJP, Muda/i dan Keputrian Kelompok',
                                     'Musyawarah Muda/i Kelompok',
@@ -114,34 +95,11 @@ class PjpScheduleResource extends Resource
                             })
                             ->addActionLabel('Tambah Musyawarah')
                             ->collapsible()
-                            ->hidden(fn() => !AccessHelper::isDaerah())
+                            ->disabled(fn() => !AccessHelper::isDaerah())
+                            ->addable(fn() => AccessHelper::isDaerah())
+                            ->deletable(fn() => AccessHelper::isDaerah())
+                            ->reorderable(fn() => AccessHelper::isDaerah())
                             ->columnSpanFull(),
-                        Repeater::make('kegiatan_rutin')
-                            ->label('Kegiatan Rutin')
-                            ->simple(
-                                TextInput::make('nm_kegiatan')
-                                    ->required()
-                                    ->label('Nama Kegiatan'),
-                            )
-                            ->default(function () {
-                                if (request()->routeIs('*.edit')) {
-                                    return null;
-                                }
-
-                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
-
-                                return $latest?->kegiatan_rutin ?? [
-                                    'Pengajian Paud/TK',
-                                    'Pengajian Caberawit (SD Kelas 1-6)',
-                                    'Pengajian Pra Remaja (SMP)',
-                                    'Pengajian Remaja (SMA)',
-                                    'Pengajian Muda/i (Umum)',
-                                ];
-                            })
-                            ->addActionLabel('Tambah Kegiatan')
-                            ->collapsible()
-                            ->columnSpanFull()
-                            ->hidden(fn() => AccessHelper::isDaerah()),
                         Repeater::make('kegiatan_kelompok')
                             ->label('Kegiatan Rutin')
                             ->simple(
@@ -150,13 +108,11 @@ class PjpScheduleResource extends Resource
                                     ->label('Nama Kegiatan'),
                             )
                             ->default(function () {
-                                if (request()->routeIs('*.edit')) {
-                                    return null;
-                                }
 
                                 $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
 
-                                return $latest?->kegiatan_rutin ?? [
+                                return $newData['list_laporan']['kegiatan_kelompok'] ?? [
                                     'Pengajian Paud/TK',
                                     'Pengajian Caberawit (SD Kelas 1-6)',
                                     'Pengajian Pra Remaja (SMP)',
@@ -165,9 +121,75 @@ class PjpScheduleResource extends Resource
                                 ];
                             })
                             ->addActionLabel('Tambah Kegiatan')
+                            ->disabled(fn() => !AccessHelper::isDaerah())
+                            ->deletable(fn() => AccessHelper::isDaerah())
+                            ->reorderable(fn() => AccessHelper::isDaerah())
                             ->collapsible()
-                            ->columnSpanFull()
-                            ->hidden(fn() => !AccessHelper::isDaerah()),
+                            ->columnSpanFull(),
+                        Repeater::make('pengurus_pjp_kelompok')
+                            ->label('Pengurus PJP')
+                            ->simple(
+                                TextInput::make('nm_dapukan')
+                                    ->label('Nama Dapukan')
+                                    ->required()
+                            )
+                            ->default(function () {
+
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
+
+                                return $newData['list_laporan']['pengurus_pjp_kelompok'] ?? [
+                                    'Pembina',
+                                    'Ketua PJP',
+                                    'Wakil Ketua PJP',
+                                ];
+                            })
+                            ->addActionLabel('Tambah Dapukan')
+                            ->disabled(fn() => !AccessHelper::isDaerah())
+                            ->addable(fn() => AccessHelper::isDaerah())
+                            ->deletable(fn() => AccessHelper::isDaerah())
+                            ->reorderable(fn() => AccessHelper::isDaerah()),
+                        Repeater::make('pengurus_lima_unsur_kelompok')
+                            ->label('Pengurus 5 Unsur')
+                            ->simple(
+                                TextInput::make('nm_dapukan')
+                                    ->label('Nama Dapukan')
+                                    ->required()
+                            )
+                            ->default(function () {
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
+
+                                return $newData['list_laporan']['pengurus_lima_unsur_kelompok'] ?? [
+                                    'Pembina',
+                                    'Mubaligh',
+                                    'Pengurus PJP',
+                                    'Pakar Pendidik',
+                                    'Orang Tua',
+                                ];
+                            })
+                            ->addActionLabel('Tambah List Dapukan')
+                            ->disabled(fn() => !AccessHelper::isDaerah())
+                            ->addable(fn() => AccessHelper::isDaerah())
+                            ->deletable(fn() => AccessHelper::isDaerah())
+                            ->reorderable(fn() => AccessHelper::isDaerah()),
+                        Repeater::make('kegiatan_tambahan')
+                            ->label('Kegiatan Tambahan')
+                            ->simple(
+                                TextInput::make('nm_kegiatan')
+                                    ->required()
+                                    ->label('Nama Kegiatan'),
+                            )
+                            ->default(function () {
+
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
+
+                                return $newData['list_laporan']['kegiatan_tambahan'] ?? [];
+                            })
+                            ->addActionLabel('Tambah Kegiatan')
+                            ->collapsible()
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('PJP Desa')
@@ -183,8 +205,9 @@ class PjpScheduleResource extends Resource
                             )
                             ->default(function () {
                                 $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
 
-                                return $latest?->musyawaroh_rutin ?? [
+                                return $newData['list_laporan']['musyawaroh_desa'] ?? [
                                     'Musyawarah PJP, Muda/i dan Keputrian Desa',
                                     'Musyawarah Muda/i Desa',
                                     'Laporan PJP Kelompok ke PJP Desa',
@@ -202,19 +225,36 @@ class PjpScheduleResource extends Resource
                                     ->label('Nama Kegiatan'),
                             )
                             ->default(function () {
-                                if (request()->routeIs('*.edit')) {
-                                    return null;
-                                }
 
                                 $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
 
-                                return $latest?->kegiatan_rutin ?? [
+                                return $newData['list_laporan']['kegiatan_desa'] ?? [
                                     'Pengajian Muda/i Desa',
                                 ];
                             })
                             ->addActionLabel('Tambah Kegiatan')
                             ->collapsible()
                             ->columnSpanFull(),
+                        Repeater::make('pengurus_pjp_desa')
+                            ->label('Pengurus PJP Desa')
+                            ->simple(
+                                TextInput::make('nm_dapukan')
+                                    ->label('Nama Dapukan')
+                                    ->required()
+                            )
+                            ->default(function () {
+
+                                $latest = \App\Models\PjpSchedule::getLatestForCurrentUser();
+                                $newData = $latest?->toArray();
+                                return $newData['list_laporan']['pengurus_pjp_desa'] ?? [
+                                    'Pembina',
+                                    'Ketua PJP',
+                                    'Wakil Ketua PJP',
+                                ];
+                            })
+                            ->addActionLabel('Tambah List Dapukan')
+                            ->hidden(fn() => !AccessHelper::isDaerah()),
 
                     ])
                     ->visible(fn() => AccessHelper::isDaerah()),
@@ -300,8 +340,46 @@ class PjpScheduleResource extends Resource
                     ->label('Edit')
                     ->modalHeading('Edit Jadwal Laporan PJP')
                     ->modalSubmitActionLabel('Simpan Perubahan')
+                    ->mountUsing(function(Form $form, PjpSchedule $pjpSchedule) {
+                        $newData = $pjpSchedule->toArray();
+
+                        if(AccessHelper::isDaerah()) {
+                            $newData['musyawaroh_desa'] = $pjpSchedule['list_laporan']['musyawaroh_desa'];
+                            $newData['kegiatan_desa'] = $pjpSchedule['list_laporan']['kegiatan_desa'];
+                            $newData['pengurus_pjp_desa'] = $pjpSchedule['list_laporan']['pengurus_pjp_desa']; 
+                        } elseif(AccessHelper::isDesa()) {
+                            $newData['musyawaroh_kelompok'] = $pjpSchedule['list_laporan']['musyawaroh_kelompok'];
+                            $newData['kegiatan_kelompok'] = $pjpSchedule['list_laporan']['kegiatan_kelompok'];
+                            $newData['pengurus_pjp_kelompok'] = $pjpSchedule['list_laporan']['pengurus_pjp_kelompok'];
+                            $newData['pengurus_lima_unsur_kelompok'] = $pjpSchedule['list_laporan']['pengurus_lima_unsur_kelompok'];
+                        }
+                        unset($newData['list_laporan']);
+                        unset($newData['created_at']);
+                        unset($newData['updated_at']);
+                        
+                        $form->fill($newData);
+                    })
                     ->action(function (array $data, PjpSchedule $pjpSchedule) {
                         $data['status'] = 'DIBUKA';
+                        if(AccessHelper::isDaerah()) {
+                            $data['list_laporan'] = [
+                                'musyawaroh_desa' => $data['musyawaroh_desa'],
+                                'kegiatan_desa' => $data['kegiatan_desa'],
+                                'pengurus_pjp_desa' => $data['pengurus_pjp_desa'],
+                            ];
+                        } elseif(AccessHelper::isDesa()) {
+                            $newData = $pjpSchedule->toArray();
+                            $data['list_laporan'] = [
+                                'musyawaroh_kelompok' => $newData['list_laporan']['musyawaroh_kelompok'],
+                                'kegiatan_kelompok' => $newData['list_laporan']['kegiatan_kelompok'],
+                                'pengurus_pjp_kelompok' => $newData['list_laporan']['pengurus_pjp_kelompok'],
+                                'pengurus_lima_unsur_kelompok' => $newData['list_laporan']['pengurus_lima_unsur_kelompok'],
+                                'kegiatan_tambahan' => $data['kegiatan_tambahan'],
+                            ];
+
+                            $data['status'] = 'DIBUKA';
+                        }
+
                         $pjpSchedule->update($data);
                     })
                     ->hidden(fn($record) => $record->is_closed === 1),

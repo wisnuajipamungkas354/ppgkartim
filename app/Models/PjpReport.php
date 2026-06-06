@@ -44,4 +44,9 @@ class PjpReport extends Model
     {
         return $this->hasMany(PjpMusyawarohReport::class);
     }
+
+    public function pengurus()
+    {
+        return $this->hasMany(PjpPengurusReport::class);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PjpReportResource\Pages;
 use App\Filament\Resources\PjpReportResource\RelationManagers;
+use App\Helpers\AccessHelper;
 use App\Models\PjpKegiatanReport;
 use App\Models\PjpReport;
 use App\Models\PjpSchedule;
@@ -44,7 +45,7 @@ class PjpReportResource extends Resource
         return $form
             ->schema([
                 // --- BAGIAN II.a: KEGIATAN RUTIN ---
-                Section::make('II.a Kegiatan Rutin')
+                Section::make('I.a Kegiatan Rutin')
                     ->description('Laporan kegiatan rutin bulanan berdasarkan jenjang/kelas')
                     ->schema([
                         Repeater::make('kegiatan_rutin')
@@ -85,7 +86,9 @@ class PjpReportResource extends Resource
                                     $settings = PjpSchedule::find($record->pjp_schedule_id);
 
                                     $defaultData = [];
-                                    foreach ($settings['kegiatan_rutin'] as $index => $setting) {
+                                    $isDesa = AccessHelper::isDesa() ? 'kegiatan_desa' : 'kegiatan_kelompok';
+
+                                    foreach ($settings['list_laporan'][$isDesa] as $index => $setting) {
                                         $defaultData[$index]['jenis_kegiatan'] = 'RUTIN';
                                         $defaultData[$index]['nm_kegiatan'] = $setting;
                                     }
@@ -95,8 +98,8 @@ class PjpReportResource extends Resource
                             })
                     ]),
 
-                // --- BAGIAN II.b: KEGIATAN KHUSUS ---
-                Section::make('II.b Kegiatan Khusus')
+                // --- BAGIAN Ib: KEGIATAN KHUSUS ---
+                Section::make('I.b Kegiatan Khusus')
                     ->description('Kegiatan di luar jadwal rutin (Seminar, Outbound, dll)')
                     ->schema([
                         Repeater::make('kegiatan_khusus')
@@ -134,7 +137,7 @@ class PjpReportResource extends Resource
                     ]),
 
                 // --- BAGIAN III: MUSYAWAROH ---
-                Section::make('III. Musyawaroh')
+                Section::make('II. Musyawaroh')
                     ->description('Ceklis musyawaroh rutin bulanan')
                     ->schema([
                         Repeater::make('musyawaroh_rutin')
@@ -171,7 +174,9 @@ class PjpReportResource extends Resource
                                     $settings = PjpSchedule::find($record->pjp_schedule_id);
 
                                     $defaultData = [];
-                                    foreach ($settings['musyawaroh_rutin'] as $index => $setting) {
+                                    $isDesa = AccessHelper::isDesa() ? 'musyawaroh_desa' : 'musyawaroh_kelompok';
+
+                                    foreach ($settings['list_laporan'][$isDesa] as $index => $setting) {
                                         $defaultData[$index]['judul_musyawaroh'] = $setting;
                                     }
                                     
@@ -181,6 +186,97 @@ class PjpReportResource extends Resource
                             ->mutateDehydratedStateUsing(function (array $state) {
                                 // Opsional: Filter agar hanya data yang diisi tanggal saja yang masuk ke database
                                 return array_filter($state, fn($item) => !empty($item['tanggal']));
+                            }),
+                    ]),
+
+                // Kepengurusan
+                Section::make('III. Kepengurusan')
+                    ->description('Ceklis kepengurusan kelompok')
+                    ->schema([
+                        Repeater::make('pengurus_pjp')
+                            ->relationship('pengurus')
+                            ->label('Pengurus PJP')
+                            ->schema([
+                                Forms\Components\Grid::make(3) // Membagi baris agar ringkas
+                                    ->schema([
+                                        Forms\Components\Hidden::make('kategori_pengurus'),
+
+                                        TextInput::make('nm_dapukan')
+                                            ->label('Nama Dapukan')
+                                            ->readOnly()
+                                            ->required(),
+
+                                        // Pengganti ceklis: Jika tidak diisi tanggal, dianggap belum musyawaroh
+                                        // Atau bisa tambah field boolean 'is_done' jika di tabel ada
+                                        TextInput::make('nm_pengurus')
+                                            ->label('Nama Pengurus')
+                                            ->placeholder('Masukkan Nama Pengurus'),
+                                        
+                                        TextInput::make('no_telp')
+                                            ->label('No. Telepon')
+                                            ->placeholder('Masukkan No. Telepon'),
+                                    ]),
+                            ])
+                            ->addable(false) // Mencegah user menambah baris baru di luar list rutin
+                            ->deletable(false) // Mencegah user menghapus baris rutin
+                            ->reorderable(false) // Agar urutan tetap konsisten
+                            ->defaultItems(4) // Misal ada 4 musyawaroh rutin wajib
+                            ->afterStateHydrated(function (Repeater $component, ?PjpReport $record, $state) {
+                                if (empty($state)) {
+                                    $settings = PjpSchedule::find($record->pjp_schedule_id);
+
+                                    $isDesa = AccessHelper::isDesa() ? 'pengurus_pjp_desa' : 'pengurus_pjp_kelompok';
+                                    $defaultData = [];
+                                    foreach ($settings['list_laporan'][$isDesa] as $index => $setting) {
+                                        $defaultData[$index]['kategori_pengurus'] = 'PJP';
+                                        $defaultData[$index]['nm_dapukan'] = $setting;
+                                    }
+                                    
+                                    $component->state($defaultData);
+                                }
+                            }),
+                        Repeater::make('pengurus_lima_unsur')
+                            ->label('Pengurus 5 Unsur')
+                            ->relationship('pengurus')
+                            ->schema([
+                                Forms\Components\Grid::make(3) // Membagi baris agar ringkas
+                                    ->schema([
+                                        Forms\Components\Hidden::make('kategori_pengurus'),
+
+                                        TextInput::make('nm_dapukan')
+                                            ->label('Nama Dapukan')
+                                            ->readOnly()
+                                            ->required(),
+
+                                        TextInput::make('nm_pengurus')
+                                            ->label('Nama Pengurus')
+                                            ->placeholder('Masukkan Nama Pengurus'),
+                                        
+                                        TextInput::make('no_telp')
+                                            ->label('No. Telepon')
+                                            ->placeholder('Masukkan No. Telepon'),
+                                    ]),
+                            ])
+                            ->addable(false) // Mencegah user menambah baris baru di luar list rutin
+                            ->deletable(false) // Mencegah user menghapus baris rutin
+                            ->reorderable(false) // Agar urutan tetap konsisten
+                            ->defaultItems(4) // Misal ada 4 musyawaroh rutin wajib
+                            ->hidden(fn() => AccessHelper::isDesa())
+                            ->afterStateHydrated(function (Repeater $component, ?PjpReport $record, $state) {
+                                if (empty($state)) {
+                                    $settings = PjpSchedule::find($record->pjp_schedule_id);
+
+                                    $defaultData = [];
+                                    
+                                    if(AccessHelper::isKelompok()) {
+                                        foreach ($settings['list_laporan']['pengurus_lima_unsur_kelompok'] as $index => $setting) {
+                                            $defaultData[$index]['kategori_pengurus'] = 'LIMA UNSUR';
+                                            $defaultData[$index]['nm_dapukan'] = $setting;
+                                        }
+                                    }
+                                    
+                                    $component->state($defaultData);
+                                }
                             }),
                     ]),
 

@@ -17,8 +17,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('bulan');
             $table->unsignedSmallInteger('tahun');
             $table->date('deadline_laporan');
-            $table->json('musyawaroh_rutin');
-            $table->json('kegiatan_rutin');
+            $table->json('list_laporan');
             $table->enum('status', ['DRAFT', 'DIBUKA', 'DITUTUP'])->default('DRAFT');
             $table->timestamps();
             $table->unique(['scheduleable_type', 'scheduleable_id', 'bulan', 'tahun'], 'pjp_schedule_unique');
@@ -54,6 +53,17 @@ return new class extends Migration
             $table->string('judul_musyawaroh')->nullable();
             $table->date('tanggal')->nullable();
             $table->json('dokumentasi')->nullable();
+            $table->text('keterangan')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('pjp_pengurus_reports', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('pjp_report_id')->constrained('pjp_reports', 'id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('kategori_pengurus')->nullable(); // Pengurus PJP, Pengurus 5 Unsur
+            $table->string('nm_dapukan')->nullable();
+            $table->string('nm_pengurus')->nullable();
+            $table->string('no_telp')->nullable();
             $table->text('keterangan')->nullable();
             $table->timestamps();
         });

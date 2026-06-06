@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Js;
 
 class CreatePjpReport extends CreateRecord
@@ -36,6 +37,11 @@ class CreatePjpReport extends CreateRecord
             ->color('gray');
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = auth('web')->user();
@@ -44,5 +50,11 @@ class CreatePjpReport extends CreateRecord
         $data['reportable_id'] = $user->userable_id;
 
         return $data;
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        dd($data);
+        return parent::getModel()::create($data);
     }
 }

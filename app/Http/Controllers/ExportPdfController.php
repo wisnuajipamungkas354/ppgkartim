@@ -7,6 +7,7 @@ use App\Models\EventParticipant;
 use App\Models\PjpReport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use App\Models\PjpPengurusReport;
 
 class ExportPdfController extends Controller
 {
@@ -44,14 +45,45 @@ class ExportPdfController extends Controller
         $kegiatanKhusus = $getData->kegiatan->where('jenis_kegiatan', 'KHUSUS')->values();
         $musyawaroh = $getData->musyawaroh;
         $bulanTahun = $this->month[$getData->pjpSchedule->bulan] . ' ' . $getData->pjpSchedule->tahun;
-        $logoImg = url('images/logo.png');
+        $logoPath = public_path('images/logo.png');
+        $logoImg = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
+        $isKelompok = $getData->reportable_type === 'App\Models\Kelompok';
+        $reportableId = $getData->reportable_id;
+
+        $generusCounts = \App\Models\Generus::whereHas('insan', function($q) use ($isKelompok, $reportableId) {
+            if ($isKelompok) {
+                $q->where('kelompok_id', $reportableId);
+            } else {
+                $q->where('desa_id', $reportableId);
+            }
+        })->with('insan:id,jk')->get();
+
         $sensus = [
-            'paud'       => ['l' => 12, 'p' => 15],
-            'cbr'        => ['l' => 20, 'p' => 18],
-            'pra_remaja' => ['l' => 15, 'p' => 20],
-            'remaja'     => ['l' => 25, 'p' => 30],
-            'pra_nikah'  => ['l' => 10, 'p' => 12],
+            'paud'       => ['l' => 0, 'p' => 0],
+            'cbr'        => ['l' => 0, 'p' => 0],
+            'pra_remaja' => ['l' => 0, 'p' => 0],
+            'remaja'     => ['l' => 0, 'p' => 0],
+            'pra_nikah'  => ['l' => 0, 'p' => 0],
         ];
+
+        $mapKategori = [
+            'PAUD' => 'paud',
+            'CABERAWIT' => 'cbr',
+            'PRA_REMAJA' => 'pra_remaja',
+            'REMAJA' => 'remaja',
+            'PRA_NIKAH' => 'pra_nikah',
+        ];
+
+        foreach ($generusCounts as $g) {
+            if (!$g->insan || !$g->insan->jk) continue;
+            $jk = strtolower($g->insan->jk);
+            if ($jk !== 'l' && $jk !== 'p') continue;
+            
+            $cat = $mapKategori[$g->kategori] ?? null;
+            if ($cat) {
+                $sensus[$cat][$jk]++;
+            }
+        }
 
         $arus = [
         'pindah'     => ['paud' => 0, 'cbr' => 1, 'pra_remaja' => 0, 'remaja' => 2, 'pra_nikah' => 0],
@@ -60,20 +92,9 @@ class ExportPdfController extends Controller
         'amar_maruf' => ['paud' => 1, 'cbr' => 2, 'pra_remaja' => 0, 'remaja' => 1, 'pra_nikah' => 0],
         ];
 
-        $kepengurusan = [
-            (object) [
-                'dapukan' => 'Ketua PJP',
-                'nama_lengkap' => 'Abdul Fulan',
-                'no_wa' => '0812-xxxx-xxxx'
-            ],
-            (object) [
-                'dapukan' => 'Sekretaris',
-                'nama_lengkap' => 'Budi Santoso',
-                'no_wa' => '0813-xxxx-xxxx'
-            ],
-        ];
+        $kepengurusan = PjpPengurusReport::query()->where('pjp_report_id', $id)->get();
 
-        $pdf = Pdf::loadView('pdf.laporan-pjp', compact('logoImg', 'bulanTahun', 'kegiatanRutin', 'kegiatanKhusus', 'musyawaroh', 'arus', 'kepengurusan', 'sensus'))
+        $pdf = Pdf::loadView('pdf.laporan-pjp', compact('logoImg', 'bulanTahun', 'kegiatanRutin', 'kegiatanKhusus', 'musyawaroh', 'arus', 'kepengurusan', 'sensus', 'isKelompok'))
             ->setPaper('A4', 'portrait');
 
         return $pdf->stream("Laporan PJP {$getData->pjpSchedule->bulan}_{$getData->pjpSchedule->tahun}.pdf");

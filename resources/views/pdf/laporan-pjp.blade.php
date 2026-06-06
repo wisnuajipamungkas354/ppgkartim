@@ -168,6 +168,7 @@
         </tbody>
     </table>
 
+    {{-- TODO: Tampilkan kembali jika struktur data arus mutasi sudah siap
     <div class="section-title">III. ARUS GENERUS (MUTASI)</div>
     <table class="data-table">
         <thead>
@@ -225,32 +226,86 @@
             </tr>
         </tbody>
     </table>
+    --}}
 
-    <div class="section-title">IV. KEPENGURUSAN</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th width="5%">No</th>
-                <th width="35%">Dapukan</th>
-                <th width="35%">Nama Lengkap</th>
-                <th width="25%">No WA</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($kepengurusan as $index => $pengurus)
-            <tr>
-                <td class="center">{{ $index + 1 }}</td>
-                <td>{{ $pengurus->dapukan }}</td>
-                <td>{{ $pengurus->nama_lengkap }}</td>
-                <td class="center">{{ $pengurus->no_wa }}</td>
-            </tr>
-            @empty
-            <tr><td colspan="4" class="center">Data kepengurusan belum diisi.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+    <div class="section-title">III. KEPENGURUSAN</div>
+    
+    @if(isset($isKelompok) && $isKelompok)
+        <div class="sub-section-title">A. PENGURUS PJP</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th width="35%">Dapukan</th>
+                    <th width="35%">Nama Lengkap</th>
+                    <th width="25%">No WA</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $pengurusPjp = $kepengurusan->where('kategori_pengurus', 'PJP')->values(); @endphp
+                @forelse($pengurusPjp as $index => $pengurus)
+                <tr>
+                    <td class="center">{{ $index + 1 }}</td>
+                    <td>{{ $pengurus->nm_dapukan }}</td>
+                    <td>{{ $pengurus->nm_pengurus }}</td>
+                    <td class="center">{{ $pengurus->no_telp }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="center">Data pengurus PJP belum diisi.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
 
-    <div class="section-title">V. MUSYAWAROH RUTIN</div>
+        <div class="sub-section-title">B. PENGURUS 5 UNSUR</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th width="35%">Dapukan</th>
+                    <th width="35%">Nama Lengkap</th>
+                    <th width="25%">No WA</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $pengurusLimaUnsur = $kepengurusan->where('kategori_pengurus', 'LIMA UNSUR')->values(); @endphp
+                @forelse($pengurusLimaUnsur as $index => $pengurus)
+                <tr>
+                    <td class="center">{{ $index + 1 }}</td>
+                    <td>{{ $pengurus->nm_dapukan }}</td>
+                    <td>{{ $pengurus->nm_pengurus }}</td>
+                    <td class="center">{{ $pengurus->no_telp }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="center">Data pengurus 5 unsur belum diisi.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    @else
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th width="35%">Dapukan</th>
+                    <th width="35%">Nama Lengkap</th>
+                    <th width="25%">No WA</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($kepengurusan as $index => $pengurus)
+                <tr>
+                    <td class="center">{{ $index + 1 }}</td>
+                    <td>{{ $pengurus->nm_dapukan }}</td>
+                    <td>{{ $pengurus->nm_pengurus }}</td>
+                    <td class="center">{{ $pengurus->no_telp }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="center">Data kepengurusan belum diisi.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    @endif
+
+    <div class="section-title">IV. MUSYAWAROH RUTIN</div>
     <table class="data-table">
         <thead>
             <tr>
@@ -271,7 +326,7 @@
                 <td class="center">{{ $musy->tanggal ? \Carbon\Carbon::parse($musy->tanggal)->format('d M Y') : '-' }}</td>
                 <td>{{ $musy->keterangan }}</td>
                 <td class="center text-bold">
-                    {{ !empty($musy->dokumentasi) ? 'Lampiran V-'.($index + 1) : '-' }}
+                    {{ !empty($musy->dokumentasi) ? 'Lampiran IV-'.($index + 1) : '-' }}
                 </td>
             </tr>
             @empty
@@ -281,69 +336,76 @@
     </table>
 
 
-    <div class="page-break"></div>
-    
-    <table class="kop-surat" style="margin-bottom: 15px;">
-        <tr>
-            <td class="kop-logo">
-                <img src="{{ public_path('images/logo-ppg.png') }}" alt="Logo PPG" onerror="this.src='https://via.placeholder.com/80x80?text=LOGO+PPG'">
-            </td>
-            <td class="kop-text">
-                <div class="kop-title-text">Penggerak Pembina Generus (PPG)<br>Karawang Timur</div>
-                <div class="kop-contact">
-                    Email: ppgkartim@contoh.com | Instagram: @ppg_kartim<br>
-                    Website: www.ppgkartim.org | WhatsApp: 0812-3456-7890
-                </div>
-            </td>
-            <td class="kop-empty"></td>
-        </tr>
-    </table>
+    @php
+        $hasDokumentasiKhusus = !empty($kegiatanKhusus) && $kegiatanKhusus->contains(function($k) { return !empty($k->dokumentasi); });
+        $hasDokumentasiMusyawaroh = !empty($musyawaroh) && $musyawaroh->contains(function($m) { return !empty($m->dokumentasi); });
+    @endphp
 
-    <div class="text-center">
-        <div class="title" style="text-decoration: none;">LAMPIRAN DOKUMENTASI</div>
-        <div class="subtitle">Laporan PJP Klari - {{ $bulan ?? 'Bulan Ini' }}</div>
-    </div>
+    @if($hasDokumentasiKhusus || $hasDokumentasiMusyawaroh)
+        <div class="page-break"></div>
+        
+        <table class="kop-surat" style="margin-bottom: 15px;">
+            <tr>
+                <td class="kop-logo">
+                    <img src="{{ $logoImg }}" alt="Logo PPG">
+                </td>
+                <td class="kop-text">
+                    <div class="kop-title-text">Penggerak Pembina Generus (PPG)<br>Karawang Timur</div>
+                    <div class="kop-contact">
+                        Email: ppgkartim@contoh.com | Instagram: @ppg_kartim<br>
+                        Website: www.ppgkartim.org | WhatsApp: 0812-3456-7890
+                    </div>
+                </td>
+                <td class="kop-empty"></td>
+            </tr>
+        </table>
 
-    @if(!empty($kegiatanKhusus) && count($kegiatanKhusus) > 0)
-        <div class="sub-section-title" style="border-bottom:1px solid #000; padding-left:0; font-size: 11px;">B. DOKUMENTASI KEGIATAN KHUSUS</div>
-        @foreach($kegiatanKhusus as $index => $khusus)
-            @if(!empty($khusus->dokumentasi))
-                <div class="lampiran-section">
-                    <div class="lampiran-title">Lampiran I.B-{{ $index + 1 }} : {{ $khusus->nm_kegiatan }} ({{ \Carbon\Carbon::parse($khusus->tanggal)->format('d M Y') }})</div>
-                    <table class="gallery-table">
-                        <tr>
-                        @foreach($khusus->dokumentasi as $foto)
-                            <td class="photo-box">
-                                <img src="{{ storage_path('app/public/' . $foto) }}" alt="Dokumentasi">
-                            </td>
-                            @if($loop->iteration % 2 == 0) </tr><tr> @endif
-                        @endforeach
-                        </tr>
-                    </table>
-                </div>
-            @endif
-        @endforeach
-    @endif
+        <div class="text-center">
+            <div class="title" style="text-decoration: none;">LAMPIRAN DOKUMENTASI</div>
+            <div class="subtitle">Laporan PJP Klari - {{ $bulan ?? 'Bulan Ini' }}</div>
+        </div>
 
-    @if(!empty($musyawaroh) && count($musyawaroh) > 0)
-        <div class="sub-section-title" style="border-bottom:1px solid #000; margin-top:20px; padding-left:0; font-size: 11px;">V. DOKUMENTASI MUSYAWAROH RUTIN</div>
-        @foreach($musyawaroh as $index => $musy)
-            @if(!empty($musy->dokumentasi))
-                <div class="lampiran-section">
-                    <div class="lampiran-title">Lampiran V-{{ $index + 1 }} : {{ $musy->judul_musyawaroh }} ({{ \Carbon\Carbon::parse($musy->tanggal)->format('d M Y') }})</div>
-                    <table class="gallery-table">
-                        <tr>
-                        @foreach($musy->dokumentasi as $foto)
-                            <td class="photo-box">
-                                <img src="{{ storage_path('app/public/' . $foto) }}" alt="Dokumentasi">
-                            </td>
-                            @if($loop->iteration % 2 == 0) </tr><tr> @endif
-                        @endforeach
-                        </tr>
-                    </table>
-                </div>
-            @endif
-        @endforeach
+        @if($hasDokumentasiKhusus)
+            <div class="sub-section-title" style="border-bottom:1px solid #000; padding-left:0; font-size: 11px;">B. DOKUMENTASI KEGIATAN KHUSUS</div>
+            @foreach($kegiatanKhusus as $index => $khusus)
+                @if(!empty($khusus->dokumentasi))
+                    <div class="lampiran-section">
+                        <div class="lampiran-title">Lampiran I.B-{{ $index + 1 }} : {{ $khusus->nm_kegiatan }} ({{ \Carbon\Carbon::parse($khusus->tanggal)->format('d M Y') }})</div>
+                        <table class="gallery-table">
+                            <tr>
+                            @foreach($khusus->dokumentasi as $foto)
+                                <td class="photo-box">
+                                    <img src="{{ storage_path('app/public/' . $foto) }}" alt="Dokumentasi">
+                                </td>
+                                @if($loop->iteration % 2 == 0) </tr><tr> @endif
+                            @endforeach
+                            </tr>
+                        </table>
+                    </div>
+                @endif
+            @endforeach
+        @endif
+
+        @if($hasDokumentasiMusyawaroh)
+            <div class="sub-section-title" style="border-bottom:1px solid #000; margin-top:20px; padding-left:0; font-size: 11px;">IV. DOKUMENTASI MUSYAWAROH RUTIN</div>
+            @foreach($musyawaroh as $index => $musy)
+                @if(!empty($musy->dokumentasi))
+                    <div class="lampiran-section">
+                        <div class="lampiran-title">Lampiran IV-{{ $index + 1 }} : {{ $musy->judul_musyawaroh }} ({{ \Carbon\Carbon::parse($musy->tanggal)->format('d M Y') }})</div>
+                        <table class="gallery-table">
+                            <tr>
+                            @foreach($musy->dokumentasi as $foto)
+                                <td class="photo-box">
+                                    <img src="{{ storage_path('app/public/' . $foto) }}" alt="Dokumentasi">
+                                </td>
+                                @if($loop->iteration % 2 == 0) </tr><tr> @endif
+                            @endforeach
+                            </tr>
+                        </table>
+                    </div>
+                @endif
+            @endforeach
+        @endif
     @endif
 
 </body>

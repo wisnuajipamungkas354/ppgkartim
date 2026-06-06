@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('kelompok_id')->constrained('kelompoks', 'id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->json('url_foto')->nullable();
             $table->string('nama');
-            $table->enum('jk', ['L', 'P']);
+            $table->enum('jk', ['L', 'P'])->nullable();
             $table->string('kota_lahir')->nullable();
             $table->date('tgl_lahir')->nullable();
             $table->enum('gol_dar', ['A', 'B', 'O', 'AB'])->nullable();

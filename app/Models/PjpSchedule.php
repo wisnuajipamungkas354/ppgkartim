@@ -10,8 +10,7 @@ class PjpSchedule extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'musyawaroh_rutin' => 'array',
-        'kegiatan_rutin' => 'array',
+        'list_laporan' => 'array',
         'deadline_laporan' => 'datetime',
     ];
 

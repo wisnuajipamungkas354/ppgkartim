@@ -30,8 +30,11 @@ class ManagePjpSchedules extends ManageRecords
                         'bulan' => $data['bulan'],
                         'tahun' => $data['tahun'],
                         'deadline_laporan' => $data['deadline_desa'],
-                        'musyawaroh_rutin' => $data['musyawaroh_desa'],
-                        'kegiatan_rutin' => $data['kegiatan_desa'],
+                        'list_laporan' => [
+                            'musyawaroh_desa' => $data['musyawaroh_desa'],
+                            'kegiatan_desa' => $data['kegiatan_desa'],
+                            'pengurus_pjp_desa' => $data['pengurus_pjp_desa'],
+                        ],
                         'status' => 'DIBUKA'
                     ];
                     PjpSchedule::create($scheduleDaerah);
@@ -44,8 +47,12 @@ class ManagePjpSchedules extends ManageRecords
                             'bulan' => $data['bulan'],
                             'tahun' => $data['tahun'],
                             'deadline_laporan' => $data['deadline_kelompok'],
-                            'musyawaroh_rutin' => $data['musyawaroh_kelompok'],
-                            'kegiatan_rutin' => $data['kegiatan_kelompok'],
+                            'list_laporan' => [
+                                'musyawaroh_kelompok' => $data['musyawaroh_kelompok'],
+                                'kegiatan_kelompok' => $data['kegiatan_kelompok'],
+                                'pengurus_pjp_kelompok' => $data['pengurus_pjp_kelompok'],
+                                'pengurus_lima_unsur_kelompok' => $data['pengurus_lima_unsur_kelompok']
+                            ],
                             'status' => 'DRAFT'
                         ];
 
