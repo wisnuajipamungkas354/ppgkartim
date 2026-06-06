@@ -45,6 +45,7 @@
         .btn-primary:hover{background:var(--em-700);box-shadow:0 12px 40px rgba(5,150,105,.38)}
         .btn-outline{background:transparent;color:var(--em-700);border:2px solid var(--em-200)}
         .btn-outline:hover{background:var(--em-50);border-color:var(--em-400)}
+        .btn-sm{padding:8px 18px;font-size:13px;border-radius:10px}
         .btn-amber{background:var(--amber-400);color:var(--sl-900)}
         .btn-amber:hover{background:var(--amber-500);box-shadow:0 10px 30px rgba(251,191,36,.38)}
         .btn-ghost{background:rgba(255,255,255,.15);color:var(--white);border:1.5px solid rgba(255,255,255,.3)}
@@ -63,9 +64,10 @@
         .nav-logo-sub{font-size:11px;font-weight:500;color:var(--sl-400);display:block}
         .nav-links{display:none;align-items:center;gap:28px}
         @media(min-width:768px){.nav-links{display:flex}}
-        .nav-links a{font-size:14px;font-weight:600;color:var(--sl-600);transition:color .2s}
         .nav-links a:hover{color:var(--em-600)}
         .nav-right{display:flex;align-items:center;gap:10px}
+        .nav-right .btn{display:none}
+        @media(min-width:768px){.nav-right .btn{display:inline-flex}}
         .hamburger{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:none;border:none}
         @media(min-width:768px){.hamburger{display:none}}
         .hamburger span{display:block;width:22px;height:2px;background:var(--sl-700);border-radius:999px;transition:all .3s}
@@ -252,13 +254,11 @@
             <a href="#chart">Chart</a>
         </div>
         <div class="nav-right">
-            @if(Route::has('login'))
-                @auth
-                    <a href="{{ url('/admin') }}" class="btn btn-primary" id="nav-dash-btn">Dashboard →</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-outline" id="nav-login-btn">Masuk</a>
-                @endauth
-            @endif
+            @auth
+                <a href="{{ url('/admin') }}" class="btn btn-primary btn-sm" id="nav-dash-btn">Dashboard →</a>
+            @else
+                <a href="{{ url('/admin/login') }}" class="btn btn-outline btn-sm" id="nav-login-btn">Masuk</a>
+            @endauth
             <button class="hamburger" id="ham-btn" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
@@ -273,13 +273,11 @@
         <a href="#generus" class="mob-link">Statistik Generus</a>
         <a href="#kepengurusan" class="mob-link">Kepengurusan</a>
         <a href="#chart" class="mob-link">Chart Wilayah</a>
-        @if(Route::has('login'))
-            @auth
-                <a href="{{ url('/admin') }}" class="btn btn-primary">Dashboard</a>
-            @else
-                <a href="{{ route('login') }}" class="btn btn-primary">Masuk Sekarang</a>
-            @endauth
-        @endif
+        @auth
+            <a href="{{ url('/admin') }}" class="btn btn-primary">Dashboard</a>
+        @else
+            <a href="{{ url('/admin/login') }}" class="btn btn-primary">Masuk</a>
+        @endauth
     </div>
 </div>
 
@@ -299,14 +297,12 @@
                     Platform digital terintegrasi untuk mengelola data generus, mubaligh, dan laporan PJP. Mewujudkan pembinaan yang terukur, terdata, dan berkelanjutan.
                 </p>
                 <div class="hero-btns reveal">
-                    @if(Route::has('login'))
-                        @auth
-                            <a href="{{ url('/admin') }}" class="btn btn-primary" id="hero-dash-btn">Ke Dashboard →</a>
-                        @else
-                            <a href="{{ route('login') }}" class="btn btn-primary" id="hero-login-btn">Masuk ke Portal</a>
-                            <a href="#generus" class="btn btn-outline" id="hero-stat-btn">Lihat Statistik</a>
-                        @endauth
-                    @endif
+                    @auth
+                        <a href="{{ url('/admin') }}" class="btn btn-primary" id="hero-dash-btn">Ke Dashboard →</a>
+                    @else
+                        <a href="{{ url('/admin/login') }}" class="btn btn-primary" id="hero-login-btn">Masuk</a>
+                        <a href="#generus" class="btn btn-outline" id="hero-stat-btn">Lihat Statistik</a>
+                    @endauth
                 </div>
                 <div class="hero-stats reveal">
                     @php $totalSemua = array_sum(array_column($totals, 'total')); @endphp
@@ -513,14 +509,12 @@
         <h2 class="cta-title">Siap Mengelola Data Generus dengan Lebih Mudah?</h2>
         <p class="cta-desc">Masuk ke portal dan manfaatkan semua fitur pengelolaan data PPG Karawang Timur secara digital.</p>
         <div class="cta-btns">
-            @if(Route::has('login'))
-                @auth
-                    <a href="{{ url('/admin') }}" class="btn btn-amber" id="cta-dash-btn">Ke Dashboard →</a>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-amber" id="cta-login-btn">Masuk ke Portal</a>
-                    <a href="#profil" class="btn btn-ghost" id="cta-back-btn">Pelajari Lebih Lanjut</a>
-                @endauth
-            @endif
+            @auth
+                <a href="{{ url('/admin') }}" class="btn btn-amber" id="cta-dash-btn">Ke Dashboard →</a>
+            @else
+                <a href="{{ url('/admin/login') }}" class="btn btn-amber" id="cta-login-btn">Masuk</a>
+                <a href="#profil" class="btn btn-ghost" id="cta-back-btn">Pelajari Lebih Lanjut</a>
+            @endauth
         </div>
     </div>
 </section>
@@ -550,13 +544,11 @@
                 <div class="footer-links-group">
                     <h5>Akses</h5>
                     <ul>
-                        @if(Route::has('login'))
-                            @auth
-                                <li><a href="{{ url('/admin') }}">Dashboard</a></li>
-                            @else
-                                <li><a href="{{ route('login') }}">Masuk</a></li>
-                            @endauth
-                        @endif
+                        @auth
+                            <li><a href="{{ url('/admin') }}">Dashboard</a></li>
+                        @else
+                            <li><a href="{{ url('/admin/login') }}">Masuk</a></li>
+                        @endauth
                         <li><a href="/registrasi-generus-form">Registrasi Generus</a></li>
                         <li><a href="/events">Cek Event</a></li>
                     </ul>
