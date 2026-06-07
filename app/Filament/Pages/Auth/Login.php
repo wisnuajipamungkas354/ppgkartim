@@ -15,27 +15,15 @@ use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
+    // Layout kustom — full-page PPG branded (tidak pakai layout default Filament)
+    protected static string $layout = 'filament.layouts.auth-login';
+
+    // View kustom — hanya berisi konten form + brand panel
+    protected static string $view = 'filament.pages.auth.login';
+
     public function mount(): void
     {
         parent::mount();
-    }
-
-    public function getHeading(): string | Htmlable
-    {
-        return new HtmlString("
-            <h1 class='text-2xl font-bold tracking-tight text-gray-950 dark:text-white'>
-                SMART PPG
-            </h1>
-        ");
-    }
-
-    public function getSubheading(): string | Htmlable | null
-    {
-        return new HtmlString('
-            <span class="text-gray-600 dark:text-gray-400">
-                Selamat datang! Silahkan masuk ke akun Anda.
-            </span>
-        ');
     }
 
     protected function getEmailFormComponent(): Component
