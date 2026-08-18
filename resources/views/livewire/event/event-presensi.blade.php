@@ -13,7 +13,21 @@
         </div>
 
         <div id="real-time-clock" class="mb-6 font-mono text-4xl text-center text-gray-700">
+        </div>
+
+        @if(!empty($availableSessions) && count($availableSessions) > 1)
+            <div class="mb-6">
+                <label class="block mb-2 text-sm font-bold text-gray-700" for="activeSession">
+                    Sesi Aktif
+                </label>
+                <select wire:model.live="activeSessionKey" id="activeSession" class="w-full px-4 py-3 leading-tight text-gray-700 bg-white border border-gray-300 rounded shadow appearance-none hover:border-gray-400 focus:outline-none focus:shadow-outline">
+                    @foreach($availableSessions as $key => $session)
+                        <option value="{{ $key }}">{{ $session['display'] }} ({{ $session['start_time'] ?? '-' }} - {{ $session['end_time'] ?? '-' }})</option>
+                    @endforeach
+                </select>
+                <p class="mt-2 text-xs text-gray-500">Pilih sesi yang sedang berlangsung agar presensi tercatat di sesi yang benar.</p>
             </div>
+        @endif
 
         <div class="mb-8">
             <input type="text" wire:model.live="rfid_tag" autofocus id="rfid-input"

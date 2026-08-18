@@ -94,8 +94,8 @@
     <div class="header">
         <h1 style="text-align: center">Rekapitulasi Presensi {{ $event->name }}</h1>
         <p style="text-align: center">
-          {{ Carbon\Carbon::parse($event->date)->format('d/m/Y') }} | 
-          Jam {{ Carbon\Carbon::parse($event->start_time)->format('H:i') }} s/d {{ Carbon\Carbon::parse($event->end_time)->format('H:i') }} | 
+          {{ $headerDate }} | 
+          {{ $headerTime }} | 
           {{ $event->place }}
         </p>
     </div>
@@ -112,6 +112,7 @@
               @foreach($event->column_config as $column)
                 <th>{{ $column['label'] }}</th>
               @endforeach
+              <th>Sesi</th>
               <th>Jam</th>
               <th>Status</th>
             </tr>
@@ -124,8 +125,47 @@
                     @foreach($event->column_config as $column)
                         <td>{{ $participant->data_json[$column['field']] }}</td>
                     @endforeach
-                    <td>{{ $participant->attendance?->check_in_at != null ? \Carbon\Carbon::parse($participant->attendance->check_in_at)->format('H:i') : '' }}</td>
-                    <td>{{ $participant->attendance->arrival_status ?? '' }}</td>
+                    <td>
+                        @foreach($allSessions as $sessionData)
+                            {{ $sessionData['label'] }}<br>
+                        @endforeach
+                    </td>
+                    <td>
+                        @foreach($allSessions as $sessionData)
+                            @php
+                                $att = $participant->attendances->firstWhere('session_label', $sessionData['label']);
+                                if (!$att && $sessionData['label'] === 'Sesi Tunggal') {
+                                    $att = $participant->attendances->first();
+                                }
+                            @endphp
+                            @if($att)
+                                {{ \Carbon\Carbon::parse($att->check_in_at)->format('H:i') }}
+                            @else
+                                -
+                            @endif
+                            <br>
+                        @endforeach
+                    </td>
+                    <td>
+                        @foreach($allSessions as $sessionData)
+                            @php
+                                $att = $participant->attendances->firstWhere('session_label', $sessionData['label']);
+                                if (!$att && $sessionData['label'] === 'Sesi Tunggal') {
+                                    $att = $participant->attendances->first();
+                                }
+                            @endphp
+                            @if($att)
+                                <span class="hadir">{{ ucwords(str_replace('_', ' ', $att->arrival_status ?? 'Hadir')) }}</span>
+                            @else
+                                @if(\Carbon\Carbon::now()->lt($sessionData['start']))
+                                    <span style="color: #95a5a6; font-weight: bold;">Belum Dimulai</span>
+                                @else
+                                    <span class="alpha">Tidak Hadir</span>
+                                @endif
+                            @endif
+                            <br>
+                        @endforeach
+                    </td>
                 </tr>
             @endforeach
         </tbody>

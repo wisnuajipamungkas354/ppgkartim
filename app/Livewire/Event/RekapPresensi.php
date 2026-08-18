@@ -53,20 +53,21 @@ class RekapPresensi extends Component implements HasForms, HasTable
             }
         }
 
-        $dynamicColumns[] = TextColumn::make('attendance.check_in_at')
-            ->label('Jam')
-            ->dateTime('H:i')
-            ->sortable();
-        $dynamicColumns[] = TextColumn::make('attendance.arrival_status')
-            ->label('Status')
-            ->badge()
-            ->color(fn(string $state) => match($state) {
-                'in_time' => 'info',
-                'on_time' => 'success',
-                'over_time' => 'warning',
-                default => 'secondary',
+        $dynamicColumns[] = TextColumn::make('kehadiran_sesi')
+            ->label('Kehadiran Sesi')
+            ->getStateUsing(function (EventParticipant $record) {
+                $atts = $record->attendances;
+                if ($atts->isEmpty()) {
+                    return ['Belum Hadir'];
+                }
+                return $atts->map(function($att) {
+                    $sessionName = $att->session_label ?: 'Sesi Tunggal';
+                    $time = Carbon::parse($att->check_in_at)->format('H:i');
+                    return "$sessionName ($time)";
+                })->toArray();
             })
-            ->sortable();
+            ->badge()
+            ->color(fn(string $state) => $state === 'Belum Hadir' ? 'danger' : 'success');
 
         return $dynamicColumns;
     }
@@ -96,11 +97,27 @@ class RekapPresensi extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(EventParticipant::where('event_id', $this->event->id))
+            ->query(EventParticipant::where('event_id', $this->event->id)->with('attendances'))
             ->columns($this->getTableColumns())
-            ->filters([
-                // 
-            ])
+            ->filters(array_merge([
+                SelectFilter::make('session_label')
+                    ->label('Filter Sesi')
+                    ->options(function () {
+                        return \App\Models\Attendance::where('event_id', $this->event->id)
+                            ->whereNotNull('session_label')
+                            ->where('session_label', '!=', '')
+                            ->distinct()
+                            ->pluck('session_label', 'session_label')
+                            ->toArray();
+                    })
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            $query->whereHas('attendances', function (\Illuminate\Database\Eloquent\Builder $query) use ($data) {
+                                $query->where('session_label', $data['value']);
+                            });
+                        }
+                    })
+            ], $this->getTableFilters()))
             ->actions([
                 Action::make('delete')
                     ->label('Reset')
@@ -117,24 +134,27 @@ class RekapPresensi extends Component implements HasForms, HasTable
     public function shareOnWhatsApp() {
         $participants = EventParticipant::where('event_id', $this->event->id)->get(); 
         $attendances = Attendance::where('event_id', $this->event->id)->get();
-        $alfa = $participants->count() - $attendances->count();
-        $date = Carbon::parse($this->event->date)->format('d/m/Y');
-        $startTime = Carbon::parse($this->event->start_time)->format('H:i');
+        
+        $uniqueAttendeesCount = $attendances->pluck('participant_id')->unique()->count();
+        $alfa = $participants->count() - $uniqueAttendeesCount;
+        
+        // Ambil info dari sesi pertama sebagai patokan tanggal di WA
+        $firstSessionDate = $this->event->sessions[0]['date'] ?? $this->event->date;
+        $date = $firstSessionDate ? Carbon::parse($firstSessionDate)->format('d/m/Y') : '-';
 
         $url = 'https://api.whatsapp.com/send?text=';
         $rawMessage = "*Rekap Presensi*
         %0A*{$this->event->name}*
         %0A
         %0A📆 {$date}
-        %0A🕒 {$startTime} s/d selesai
         %0A📍 {$this->event->place}
         %0A
-        %0A*Kehadiran*
-        %0A✅ Hadir : {$attendances->count()}
+        %0A*Kehadiran (Minimal 1 Sesi)*
+        %0A✅ Hadir : {$uniqueAttendeesCount}
         %0A❌ Tidak Hadir : {$alfa}
         %0A👳🏻‍♀🧕 Total Peserta : {$participants->count()}
         %0A
-        %0A*Status*
+        %0A*Total Presensi Tersimpan: {$attendances->count()}*
         %0A- In Time : {$attendances->where('arrival_status', 'in_time')->count()}
         %0A- On Time : {$attendances->where('arrival_status', 'on_time')->count()}
         %0A- Over Time : {$attendances->where('arrival_status', 'over_time')->count()}
@@ -143,6 +163,89 @@ class RekapPresensi extends Component implements HasForms, HasTable
         ";
 
         return $url . $rawMessage;
+    }
+
+    public function getEventScheduleDisplayProperty()
+    {
+        $selectedSession = $this->getTableFilterState('session_label')['value'] ?? null;
+
+        $dateStr = '';
+        $timeStr = '';
+
+        if ($this->event->event_type === 'single') {
+            $dateStr = \Carbon\Carbon::parse($this->event->date)->locale('id')->translatedFormat('d F Y');
+            $timeStr = \Carbon\Carbon::parse($this->event->start_time)->format('H:i') . ' s/d ' . \Carbon\Carbon::parse($this->event->end_time)->format('H:i');
+        } else {
+            $found = false;
+            
+            // Jika ada sesi spesifik yang di-filter
+            if ($selectedSession) {
+                foreach ($this->event->sessions ?? [] as $day) {
+                    if (isset($day['sesi'])) { // multi_day
+                        foreach ($day['sesi'] as $sesi) {
+                            if ($sesi['label'] === $selectedSession) {
+                                $dateStr = \Carbon\Carbon::parse($day['date'] ?? now())->locale('id')->translatedFormat('d F Y');
+                                $timeStr = \Carbon\Carbon::parse($sesi['start_time'])->format('H:i') . ' s/d ' . \Carbon\Carbon::parse($sesi['end_time'])->format('H:i');
+                                $found = true;
+                                break 2;
+                            }
+                        }
+                    } else { // multi_session
+                        if ($day['label'] === $selectedSession) {
+                            $dateStr = \Carbon\Carbon::parse($this->event->date ?? now())->locale('id')->translatedFormat('d F Y');
+                            $timeStr = \Carbon\Carbon::parse($day['start_time'])->format('H:i') . ' s/d ' . \Carbon\Carbon::parse($day['end_time'])->format('H:i');
+                            $found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Jika tidak ada filter sesi (Semua Sesi), atau filter tidak ditemukan
+            if (!$found) {
+                $dates = [];
+                if ($this->event->event_type === 'multi_day') {
+                    foreach ($this->event->sessions ?? [] as $day) {
+                        if (!empty($day['date'])) {
+                            $dates[] = $day['date'];
+                        }
+                    }
+                }
+                
+                if (empty($dates)) {
+                    $dates[] = $this->event->date ?? now()->toDateString();
+                }
+
+                sort($dates);
+                $startDate = \Carbon\Carbon::parse($dates[0])->locale('id');
+                $endDate = \Carbon\Carbon::parse(end($dates))->locale('id');
+
+                if ($startDate->isSameDay($endDate)) {
+                    $dateStr = $startDate->translatedFormat('d F Y');
+                } elseif ($startDate->isSameMonth($endDate)) {
+                    $dateStr = $startDate->format('d') . ' - ' . $endDate->translatedFormat('d F Y');
+                } elseif ($startDate->isSameYear($endDate)) {
+                    $dateStr = $startDate->translatedFormat('d F') . ' - ' . $endDate->translatedFormat('d F Y');
+                } else {
+                    $dateStr = $startDate->translatedFormat('d F Y') . ' - ' . $endDate->translatedFormat('d F Y');
+                }
+
+                $timeStr = ""; // Tidak perlu menampilkan jam jika semua sesi
+            }
+        }
+
+        $display = $dateStr;
+        if ($timeStr !== '') {
+            $display .= ' | ' . $timeStr;
+        }
+        
+        if ($selectedSession) {
+            $display .= ' | Filter: ' . $selectedSession;
+        } elseif ($this->event->event_type !== 'single') {
+            $display .= ' | Semua Sesi';
+        }
+
+        return $display;
     }
 
     public function render()

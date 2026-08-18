@@ -16,13 +16,15 @@ class RekapPresensiStat extends BaseWidget
         $participants = EventParticipant::where('event_id', $this->event->id)->get();
         $attendances = Attendance::where('event_id', $this->event->id)->get();
 
+        $uniqueAttendeesCount = $attendances->pluck('participant_id')->unique()->count();
+
         return [
             Stat::make('Total Peserta', $participants->count()),
-            Stat::make('Hadir', $attendances->count()),
-            Stat::make('Tidak Hadir', ($participants->count() - $attendances->count())),
-            Stat::make('In Time', $attendances->where('arrival_status', 'in_time')->count()),
-            Stat::make('On Time', $attendances->where('arrival_status', 'on_time')->count()),
-            Stat::make('Over Time', $attendances->where('arrival_status', 'over_time')->count()),
+            Stat::make('Peserta Hadir (Min 1 Sesi)', $uniqueAttendeesCount),
+            Stat::make('Tidak Hadir', ($participants->count() - $uniqueAttendeesCount)),
+            Stat::make('Total Presensi (In Time)', $attendances->where('arrival_status', 'in_time')->count()),
+            Stat::make('Total Presensi (On Time)', $attendances->where('arrival_status', 'on_time')->count()),
+            Stat::make('Total Presensi (Over Time)', $attendances->where('arrival_status', 'over_time')->count()),
         ];
     }
 }

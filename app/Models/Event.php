@@ -13,10 +13,11 @@ class Event extends Model
     public $incrementing = false;
 
     protected $casts = [
-        'date'         => 'date',
-        'start_time'   => 'datetime:H:i',
-        'end_time'     => 'datetime:H:i',
-        'column_config'=> 'array',
+        'date'          => 'date',
+        'start_time'    => 'datetime:H:i',
+        'end_time'      => 'datetime:H:i',
+        'column_config' => 'array',
+        'sessions'      => 'array',
     ];
 
     // Event "creating" untuk otomatis mengisi pengkodean id
@@ -53,7 +54,7 @@ class Event extends Model
         $finalId = strval($dateYearMonth) . strval($uniqueIdFormatted) . $uniqueStr;
 
         // Create QR-Code Images
-        $generateQr = QrCode::format('png')->style('round')->size(300)->margin(1)->errorCorrection('H')->generate(url('event/' . $finalId . '/presensi'));
+        $generateQr = QrCode::format('png')->size(300)->margin(1)->errorCorrection('H')->generate(url('event/' . $finalId . '/presensi'));
         Storage::disk('public')->put('events/qr-images/' . $finalId . '.png', $generateQr);
 
         return $finalId;

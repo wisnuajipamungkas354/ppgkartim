@@ -28,12 +28,80 @@ class ExportPdfController extends Controller
 
     public function rekapPresensiPdf(Event $event) {
         setlocale(LC_ALL, 'id-ID', 'id_ID');
-        $eventParticipant = EventParticipant::query()->with('attendance')->where('event_id', $event->id)->get();
+        $eventParticipant = EventParticipant::query()->with('attendances')->where('event_id', $event->id)->get();
         $totalParticipant = $eventParticipant->count();
-        $hadir = $eventParticipant->filter(fn($participant) => $participant->attendance?->arrival_status !== null)->count();
+        $hadir = $eventParticipant->filter(fn($participant) => $participant->attendances->isNotEmpty())->count();
         $alfa = $totalParticipant - $hadir;
 
-        $pdf = Pdf::loadView('pdf.rekap-presensi', compact('event', 'eventParticipant', 'totalParticipant', 'hadir', 'alfa'))
+        // Ambil semua sesi yang ada di event ini beserta jam mulainya
+        $allSessions = [];
+        if ($event->event_type === 'single') {
+            $allSessions[] = [
+                'label' => 'Sesi Tunggal',
+                'start' => \Carbon\Carbon::parse($event->date . ' ' . $event->start_time)
+            ];
+        } else {
+            foreach ($event->sessions ?? [] as $day) {
+                if (isset($day['sesi'])) { // multi_day
+                    foreach ($day['sesi'] as $sesi) {
+                        $allSessions[] = [
+                            'label' => $sesi['label'] ?? 'Sesi Unknown',
+                            'start' => \Carbon\Carbon::parse(($day['date'] ?? '') . ' ' . ($sesi['start_time'] ?? '00:00:00'))
+                        ];
+                    }
+                } else { // multi_session
+                    $allSessions[] = [
+                        'label' => $day['label'] ?? 'Sesi Unknown',
+                        'start' => \Carbon\Carbon::parse($event->date . ' ' . ($day['start_time'] ?? '00:00:00'))
+                    ];
+                }
+            }
+        }
+        
+        // Fallback jika tidak ada sesi terdefinisi
+        if (empty($allSessions)) {
+            $allSessions[] = [
+                'label' => 'Sesi Tunggal',
+                'start' => \Carbon\Carbon::now() // Fallback
+            ];
+        }
+
+        $headerTime = '';
+        if ($event->event_type === 'single') {
+            $headerTime = 'Jam ' . \Carbon\Carbon::parse($event->start_time)->format('H:i') . ' s/d ' . \Carbon\Carbon::parse($event->end_time)->format('H:i');
+        } else {
+            $headerTime = 'Semua Sesi';
+        }
+
+        // Kalkulasi Range Tanggal
+        $dates = [];
+        if ($event->event_type === 'multi_day') {
+            foreach ($event->sessions ?? [] as $day) {
+                if (!empty($day['date'])) {
+                    $dates[] = $day['date'];
+                }
+            }
+        }
+        
+        if (empty($dates)) {
+            $dates[] = $event->date ?? now()->toDateString();
+        }
+
+        sort($dates);
+        $startDate = \Carbon\Carbon::parse($dates[0])->locale('id');
+        $endDate = \Carbon\Carbon::parse(end($dates))->locale('id');
+
+        if ($startDate->isSameDay($endDate)) {
+            $headerDate = $startDate->translatedFormat('d F Y');
+        } elseif ($startDate->isSameMonth($endDate)) {
+            $headerDate = $startDate->format('d') . ' - ' . $endDate->translatedFormat('d F Y');
+        } elseif ($startDate->isSameYear($endDate)) {
+            $headerDate = $startDate->translatedFormat('d F') . ' - ' . $endDate->translatedFormat('d F Y');
+        } else {
+            $headerDate = $startDate->translatedFormat('d F Y') . ' - ' . $endDate->translatedFormat('d F Y');
+        }
+
+        $pdf = Pdf::loadView('pdf.rekap-presensi', compact('event', 'eventParticipant', 'totalParticipant', 'hadir', 'alfa', 'allSessions', 'headerTime', 'headerDate'))
             ->setPaper('A4', 'landscape');
 
         return $pdf->stream("Rekap Presensi {$event->name}.pdf");

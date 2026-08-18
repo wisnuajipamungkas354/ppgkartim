@@ -22,6 +22,8 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Illuminate\Support\Str;
 
 class EventResource extends Resource
 {
@@ -65,26 +67,100 @@ class EventResource extends Resource
                         ->placeholder('Masukkan nama lokasi')
                         ->required(),
 
-                    Select::make('attendance_method')
-                        ->label('Metode Presensi')
+                    Select::make('event_type')
+                        ->label('Jenis Kegiatan')
                         ->options([
-                            'manual' => 'Manual',
-                            'rfid'   => 'RFID',
-                            'manual_rfid' => 'Manual + RFID',
+                            'single'        => '1 Hari, 1 Sesi',
+                            'multi_session' => '1 Hari, Beberapa Sesi',
+                            'multi_day'     => 'Beberapa Hari (Multi Sesi)',
                         ])
-                        ->required(),
+                        ->default('single')
+                        ->required()
+                        ->live()
+                        ->columnSpanFull()
+                        ->helperText(fn (Get $get) => match($get('event_type')) {
+                            'multi_session' => 'Satu tanggal dengan beberapa sesi waktu berbeda.',
+                            'multi_day'     => 'Kegiatan berlangsung lebih dari satu hari, tiap hari bisa punya sesi berbeda.',
+                            default         => 'Kegiatan berlangsung satu hari dengan satu sesi waktu.',
+                        }),
 
+                    // Tanggal: tampil untuk single & multi_session (bukan multi_day)
                     Forms\Components\DatePicker::make('date')
                         ->label('Tanggal Pelaksanaan')
-                        ->required(),
+                        ->required()
+                        ->visible(fn (Get $get) => in_array($get('event_type') ?? 'single', ['single', 'multi_session']))
+                        ->columnSpanFull(),
 
+                    // Waktu: hanya untuk single
                     Forms\Components\TimePicker::make('start_time')
                         ->label('Waktu Mulai')
-                        ->seconds(false),
+                        ->seconds(false)
+                        ->visible(fn (Get $get) => ($get('event_type') ?? 'single') === 'single'),
+
                     Forms\Components\TimePicker::make('end_time')
                         ->label('Waktu Selesai')
-                        ->seconds(false),
+                        ->seconds(false)
+                        ->visible(fn (Get $get) => ($get('event_type') ?? 'single') === 'single'),
                 ]),
+
+                // ── MULTI SESSION: sesi-sesi dalam 1 hari ──
+                Repeater::make('sessions')
+                    ->label('Sesi Kegiatan')
+                    ->schema([
+                        Forms\Components\TextInput::make('label')
+                            ->label('Nama Sesi')
+                            ->placeholder('Contoh: Sesi Pagi')
+                            ->required(),
+                        Forms\Components\TimePicker::make('start_time')
+                            ->label('Waktu Mulai')
+                            ->seconds(false)
+                            ->required(),
+                        Forms\Components\TimePicker::make('end_time')
+                            ->label('Waktu Selesai')
+                            ->seconds(false)
+                            ->required(),
+                    ])
+                    ->columns(3)
+                    ->columnSpanFull()
+                    ->addActionLabel('Tambah Sesi')
+                    ->minItems(1)
+                    ->visible(fn (Get $get) => $get('event_type') === 'multi_session'),
+
+                // ── MULTI DAY: tiap hari punya sesinya sendiri ──
+                // Nama field 'days' (bukan 'sessions') untuk hindari duplikat.
+                // Di handleRecordCreation, 'days' akan dipindah ke kolom 'sessions'.
+                Repeater::make('days')
+                    ->label('Hari Kegiatan')
+                    ->schema([
+                        Forms\Components\DatePicker::make('date')
+                            ->label('Tanggal')
+                            ->required()
+                            ->columnSpanFull(),
+                        Repeater::make('sesi')
+                            ->label('Sesi')
+                            ->schema([
+                                Forms\Components\TextInput::make('label')
+                                    ->label('Nama Sesi')
+                                    ->placeholder('Contoh: Sesi Pagi')
+                                    ->required(),
+                                Forms\Components\TimePicker::make('start_time')
+                                    ->label('Waktu Mulai')
+                                    ->seconds(false)
+                                    ->required(),
+                                Forms\Components\TimePicker::make('end_time')
+                                    ->label('Waktu Selesai')
+                                    ->seconds(false)
+                                    ->required(),
+                            ])
+                            ->columns(3)
+                            ->addActionLabel('Tambah Sesi')
+                            ->minItems(1)
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpanFull()
+                    ->addActionLabel('Tambah Hari')
+                    ->minItems(1)
+                    ->visible(fn (Get $get) => $get('event_type') === 'multi_day'),
 
                 // konfigurasi kolom dinamis
                 Repeater::make('column_config')
@@ -93,11 +169,21 @@ class EventResource extends Resource
                         Forms\Components\TextInput::make('label')
                             ->label('Judul Kolom')
                             ->placeholder('Contoh : Nama Lengkap')
-                            ->required(),
+                            ->required()
+                            ->live(debounce: 400)
+                            ->afterStateUpdated(function (Set $set, ?string $state) {
+                                $set('field', Str::snake($state ?? ''));
+                            }),
                         Forms\Components\TextInput::make('field')
                             ->label('Nama Kolom')
                             ->placeholder('Contoh : nama_lengkap')
-                            ->required(),
+                            ->required()
+                            ->live(debounce: 300)
+                            ->afterStateUpdated(fn (Set $set, ?string $state) =>
+                                $set('field', strtolower(preg_replace('/[^a-z0-9_]/', '', strtolower($state ?? '')))
+                            ))
+                            ->rules(['regex:/^[a-z][a-z0-9_]*$/'])
+                            ->validationMessages(['regex' => 'Hanya boleh huruf kecil, angka, dan underscore (_).']),
                         Forms\Components\Select::make('type')
                             ->label('Tipe Kolom')
                             ->options([
@@ -164,14 +250,7 @@ class EventResource extends Resource
                     ->copyMessageDuration(1500),
                 ToggleColumn::make('is_active')
                     ->label('Aktif'),                    
-                TextColumn::make('attendance_method')
-                    ->label('Metode Presensi'),
-                TextColumn::make('start_time')
-                    ->label('Waktu Mulai')
-                    ->time(),
-                TextColumn::make('end_time')
-                    ->label('Waktu Selesai')
-                    ->time(),
+
             ])
             ->filters([])
             ->actions([
@@ -195,9 +274,8 @@ class EventResource extends Resource
                             'name' => $record->name,
                             'place' => $record->place,
                             'date' => $record->date,
-                            'attendance_method' => $record->attendance_method,
-                            'start_time' => $record->start_time,
-                            'end_time' => $record->end_time,
+                            'event_type' => $record->event_type,
+                            'sessions' => $record->sessions,
                             'column_config' => $record->column_config,
                             'kode_event' => $record->kode_event,
                             'is_active' => $record->is_active,
