@@ -140,7 +140,12 @@ class IotAttendanceController extends Controller
             if ($activeEvents->isEmpty()) {
                 $debugMsg .= ' (Debug: Tidak ada Event aktif yang ditemukan untuk akun dengan User ID ' . $device->user_id . ' milik ESP32 ini. Pastikan Event dibuat oleh akun yang persis sama!)';
             } else {
-                $debugMsg .= ' (Debug: Ditemukan ' . $activeEvents->count() . ' Event, tapi jam saat ini (' . $now->format('H:i') . ') tidak masuk dalam rentang waktu sesi mana pun!)';
+                // Kumpulkan informasi sesi terakhir yang dicek untuk debugging
+                $lastSessionInfo = 'unknown';
+                if (isset($validStart) && isset($validEnd)) {
+                    $lastSessionInfo = $validStart->format('Y-m-d H:i') . ' s/d ' . $validEnd->format('Y-m-d H:i');
+                }
+                $debugMsg .= ' (Debug: Ditemukan ' . $activeEvents->count() . ' Event, tapi jam saat ini (' . $now->format('Y-m-d H:i') . ') tidak masuk dalam rentang waktu sesi mana pun! Sesi terakhir dicek rentangnya: ' . $lastSessionInfo . ')';
             }
             return response()->json(['status' => 'idle', 'message' => $debugMsg]);
         }
