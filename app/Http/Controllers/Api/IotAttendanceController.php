@@ -42,7 +42,8 @@ class IotAttendanceController extends Controller
             ->where('is_active', true)
             ->get();
 
-        $now = Carbon::now();
+        // Gunakan timezone spesifik untuk menghindari masalah server production yang berjalan di UTC
+        $now = Carbon::now('Asia/Jakarta');
         $todayStr = $now->format('Y-m-d');
         
         $currentSession = null;
@@ -85,9 +86,15 @@ class IotAttendanceController extends Controller
 
             // Periksa daftar sesi yang sudah di-normalisasi
             foreach ($eventSessions as $sesi) {
-                $sessionDate = $sesi['date'] ?? $todayStr;
-                $start = $sesi['start_time'] ? Carbon::parse($sessionDate . ' ' . $sesi['start_time']) : null;
-                $end = $sesi['end_time'] ? Carbon::parse($sessionDate . ' ' . $sesi['end_time']) : null;
+                $sessionDate = \Carbon\Carbon::parse($sesi['date'] ?? $todayStr)->format('Y-m-d');
+                
+                // Pastikan jika nilai berupa Carbon object, kita ambil string jamnya saja
+                $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
+                $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
+
+                // Parse dengan timezone yang sama
+                $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
+                $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
                 
                 if ($start && $end) {
                     // Jika jam selesai lebih kecil dari jam mulai, berarti sesinya lewat tengah malam (ganti hari)
@@ -186,15 +193,21 @@ class IotAttendanceController extends Controller
         
         if ($event->event_type === 'single') {
             if ($event->date === $sessionDate && 'Sesi Tunggal' === $sessionLabel) {
-                $start = $event->start_time ? Carbon::parse($sessionDate . ' ' . $event->start_time) : null;
-                $end = $event->end_time ? Carbon::parse($sessionDate . ' ' . $event->end_time) : null;
+                $startTimeStr = is_object($event->start_time) ? $event->start_time->format('H:i') : $event->start_time;
+                $endTimeStr = is_object($event->end_time) ? $event->end_time->format('H:i') : $event->end_time;
+
+                $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
+                $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
             }
         } elseif ($event->event_type === 'multi_session') {
             if ($event->date === $sessionDate) {
                 foreach ($event->sessions ?? [] as $sesi) {
                     if (($sesi['label'] ?? '') === $sessionLabel) {
-                        $start = $sesi['start_time'] ? Carbon::parse($sessionDate . ' ' . $sesi['start_time']) : null;
-                        $end = $sesi['end_time'] ? Carbon::parse($sessionDate . ' ' . $sesi['end_time']) : null;
+                        $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
+                        $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
+
+                        $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
+                        $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
                         break;
                     }
                 }
@@ -204,8 +217,11 @@ class IotAttendanceController extends Controller
                 if (($day['date'] ?? '') === $sessionDate) {
                     foreach ($day['sesi'] ?? [] as $sesi) {
                         if (($sesi['label'] ?? '') === $sessionLabel) {
-                            $start = $sesi['start_time'] ? Carbon::parse($sessionDate . ' ' . $sesi['start_time']) : null;
-                            $end = $sesi['end_time'] ? Carbon::parse($sessionDate . ' ' . $sesi['end_time']) : null;
+                            $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
+                            $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
+
+                            $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
+                            $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
                             break 2;
                         }
                     }
@@ -242,9 +258,10 @@ class IotAttendanceController extends Controller
             if ($already) continue;
 
             try {
-                $scannedAt = Carbon::parse($scannedAtStr);
+                // Parse timestamp dari alat dengan timezone yang sama
+                $scannedAt = Carbon::parse($scannedAtStr, 'Asia/Jakarta');
             } catch (\Exception $e) {
-                $scannedAt = Carbon::now();
+                $scannedAt = Carbon::now('Asia/Jakarta');
             }
 
             // Hitung status kedatangan
