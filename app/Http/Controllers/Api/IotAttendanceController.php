@@ -117,6 +117,10 @@ class IotAttendanceController extends Controller
             $eventSessions = $this->normalizeEventSessions($event);
 
             foreach ($eventSessions as $sesi) {
+                // Simpan raw data untuk debug
+                $rawStartTime = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : ($sesi['start_time'] ?? 'NULL');
+                $rawEndTime = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : ($sesi['end_time'] ?? 'NULL');
+                
                 [$start, $end, $sessionDate] = $this->getSessionTimeBounds($sesi, $todayStr);
                 
                 if ($start && $end) {
@@ -144,8 +148,10 @@ class IotAttendanceController extends Controller
                 $lastSessionInfo = 'unknown';
                 if (isset($validStart) && isset($validEnd)) {
                     $lastSessionInfo = $validStart->format('Y-m-d H:i') . ' s/d ' . $validEnd->format('Y-m-d H:i');
+                } else {
+                    $lastSessionInfo = "Raw Start: $rawStartTime, Raw End: $rawEndTime (Gagal di-parse!)";
                 }
-                $debugMsg .= ' (Debug: Ditemukan ' . $activeEvents->count() . ' Event, tapi jam saat ini (' . $now->format('Y-m-d H:i') . ') tidak masuk dalam rentang waktu sesi mana pun! Sesi terakhir dicek rentangnya: ' . $lastSessionInfo . ')';
+                $debugMsg .= ' (Debug: Ditemukan ' . $activeEvents->count() . ' Event (Tipe: ' . ($event->event_type ?? 'unknown') . '), tapi jam saat ini (' . $now->format('Y-m-d H:i') . ') tidak masuk dalam rentang waktu sesi mana pun! Sesi terakhir dicek rentangnya: ' . $lastSessionInfo . ')';
             }
             return response()->json(['status' => 'idle', 'message' => $debugMsg]);
         }
