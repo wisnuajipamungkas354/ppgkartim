@@ -27,6 +27,68 @@ class IotAttendanceController extends Controller
     }
 
     /**
+     * Menormalisasi format sesi dari berbagai tipe acara menjadi satu format array baku.
+     */
+    private function normalizeEventSessions($event)
+    {
+        $eventSessions = [];
+
+        if ($event->event_type === 'single') {
+            $eventSessions[] = [
+                'label' => 'Sesi Tunggal',
+                'date' => $event->date,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+            ];
+        } elseif ($event->event_type === 'multi_session') {
+            foreach ($event->sessions ?? [] as $sesi) {
+                $eventSessions[] = [
+                    'label' => $sesi['label'] ?? 'Unknown Session',
+                    'date' => $event->date,
+                    'start_time' => $sesi['start_time'] ?? null,
+                    'end_time' => $sesi['end_time'] ?? null,
+                ];
+            }
+        } elseif ($event->event_type === 'multi_day') {
+            foreach ($event->sessions ?? [] as $day) {
+                $date = $day['date'] ?? null;
+                foreach ($day['sesi'] ?? [] as $sesi) {
+                    $eventSessions[] = [
+                        'label' => $sesi['label'] ?? 'Unknown Session',
+                        'date' => $date,
+                        'start_time' => $sesi['start_time'] ?? null,
+                        'end_time' => $sesi['end_time'] ?? null,
+                    ];
+                }
+            }
+        }
+
+        return $eventSessions;
+    }
+
+    /**
+     * Memparsing string waktu sesi menjadi instance Carbon dengan zona waktu Asia/Jakarta.
+     * Mengembalikan array berisi [$startCarbon, $endCarbon, $sessionDateString].
+     */
+    private function getSessionTimeBounds($sesi, $fallbackDate)
+    {
+        $sessionDate = \Carbon\Carbon::parse($sesi['date'] ?? $fallbackDate)->format('Y-m-d');
+        
+        $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
+        $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
+
+        $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
+        $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
+        
+        // Jika jam selesai lebih kecil dari jam mulai, berarti sesinya lewat tengah malam (ganti hari)
+        if ($start && $end && $end->lt($start)) {
+            $end->addDay();
+        }
+
+        return [$start, $end, $sessionDate];
+    }
+    
+    /**
      * API 1: Mengecek acara dan sesi yang sedang berlangsung
      * Endpoint: GET /api/v1/device/status
      */
@@ -52,56 +114,12 @@ class IotAttendanceController extends Controller
         // Iterasi semua event yang aktif untuk mencari sesi yang berlangsung HARI INI
         // dan jamnya mencakup waktu sekarang
         foreach ($activeEvents as $event) {
-            $eventSessions = [];
+            $eventSessions = $this->normalizeEventSessions($event);
 
-            if ($event->event_type === 'single') {
-                $eventSessions[] = [
-                    'label' => 'Sesi Tunggal',
-                    'date' => $event->date,
-                    'start_time' => $event->start_time,
-                    'end_time' => $event->end_time,
-                ];
-            } elseif ($event->event_type === 'multi_session') {
-                foreach ($event->sessions ?? [] as $sesi) {
-                    $eventSessions[] = [
-                        'label' => $sesi['label'] ?? 'Unknown Session',
-                        'date' => $event->date,
-                        'start_time' => $sesi['start_time'] ?? null,
-                        'end_time' => $sesi['end_time'] ?? null,
-                    ];
-                }
-            } elseif ($event->event_type === 'multi_day') {
-                foreach ($event->sessions ?? [] as $day) {
-                    $date = $day['date'] ?? null;
-                    foreach ($day['sesi'] ?? [] as $sesi) {
-                        $eventSessions[] = [
-                            'label' => $sesi['label'] ?? 'Unknown Session',
-                            'date' => $date,
-                            'start_time' => $sesi['start_time'] ?? null,
-                            'end_time' => $sesi['end_time'] ?? null,
-                        ];
-                    }
-                }
-            }
-
-            // Periksa daftar sesi yang sudah di-normalisasi
             foreach ($eventSessions as $sesi) {
-                $sessionDate = \Carbon\Carbon::parse($sesi['date'] ?? $todayStr)->format('Y-m-d');
-                
-                // Pastikan jika nilai berupa Carbon object, kita ambil string jamnya saja
-                $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
-                $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
-
-                // Parse dengan timezone yang sama
-                $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
-                $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
+                [$start, $end, $sessionDate] = $this->getSessionTimeBounds($sesi, $todayStr);
                 
                 if ($start && $end) {
-                    // Jika jam selesai lebih kecil dari jam mulai, berarti sesinya lewat tengah malam (ganti hari)
-                    if ($end->lt($start)) {
-                        $end->addDay();
-                    }
-                    
                     // Cek apakah jam saat ini berada di dalam rentang sesi
                     // Diberi toleransi: start - 30 menit s/d end + 60 menit
                     $validStart = $start->copy()->subMinutes(30);
@@ -191,46 +209,16 @@ class IotAttendanceController extends Controller
         $start = null;
         $end = null;
         
-        if ($event->event_type === 'single') {
-            if ($event->date === $sessionDate && 'Sesi Tunggal' === $sessionLabel) {
-                $startTimeStr = is_object($event->start_time) ? $event->start_time->format('H:i') : $event->start_time;
-                $endTimeStr = is_object($event->end_time) ? $event->end_time->format('H:i') : $event->end_time;
-
-                $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
-                $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
+        $eventSessions = $this->normalizeEventSessions($event);
+        foreach ($eventSessions as $sesi) {
+            [$sesiStart, $sesiEnd, $sessionDateParsed] = $this->getSessionTimeBounds($sesi, $sessionDate);
+            
+            // Cocokkan berdasarkan tanggal dan label sesi
+            if ($sessionDateParsed === $sessionDate && ($sesi['label'] ?? '') === $sessionLabel) {
+                $start = $sesiStart;
+                $end = $sesiEnd;
+                break;
             }
-        } elseif ($event->event_type === 'multi_session') {
-            if ($event->date === $sessionDate) {
-                foreach ($event->sessions ?? [] as $sesi) {
-                    if (($sesi['label'] ?? '') === $sessionLabel) {
-                        $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
-                        $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
-
-                        $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
-                        $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
-                        break;
-                    }
-                }
-            }
-        } elseif ($event->event_type === 'multi_day') {
-            foreach ($event->sessions ?? [] as $day) {
-                if (($day['date'] ?? '') === $sessionDate) {
-                    foreach ($day['sesi'] ?? [] as $sesi) {
-                        if (($sesi['label'] ?? '') === $sessionLabel) {
-                            $startTimeStr = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : $sesi['start_time'];
-                            $endTimeStr = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : $sesi['end_time'];
-
-                            $start = $startTimeStr ? Carbon::parse($sessionDate . ' ' . $startTimeStr, 'Asia/Jakarta') : null;
-                            $end = $endTimeStr ? Carbon::parse($sessionDate . ' ' . $endTimeStr, 'Asia/Jakarta') : null;
-                            break 2;
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($start && $end && $end->lt($start)) {
-            $end->addDay();
         }
 
         $lateTime = $start ? $start->copy()->addMinutes(10) : null;
