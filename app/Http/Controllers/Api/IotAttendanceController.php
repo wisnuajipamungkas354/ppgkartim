@@ -136,7 +136,13 @@ class IotAttendanceController extends Controller
         }
 
         if (!$currentEvent || !$currentSession) {
-            return response()->json(['status' => 'idle', 'message' => 'Tidak ada acara yang sedang berlangsung']);
+            $debugMsg = 'Tidak ada acara yang sedang berlangsung.';
+            if ($activeEvents->isEmpty()) {
+                $debugMsg .= ' (Debug: Tidak ada Event aktif yang ditemukan untuk akun dengan User ID ' . $device->user_id . ' milik ESP32 ini. Pastikan Event dibuat oleh akun yang persis sama!)';
+            } else {
+                $debugMsg .= ' (Debug: Ditemukan ' . $activeEvents->count() . ' Event, tapi jam saat ini (' . $now->format('H:i') . ') tidak masuk dalam rentang waktu sesi mana pun!)';
+            }
+            return response()->json(['status' => 'idle', 'message' => $debugMsg]);
         }
 
         // Cari tahu key mana di data_json yang menyimpan nama peserta
