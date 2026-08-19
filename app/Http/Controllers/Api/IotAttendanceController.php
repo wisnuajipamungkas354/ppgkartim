@@ -33,33 +33,18 @@ class IotAttendanceController extends Controller
     {
         $eventSessions = [];
 
-        if ($event->event_type === 'single') {
-            $eventSessions[] = [
-                'label' => 'Sesi Tunggal',
-                'date' => $event->date,
-                'start_time' => $event->start_time,
-                'end_time' => $event->end_time,
-            ];
-        } elseif ($event->event_type === 'multi_session') {
-            foreach ($event->sessions ?? [] as $sesi) {
+        // Ternyata di Filament (EventResource), SEMUA tipe event (single, multi_session, multi_day)
+        // selalu disimpan dalam bentuk array bersarang yang sama di dalam kolom JSON 'sessions'.
+        // Strukturnya: [ ['date' => '...', 'sesi' => [ ['label' => '...', 'start_time' => '...'] ] ] ]
+        foreach ($event->sessions ?? [] as $day) {
+            $date = $day['date'] ?? $event->date;
+            foreach ($day['sesi'] ?? [] as $sesi) {
                 $eventSessions[] = [
                     'label' => $sesi['label'] ?? 'Unknown Session',
-                    'date' => $event->date,
+                    'date' => $date,
                     'start_time' => $sesi['start_time'] ?? null,
                     'end_time' => $sesi['end_time'] ?? null,
                 ];
-            }
-        } elseif ($event->event_type === 'multi_day') {
-            foreach ($event->sessions ?? [] as $day) {
-                $date = $day['date'] ?? null;
-                foreach ($day['sesi'] ?? [] as $sesi) {
-                    $eventSessions[] = [
-                        'label' => $sesi['label'] ?? 'Unknown Session',
-                        'date' => $date,
-                        'start_time' => $sesi['start_time'] ?? null,
-                        'end_time' => $sesi['end_time'] ?? null,
-                    ];
-                }
             }
         }
 
