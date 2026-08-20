@@ -102,6 +102,31 @@ class EventResource extends Resource
                         ->seconds(false)
                         ->visible(fn (Get $get) => ($get('event_type') ?? 'single') === 'single'),
                 ]),
+                
+                Forms\Components\Fieldset::make('Pengaturan Presensi')
+                    ->schema([
+                        Forms\Components\Select::make('open_attendance_before')
+                            ->label('Presensi Dibuka (Sebelum Acara)')
+                            ->options([
+                                15 => '15 Menit Sebelum Acara',
+                                30 => '30 Menit Sebelum Acara',
+                                60 => '1 Jam Sebelum Acara',
+                            ])
+                            ->default(30)
+                            ->required(),
+                        
+                        Forms\Components\Select::make('late_tolerance')
+                            ->label('Toleransi Keterlambatan (Setelah Mulai)')
+                            ->options([
+                                5 => '5 Menit',
+                                10 => '10 Menit',
+                                15 => '15 Menit',
+                                20 => '20 Menit',
+                                30 => '30 Menit',
+                            ])
+                            ->default(10)
+                            ->required(),
+                    ])->columns(2),
 
                 // ── MULTI SESSION: sesi-sesi dalam 1 hari ──
                 Repeater::make('sessions')

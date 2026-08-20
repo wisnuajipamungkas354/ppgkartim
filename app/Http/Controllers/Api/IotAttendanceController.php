@@ -93,50 +93,39 @@ class IotAttendanceController extends Controller
         $now = Carbon::now('Asia/Jakarta');
         $todayStr = $now->format('Y-m-d');
         
-        $currentSession = null;
         $currentEvent = null;
+        $todaySessions = [];
 
         // Iterasi semua event yang aktif untuk mencari sesi yang berlangsung HARI INI
-        // dan jamnya mencakup waktu sekarang
         foreach ($activeEvents as $event) {
             $eventSessions = $this->normalizeEventSessions($event);
 
             foreach ($eventSessions as $sesi) {
-                // Simpan raw data untuk debug
-                $rawStartTime = is_object($sesi['start_time']) ? $sesi['start_time']->format('H:i') : ($sesi['start_time'] ?? 'NULL');
-                $rawEndTime = is_object($sesi['end_time']) ? $sesi['end_time']->format('H:i') : ($sesi['end_time'] ?? 'NULL');
-                
                 [$start, $end, $sessionDate] = $this->getSessionTimeBounds($sesi, $todayStr);
                 
-                if ($start && $end) {
-                    // Cek apakah jam saat ini berada di dalam rentang sesi
-                    // Diberi toleransi: start - 30 menit s/d end + 60 menit
-                    $validStart = $start->copy()->subMinutes(30);
+                // Jika sesi ini dijadwalkan pada hari ini
+                if ($start && $end && $sessionDate === $todayStr) {
+                    $currentEvent = $event;
+                    
+                    // Hitung batas validasi (sudah dikurangi open_attendance_before)
+                    $validStart = $start->copy()->subMinutes($event->open_attendance_before ?? 30);
                     $validEnd = $end->copy()->addMinutes(60);
                     
-                    if ($now->between($validStart, $validEnd)) {
-                        $currentSession = $sesi;
-                        $currentSession['date'] = $sessionDate;
-                        $currentEvent = $event;
-                        break 2; // Langsung keluar dari pencarian event & sesi
-                    }
+                    $todaySessions[] = [
+                        'session_date' => $sessionDate,
+                        'session_label' => $sesi['label'] ?? 'Unknown Session',
+                        'valid_start' => $validStart->format('Y-m-d H:i:s'),
+                        'valid_end' => $validEnd->format('Y-m-d H:i:s'),
+                    ];
                 }
             }
+            if ($currentEvent) break; // Sudah ketemu event untuk hari ini, stop iterasi event lain
         }
 
-        if (!$currentEvent || !$currentSession) {
-            $debugMsg = 'Tidak ada acara yang sedang berlangsung.';
+        if (!$currentEvent || empty($todaySessions)) {
+            $debugMsg = 'Tidak ada acara yang dijadwalkan hari ini.';
             if ($activeEvents->isEmpty()) {
-                $debugMsg .= ' (Debug: Tidak ada Event aktif yang ditemukan untuk akun dengan User ID ' . $device->user_id . ' milik ESP32 ini. Pastikan Event dibuat oleh akun yang persis sama!)';
-            } else {
-                // Kumpulkan informasi sesi terakhir yang dicek untuk debugging
-                $lastSessionInfo = 'unknown';
-                if (isset($validStart) && isset($validEnd)) {
-                    $lastSessionInfo = $validStart->format('Y-m-d H:i') . ' s/d ' . $validEnd->format('Y-m-d H:i');
-                } else {
-                    $lastSessionInfo = "Raw Start: $rawStartTime, Raw End: $rawEndTime (Gagal di-parse!)";
-                }
-                $debugMsg .= ' (Debug: Ditemukan ' . $activeEvents->count() . ' Event (Tipe: ' . ($event->event_type ?? 'unknown') . '), tapi jam saat ini (' . $now->format('Y-m-d H:i') . ') tidak masuk dalam rentang waktu sesi mana pun! Sesi terakhir dicek rentangnya: ' . $lastSessionInfo . ')';
+                $debugMsg .= ' (Debug: Tidak ada Event aktif untuk User ID ' . $device->user_id . ')';
             }
             return response()->json(['status' => 'idle', 'message' => $debugMsg]);
         }
@@ -173,10 +162,7 @@ class IotAttendanceController extends Controller
             'data' => [
                 'event_id' => $currentEvent->id,
                 'event_name' => $currentEvent->name,
-                'session_date' => $currentSession['date'],
-                'session_label' => $currentSession['label'] ?? 'Unknown Session',
-                'start_time' => $currentSession['start_time'],
-                'end_time' => $currentSession['end_time'],
+                'sessions' => $todaySessions,
                 'participants' => $participants
             ]
         ]);
@@ -223,7 +209,7 @@ class IotAttendanceController extends Controller
             }
         }
 
-        $lateTime = $start ? $start->copy()->addMinutes(10) : null;
+        $lateTime = $start ? $start->copy()->addMinutes($currentEvent->late_tolerance ?? 10) : null;
         $insertedCount = 0;
 
         foreach ($scans as $scan) {

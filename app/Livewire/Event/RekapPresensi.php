@@ -53,17 +53,31 @@ class RekapPresensi extends Component implements HasForms, HasTable
             }
         }
 
-        $dynamicColumns[] = TextColumn::make('kehadiran_sesi')
-            ->label('Kehadiran Sesi')
+        if ($this->event->event_type !== 'single') {
+            $dynamicColumns[] = TextColumn::make('nama_sesi')
+                ->label('Sesi Kehadiran')
+                ->getStateUsing(function (EventParticipant $record) {
+                    $atts = $record->attendances;
+                    if ($atts->isEmpty()) {
+                        return ['-'];
+                    }
+                    return $atts->map(function($att) {
+                        return $att->session_label ?: 'Sesi Tunggal';
+                    })->toArray();
+                })
+                ->badge()
+                ->color(fn(string $state) => $state === '-' ? 'danger' : 'primary');
+        }
+
+        $dynamicColumns[] = TextColumn::make('jam_hadir')
+            ->label('Jam Presensi')
             ->getStateUsing(function (EventParticipant $record) {
                 $atts = $record->attendances;
                 if ($atts->isEmpty()) {
                     return ['Belum Hadir'];
                 }
                 return $atts->map(function($att) {
-                    $sessionName = $att->session_label ?: 'Sesi Tunggal';
-                    $time = Carbon::parse($att->check_in_at)->format('H:i');
-                    return "$sessionName ($time)";
+                    return Carbon::parse($att->check_in_at)->format('H:i');
                 })->toArray();
             })
             ->badge()
