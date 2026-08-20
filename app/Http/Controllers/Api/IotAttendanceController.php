@@ -109,11 +109,12 @@ class IotAttendanceController extends Controller
                     
                     // Hitung batas validasi (sudah dikurangi open_attendance_before)
                     $validStart = $start->copy()->subMinutes($event->open_attendance_before ?? 30);
-                    $validEnd = $end->copy()->addMinutes(60);
+                    $validEnd = $end->copy(); // Sesi ditutup TEPAT pada jam selesai sesi
                     
                     $todaySessions[] = [
                         'session_date' => $sessionDate,
                         'session_label' => $sesi['label'] ?? 'Unknown Session',
+                        'start_time' => $start->format('H:i'),
                         'valid_start' => $validStart->format('Y-m-d H:i:s'),
                         'valid_end' => $validEnd->format('Y-m-d H:i:s'),
                     ];
