@@ -108,6 +108,8 @@ class EventResource extends Resource
                         Forms\Components\Select::make('open_attendance_before')
                             ->label('Presensi Dibuka (Sebelum Acara)')
                             ->options([
+                                5 => '5 Menit Sebelum Acara',
+                                10 => '10 Menit Sebelum Acara',
                                 15 => '15 Menit Sebelum Acara',
                                 30 => '30 Menit Sebelum Acara',
                                 60 => '1 Jam Sebelum Acara',
