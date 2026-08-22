@@ -117,6 +117,61 @@ class RekapPresensi extends Component implements HasForms, HasTable
         return $filters;
     }
     
+    public function getDefaultSessionLabel()
+    {
+        if ($this->event->event_type === 'single') {
+            return null;
+        }
+
+        $now = Carbon::now();
+        $todayStr = $now->format('Y-m-d');
+
+        $firstSession = null;
+        $lastSession = null;
+
+        $sessions = $this->event->sessions ?? [];
+        $normalizedDays = [];
+        if ($this->event->event_type === 'multi_session') {
+            if (isset($sessions[0]['date']) && isset($sessions[0]['sesi'])) {
+                $normalizedDays = $sessions;
+            } else {
+                $normalizedDays = [['date' => $this->event->date, 'sesi' => $sessions]];
+            }
+        } elseif ($this->event->event_type === 'multi_day') {
+            $normalizedDays = $sessions;
+        }
+
+        foreach ($normalizedDays as $day) {
+            $sessionDate = $day['date'] ?? $this->event->date;
+            
+            if (!empty($day['sesi']) && is_array($day['sesi'])) {
+                foreach ($day['sesi'] as $sesi) {
+                    $label = $sesi['label'] ?? null;
+                    if (!$label) continue;
+
+                    if (!$firstSession) $firstSession = $label;
+                    $lastSession = $label;
+
+                    if ($sessionDate === $todayStr) {
+                        $end = Carbon::parse($sesi['end_time'] ?? '23:59');
+                        $end->setDateFrom(Carbon::parse($sessionDate));
+                        
+                        $start = Carbon::parse($sesi['start_time'] ?? '00:00');
+                        if ($end->lessThan($start)) {
+                            $end->addDay();
+                        }
+
+                        if ($now->lessThanOrEqualTo($end)) {
+                            return $label;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $lastSession ?? $firstSession;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -126,13 +181,44 @@ class RekapPresensi extends Component implements HasForms, HasTable
                 SelectFilter::make('session_label')
                     ->label('Filter Sesi')
                     ->options(function () {
-                        return \App\Models\Attendance::where('event_id', $this->event->id)
+                        $options = [];
+                        
+                        $sessions = $this->event->sessions ?? [];
+                        $normalizedDays = [];
+                        if ($this->event->event_type === 'multi_session') {
+                            if (isset($sessions[0]['date']) && isset($sessions[0]['sesi'])) {
+                                $normalizedDays = $sessions;
+                            } else {
+                                $normalizedDays = [['date' => $this->event->date, 'sesi' => $sessions]];
+                            }
+                        } elseif ($this->event->event_type === 'multi_day') {
+                            $normalizedDays = $sessions;
+                        }
+                        
+                        foreach ($normalizedDays as $day) {
+                            if (!empty($day['sesi']) && is_array($day['sesi'])) {
+                                foreach ($day['sesi'] as $sesi) {
+                                    if (!empty($sesi['label'])) {
+                                        $options[$sesi['label']] = $sesi['label'];
+                                    }
+                                }
+                            }
+                        }
+
+                        $dbSessions = \App\Models\Attendance::where('event_id', $this->event->id)
                             ->whereNotNull('session_label')
                             ->where('session_label', '!=', '')
                             ->distinct()
-                            ->pluck('session_label', 'session_label')
+                            ->pluck('session_label')
                             ->toArray();
+                            
+                        foreach($dbSessions as $dbSesi) {
+                            $options[$dbSesi] = $dbSesi;
+                        }
+
+                        return $options;
                     })
+                    ->default(fn() => $this->getDefaultSessionLabel())
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
                         if (!empty($data['value'])) {
                             $query->whereHas('attendances', function (\Illuminate\Database\Eloquent\Builder $query) use ($data) {
@@ -155,8 +241,15 @@ class RekapPresensi extends Component implements HasForms, HasTable
     }
 
     public function shareOnWhatsApp() {
+        $selectedSession = $this->getTableFilterState('session_label')['value'] ?? null;
+        
         $participants = EventParticipant::where('event_id', $this->event->id)->get(); 
-        $attendances = Attendance::where('event_id', $this->event->id)->get();
+        
+        $attendancesQuery = Attendance::where('event_id', $this->event->id);
+        if ($selectedSession) {
+            $attendancesQuery->where('session_label', $selectedSession);
+        }
+        $attendances = $attendancesQuery->get();
         
         $uniqueAttendeesCount = $attendances->pluck('participant_id')->unique()->count();
         $alfa = $participants->count() - $uniqueAttendeesCount;
@@ -164,28 +257,69 @@ class RekapPresensi extends Component implements HasForms, HasTable
         // Ambil info dari sesi pertama sebagai patokan tanggal di WA
         $firstSessionDate = $this->event->sessions[0]['date'] ?? $this->event->date;
         $date = $firstSessionDate ? Carbon::parse($firstSessionDate)->format('d/m/Y') : '-';
+        
+        $sessionTitle = $selectedSession ? "Sesi: {$selectedSession}" : "Semua Sesi";
 
-        $url = 'https://api.whatsapp.com/send?text=';
-        $rawMessage = "*Rekap Presensi*
-        %0A*{$this->event->name}*
-        %0A
-        %0A📆 {$date}
-        %0A📍 {$this->event->place}
-        %0A
-        %0A*Kehadiran (Minimal 1 Sesi)*
-        %0A✅ Hadir : {$uniqueAttendeesCount}
-        %0A❌ Tidak Hadir : {$alfa}
-        %0A👳🏻‍♀🧕 Total Peserta : {$participants->count()}
-        %0A
-        %0A*Total Presensi Tersimpan: {$attendances->count()}*
-        %0A- In Time : {$attendances->where('arrival_status', 'in_time')->count()}
-        %0A- On Time : {$attendances->where('arrival_status', 'on_time')->count()}
-        %0A- Over Time : {$attendances->where('arrival_status', 'over_time')->count()}
-        %0A
-        %0Aالحمدلله جزاكم الله خيرا😊🙏🏻
-        ";
+        $nameField = null;
+        foreach ($this->event->column_config as $c) {
+            if (str_contains(strtolower($c['field']), 'nama') || str_contains(strtolower($c['label']), 'nama')) {
+                $nameField = $c['field'];
+                break;
+            }
+        }
+        if (!$nameField && !empty($this->event->column_config[0])) {
+            $nameField = $this->event->column_config[0]['field'];
+        }
 
-        return $url . $rawMessage;
+        $earliest = Attendance::where('event_id', $this->event->id)
+            ->when($selectedSession, fn($q) => $q->where('session_label', $selectedSession))
+            ->with('participant')
+            ->orderBy('check_in_at', 'asc')
+            ->limit(3)
+            ->get();
+
+        $latest = Attendance::where('event_id', $this->event->id)
+            ->when($selectedSession, fn($q) => $q->where('session_label', $selectedSession))
+            ->with('participant')
+            ->orderBy('check_in_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        $rawMessage = "*Rekap Presensi*\n"
+            . "*{$this->event->name}*\n\n"
+            . "📆 {$date}\n"
+            . "📍 {$this->event->place}\n"
+            . "🏷 {$sessionTitle}\n\n"
+            . "*Kehadiran*\n"
+            . "✅ Hadir : {$uniqueAttendeesCount}\n"
+            . "❌ Tidak Hadir : {$alfa}\n"
+            . "👳🏻‍♀🧕 Total Peserta : {$participants->count()}\n\n"
+            . "*Detail Keterlambatan:*\n"
+            . "- In Time : {$attendances->where('arrival_status', 'in_time')->count()}\n"
+            . "- On Time : {$attendances->where('arrival_status', 'on_time')->count()}\n"
+            . "- Over Time : {$attendances->where('arrival_status', 'over_time')->count()}\n\n"
+            . "*🏆 3 Peserta Paling Awal:*\n"
+            . $this->formatTopAttendees($earliest, $nameField) . "\n\n"
+            . "*🏃 3 Peserta Paling Akhir:*\n"
+            . $this->formatTopAttendees($latest, $nameField) . "\n\n"
+            . "الحمدلله جزاكم الله خيرا😊🙏🏻";
+
+        // Ganti \n dengan %0A dan replace spasi biasa untuk URL encode yang bersih
+        return 'https://api.whatsapp.com/send?text=' . str_replace('%250A', '%0A', urlencode(str_replace("\n", "%0A", $rawMessage)));
+    }
+
+    private function formatTopAttendees($attendancesList, $nameField) {
+        if ($attendancesList->isEmpty()) {
+            return "- Belum ada data -";
+        }
+        $result = [];
+        foreach ($attendancesList as $index => $att) {
+            $name = $att->participant->data_json[$nameField] ?? 'Tanpa Nama';
+            $time = Carbon::parse($att->check_in_at)->format('H:i');
+            $rank = $index + 1;
+            $result[] = "{$rank}. {$name} ({$time})";
+        }
+        return implode("\n", $result);
     }
 
     public function getEventScheduleDisplayProperty()
