@@ -78,9 +78,8 @@ class EditEvent extends EditRecord
                 ->modalDescription('Apakah kamu yakin ingin menghapus event ini ?')
                 ->modalSubmitActionLabel('Ya')
                 ->modalCancelActionLabel('Batal')
-                ->action(function(array $data, Event $record) {
+                ->before(function(Event $record) {
                     if($record->poster_image != null) Storage::delete($record->poster_image);
-                    $record->delete();
                 })
                 ->successNotification(fn(Notification $notification) => $notification->title('Dihapus')),
         ];

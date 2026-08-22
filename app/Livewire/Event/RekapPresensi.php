@@ -81,7 +81,16 @@ class RekapPresensi extends Component implements HasForms, HasTable
                 })->toArray();
             })
             ->badge()
-            ->color(fn(string $state) => $state === 'Belum Hadir' ? 'danger' : 'success');
+            ->color(fn(string $state) => $state === 'Belum Hadir' ? 'danger' : 'success')
+            ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction) {
+                return $query->orderBy(
+                    \App\Models\Attendance::select('check_in_at')
+                        ->whereColumn('attendances.participant_id', 'event_participants.id')
+                        ->orderBy('check_in_at', 'asc')
+                        ->limit(1),
+                    $direction
+                );
+            });
 
         return $dynamicColumns;
     }
