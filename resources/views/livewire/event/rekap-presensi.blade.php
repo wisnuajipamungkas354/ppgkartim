@@ -10,7 +10,10 @@
     </div>
   </header>
   <div class="my-5">
-    @livewire(\App\Livewire\Event\Widget\RekapPresensiStat::class, ['event' => $event])
+    @livewire(\App\Livewire\Event\Widget\RekapPresensiStat::class, [
+        'event' => $event,
+        'selectedSession' => $this->getTableFilterState('session_label')['value'] ?? null
+    ])
   </div>
   <div>
     {{ $this->table }}
