@@ -193,6 +193,26 @@ class RekapPresensi extends Component implements HasForms, HasTable
             ->query(EventParticipant::where('event_id', $this->event->id)->with('attendances'))
             ->columns($this->getTableColumns())
             ->filters(array_merge([
+                SelectFilter::make('kehadiran')
+                    ->label('Kehadiran')
+                    ->options([
+                        'hadir' => 'Hadir',
+                        'tidak_hadir' => 'Tidak Hadir',
+                    ])
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            $selectedSession = $this->getTableFilterState('session_label')['value'] ?? null;
+                            if ($data['value'] === 'hadir') {
+                                $query->whereHas('attendances', function ($q) use ($selectedSession) {
+                                    if ($selectedSession) $q->where('session_label', $selectedSession);
+                                });
+                            } elseif ($data['value'] === 'tidak_hadir') {
+                                $query->whereDoesntHave('attendances', function ($q) use ($selectedSession) {
+                                    if ($selectedSession) $q->where('session_label', $selectedSession);
+                                });
+                            }
+                        }
+                    }),
                 SelectFilter::make('session_label')
                     ->label('Filter Sesi')
                     ->options(function () {
@@ -235,11 +255,8 @@ class RekapPresensi extends Component implements HasForms, HasTable
                     })
                     ->default(fn() => $this->getDefaultSessionLabel())
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
-                        if (!empty($data['value'])) {
-                            $query->whereHas('attendances', function (\Illuminate\Database\Eloquent\Builder $query) use ($data) {
-                                $query->where('session_label', $data['value']);
-                            });
-                        }
+                        // Do not filter the participants query here, so we can still see absentees!
+                        // The session_label state is used by the Kehadiran filter and table columns.
                     })
             ], $this->getTableFilters()))
             ->actions([
