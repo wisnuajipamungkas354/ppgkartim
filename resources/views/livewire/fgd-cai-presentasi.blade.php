@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100 flex flex-col font-sans" x-data="{ fullscreen: false }">
+<div class="min-h-screen bg-gray-100 flex flex-col font-sans" x-data="{ fullscreen: false }" @fullscreenchange.window="fullscreen = !!document.fullscreenElement">
     <!-- Header Controls (Hidden in Fullscreen if needed, or kept minimal) -->
     <header class="bg-white border-b py-3 px-6 shadow-sm flex flex-wrap items-center justify-between gap-4" :class="{ 'hidden': fullscreen }">
         <div class="flex items-center gap-3">
@@ -54,11 +54,16 @@
     <main class="flex-grow p-4 md:p-6 flex flex-col w-full max-w-[1920px] mx-auto">
         @if($activeGroupId && $activeThemeId)
             
-            <div class="mb-6 flex items-center justify-center gap-4 text-white py-4 px-6 rounded-xl shadow-lg" style="background-color: #1e3a8a; border: 1px solid #1e40af;" x-show="fullscreen" x-transition x-cloak>
-                <img src="{{ asset('images/logo-cai.webp') }}" alt="Logo CAI" class="h-10 w-auto object-contain bg-white rounded p-1">
-                <h2 class="text-3xl md:text-4xl font-black tracking-widest uppercase">
-                    {{ $groups->firstWhere('id', $activeGroupId)?->name }} <span class="text-blue-300 mx-2">—</span> {{ $themes->firstWhere('id', $activeThemeId)?->title }}
-                </h2>
+            <div class="mb-6 flex flex-col md:flex-row items-center justify-center gap-6 text-white py-5 px-8 rounded-xl shadow-lg" style="background-color: #1e3a8a; border: 1px solid #1e40af;" x-show="fullscreen" x-transition x-cloak>
+                <img src="{{ asset('images/logo-cai.webp') }}" alt="Logo CAI" class="h-16 md:h-20 w-auto object-contain bg-white rounded-lg p-2 shadow-sm">
+                <div class="text-center md:text-left">
+                    <h2 class="text-3xl md:text-5xl font-black tracking-widest uppercase text-yellow-400 mb-2">
+                        {{ $groups->firstWhere('id', $activeGroupId)?->name }}
+                    </h2>
+                    <h3 class="text-xl md:text-2xl font-bold uppercase text-blue-100">
+                        {{ $themes->firstWhere('id', $activeThemeId)?->title }}
+                    </h3>
+                </div>
             </div>
             
             @if($note)
