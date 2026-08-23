@@ -1,10 +1,21 @@
 <div class="min-h-screen bg-gray-50 flex flex-col font-sans">
     <!-- Header/Navbar -->
-    <header class="bg-white border-b py-3 px-4 md:py-4 md:px-12 flex items-center gap-3 shadow-sm">
-        <img src="{{ asset('images/logo-cai.webp') }}" alt="Logo CAI" class="h-8 md:h-10 w-auto object-contain">
+    <header class="bg-white border-b py-3 px-4 md:py-4 md:px-12 flex items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-center gap-3">
+            <img src="{{ asset('images/logo-cai.webp') }}" alt="Logo CAI" class="h-8 md:h-10 w-auto object-contain">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-blue-900">Notulis FGD</h1>
+                <p class="text-xs md:text-sm text-gray-500">Cinta Alam Indonesia — Focus Group Discussion</p>
+            </div>
+        </div>
         <div>
-            <h1 class="text-xl md:text-2xl font-bold text-blue-900">Notulis FGD</h1>
-            <p class="text-xs md:text-sm text-gray-500">Cinta Alam Indonesia — Focus Group Discussion</p>
+            <a href="{{ route('fgd-cai.presentasi') }}" target="_blank" class="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs md:text-sm font-bold rounded-lg shadow-sm transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span class="hidden sm:inline">Mode Presentasi</span>
+                <span class="sm:hidden">Presentasi</span>
+            </a>
         </div>
     </header>
 

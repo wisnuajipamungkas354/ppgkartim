@@ -26,3 +26,4 @@ Route::get('/event/{event}/rekap', RekapPresensi::class)->name('events.rekap');
 Route::get('/event/{event}/rekap/download', [ExportPdfController::class, 'rekapPresensiPdf'])->name('events.rekap.download');
 Route::get('admin/pjp-reports/{id}/laporan-pjp', [ExportPdfController::class, 'laporanPjpPdf'])->name('cetak.pjp');
 Route::get('/fgd-cai', \App\Livewire\FgdCai::class)->name('fgd-cai');
+Route::get('/fgd-cai/presentasi', \App\Livewire\FgdCaiPresentasi::class)->name('fgd-cai.presentasi');
