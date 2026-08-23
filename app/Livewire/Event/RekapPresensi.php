@@ -57,7 +57,13 @@ class RekapPresensi extends Component implements HasForms, HasTable
             $dynamicColumns[] = TextColumn::make('nama_sesi')
                 ->label('Sesi Kehadiran')
                 ->getStateUsing(function (EventParticipant $record) {
+                    $selectedSession = $this->getTableFilterState('session_label')['value'] ?? null;
                     $atts = $record->attendances;
+                    
+                    if ($selectedSession) {
+                        $atts = $atts->filter(fn($att) => $att->session_label === $selectedSession);
+                    }
+
                     if ($atts->isEmpty()) {
                         return ['-'];
                     }
@@ -72,7 +78,13 @@ class RekapPresensi extends Component implements HasForms, HasTable
         $dynamicColumns[] = TextColumn::make('jam_hadir')
             ->label('Jam Presensi')
             ->getStateUsing(function (EventParticipant $record) {
+                $selectedSession = $this->getTableFilterState('session_label')['value'] ?? null;
                 $atts = $record->attendances;
+                
+                if ($selectedSession) {
+                    $atts = $atts->filter(fn($att) => $att->session_label === $selectedSession);
+                }
+
                 if ($atts->isEmpty()) {
                     return ['Belum Hadir'];
                 }
@@ -83,9 +95,12 @@ class RekapPresensi extends Component implements HasForms, HasTable
             ->badge()
             ->color(fn(string $state) => $state === 'Belum Hadir' ? 'danger' : 'success')
             ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction) {
+                $selectedSession = $this->getTableFilterState('session_label')['value'] ?? null;
+                
                 return $query->orderBy(
                     \App\Models\Attendance::select('check_in_at')
                         ->whereColumn('attendances.participant_id', 'event_participants.id')
+                        ->when($selectedSession, fn($q) => $q->where('session_label', $selectedSession))
                         ->orderBy('check_in_at', 'asc')
                         ->limit(1),
                     $direction
