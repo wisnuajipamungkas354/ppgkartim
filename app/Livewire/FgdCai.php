@@ -115,15 +115,6 @@ class FgdCai extends Component implements HasForms
                         Forms\Components\RichEditor::make('ap_waktu')->label('Waktu')->placeholder('Tuliskan target waktu pelaksanaan...'),
                         Forms\Components\RichEditor::make('ap_dana')->label('Dana')->placeholder('Tuliskan rincian kebutuhan dana...'),
                     ])->columns(1),
-
-                Forms\Components\Section::make('PERAN 5 UNSUR')
-                    ->schema([
-                        Forms\Components\RichEditor::make('peran_keimaman')->label('Peran Keimaman')->placeholder('Tuliskan peran masing-masing unsur di sini...'),
-                        Forms\Components\RichEditor::make('peran_pengurus')->label('Peran Pengurus')->placeholder('Tuliskan peran masing-masing unsur di sini...'),
-                        Forms\Components\RichEditor::make('peran_orang_tua')->label('Peran Orang Tua')->placeholder('Tuliskan peran masing-masing unsur di sini...'),
-                        Forms\Components\RichEditor::make('peran_mubaligh')->label('Peran Mubaligh')->placeholder('Tuliskan peran masing-masing unsur di sini...'),
-                        Forms\Components\RichEditor::make('peran_ahli_pendidik')->label('Peran Ahli Pendidik')->placeholder('Tuliskan peran masing-masing unsur di sini...'),
-                    ])->columns(1),
             ])
             ->statePath('data');
     }
