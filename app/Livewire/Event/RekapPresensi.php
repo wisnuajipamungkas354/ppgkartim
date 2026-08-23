@@ -316,8 +316,26 @@ class RekapPresensi extends Component implements HasForms, HasTable
             . "*🏆 3 Peserta Paling Awal:*\n"
             . $this->formatTopAttendees($earliest, $nameField) . "\n\n"
             . "*🏃 3 Peserta Paling Akhir:*\n"
-            . $this->formatTopAttendees($latest, $nameField) . "\n\n"
-            . "الحمدلله جزاكم الله خيرا😊🙏🏻";
+            . $this->formatTopAttendees($latest, $nameField) . "\n\n";
+
+        $absentParticipantIds = $participants->pluck('id')->diff($attendances->pluck('participant_id'));
+        $absentParticipants = $participants->whereIn('id', $absentParticipantIds)->values();
+
+        if ($absentParticipants->isNotEmpty()) {
+            $rawMessage .= "*❌ Peserta Tidak Hadir:*\n";
+            $limit = min(5, $absentParticipants->count());
+            for ($i = 0; $i < $limit; $i++) {
+                $name = $absentParticipants[$i]->data_json[$nameField] ?? 'Tanpa Nama';
+                $rawMessage .= ($i + 1) . ". {$name}\n";
+            }
+            if ($absentParticipants->count() > 5) {
+                $rekapUrl = route('events.rekap', $this->event->hash_id ?? $this->event->id);
+                $rawMessage .= "6. Lihat selengkapnya di {$rekapUrl}\n";
+            }
+            $rawMessage .= "\n";
+        }
+
+        $rawMessage .= "الحمدلله جزاكم الله خيرا😊🙏🏼";
 
         // Ganti \n dengan %0A dan replace spasi biasa untuk URL encode yang bersih
         return 'https://api.whatsapp.com/send?text=' . str_replace('%250A', '%0A', urlencode(str_replace("\n", "%0A", $rawMessage)));
