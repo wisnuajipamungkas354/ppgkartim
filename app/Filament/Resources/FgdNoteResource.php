@@ -54,16 +54,7 @@ class FgdNoteResource extends Resource
                         Forms\Components\RichEditor::make('ap_peserta')->label('Peserta')->disabled(),
                         Forms\Components\RichEditor::make('ap_waktu')->label('Waktu')->disabled(),
                         Forms\Components\RichEditor::make('ap_dana')->label('Dana')->disabled(),
-                    ]),
-
-                Forms\Components\Section::make('3. Peran 5 Unsur')
-                    ->schema([
-                        Forms\Components\RichEditor::make('peran_keimaman')->label('Peran Keimaman')->disabled(),
-                        Forms\Components\RichEditor::make('peran_pengurus')->label('Peran Pengurus')->disabled(),
-                        Forms\Components\RichEditor::make('peran_orang_tua')->label('Peran Orang Tua')->disabled(),
-                        Forms\Components\RichEditor::make('peran_mubaligh')->label('Peran Mubaligh')->disabled(),
-                        Forms\Components\RichEditor::make('peran_ahli_pendidik')->label('Peran Ahli Pendidik')->disabled(),
-                    ]),
+                    ])->columns(1),
             ]);
     }
 

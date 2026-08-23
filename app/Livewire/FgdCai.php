@@ -143,11 +143,6 @@ class FgdCai extends Component implements HasForms
                 'ap_peserta' => $formData['ap_peserta'] ?? null,
                 'ap_waktu' => $formData['ap_waktu'] ?? null,
                 'ap_dana' => $formData['ap_dana'] ?? null,
-                'peran_keimaman' => $formData['peran_keimaman'] ?? null,
-                'peran_pengurus' => $formData['peran_pengurus'] ?? null,
-                'peran_orang_tua' => $formData['peran_orang_tua'] ?? null,
-                'peran_mubaligh' => $formData['peran_mubaligh'] ?? null,
-                'peran_ahli_pendidik' => $formData['peran_ahli_pendidik'] ?? null,
             ]
         );
 
