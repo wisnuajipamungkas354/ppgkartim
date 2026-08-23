@@ -340,14 +340,14 @@ class RekapPresensi extends Component implements HasForms, HasTable
 
         if ($absentParticipants->isNotEmpty()) {
             $rawMessage .= "*❌ Peserta Tidak Hadir:*\n";
-            $limit = min(5, $absentParticipants->count());
+            $limit = min(10, $absentParticipants->count());
             for ($i = 0; $i < $limit; $i++) {
                 $name = $absentParticipants[$i]->data_json[$nameField] ?? 'Tanpa Nama';
                 $rawMessage .= ($i + 1) . ". {$name}\n";
             }
-            if ($absentParticipants->count() > 5) {
+            if ($absentParticipants->count() > 10) {
                 $rekapUrl = route('events.rekap', $this->event->hash_id ?? $this->event->id);
-                $rawMessage .= "6. Lihat selengkapnya di {$rekapUrl}\n";
+                $rawMessage .= "11. Lihat selengkapnya di {$rekapUrl}\n";
             }
             $rawMessage .= "\n";
         }
