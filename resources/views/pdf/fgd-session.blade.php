@@ -102,6 +102,37 @@
             width: 20%;
         }
 
+        .vertical-list {
+            margin-bottom: 15px;
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            page-break-inside: auto;
+        }
+
+        .list-item {
+            margin-bottom: 12px;
+            page-break-inside: auto;
+        }
+
+        .list-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .list-label {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #ecf0f1;
+            padding: 4px 8px;
+            border-left: 3px solid #2980b9;
+            margin-bottom: 5px;
+            page-break-after: avoid; /* Keep label attached to its content */
+        }
+
+        .list-content {
+            padding: 0 8px;
+            page-break-inside: auto;
+        }
+
         /* Prevent empty p tags in rich text from taking too much space */
         p { margin-top: 0; margin-bottom: 8px; }
     </style>
@@ -165,34 +196,39 @@
                 </table>
 
                 @if($note->ap_deskripsi || $note->ap_nama_kegiatan || $note->ap_peserta || $note->ap_waktu || $note->ap_dana)
-                    <table>
-                        <thead>
-                            <tr>
-                                <td colspan="5" style="border: none; padding: 0;">
-                                    <div class="section-title">Action Plan</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="ap-th">Deskripsi</th>
-                                <th class="ap-th">Nama Kegiatan</th>
-                                <th class="ap-th">Peserta</th>
-                                <th class="ap-th">Waktu</th>
-                                <th class="ap-th">Dana</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="height: 0; border: none; padding: 0;">
-                                <td colspan="5" style="height: 0; border: none; padding: 0; line-height: 0;"></td>
-                            </tr>
-                            <tr>
-                                <td>{!! $note->ap_deskripsi ?: '-' !!}</td>
-                                <td>{!! $note->ap_nama_kegiatan ?: '-' !!}</td>
-                                <td>{!! $note->ap_peserta ?: '-' !!}</td>
-                                <td>{!! $note->ap_waktu ?: '-' !!}</td>
-                                <td>{!! $note->ap_dana ?: '-' !!}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="section-title">Action Plan</div>
+                    <div class="vertical-list">
+                        @if($note->ap_deskripsi)
+                            <div class="list-item">
+                                <div class="list-label">Deskripsi</div>
+                                <div class="list-content">{!! $note->ap_deskripsi !!}</div>
+                            </div>
+                        @endif
+                        @if($note->ap_nama_kegiatan)
+                            <div class="list-item">
+                                <div class="list-label">Nama Kegiatan</div>
+                                <div class="list-content">{!! $note->ap_nama_kegiatan !!}</div>
+                            </div>
+                        @endif
+                        @if($note->ap_peserta)
+                            <div class="list-item">
+                                <div class="list-label">Peserta</div>
+                                <div class="list-content">{!! $note->ap_peserta !!}</div>
+                            </div>
+                        @endif
+                        @if($note->ap_waktu)
+                            <div class="list-item">
+                                <div class="list-label">Waktu</div>
+                                <div class="list-content">{!! $note->ap_waktu !!}</div>
+                            </div>
+                        @endif
+                        @if($note->ap_dana)
+                            <div class="list-item">
+                                <div class="list-label">Dana</div>
+                                <div class="list-content">{!! $note->ap_dana !!}</div>
+                            </div>
+                        @endif
+                    </div>
                 @endif
             </div>
 
