@@ -153,6 +153,9 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr style="height: 0; border: none; padding: 0;">
+                            <td colspan="3" style="height: 0; border: none; padding: 0; line-height: 0;"></td>
+                        </tr>
                         <tr>
                             <td>{!! $note->problem ?: '-' !!}</td>
                             <td>{!! $note->penyebab ?: '-' !!}</td>
@@ -178,6 +181,9 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <tr style="height: 0; border: none; padding: 0;">
+                                <td colspan="5" style="height: 0; border: none; padding: 0; line-height: 0;"></td>
+                            </tr>
                             <tr>
                                 <td>{!! $note->ap_deskripsi ?: '-' !!}</td>
                                 <td>{!! $note->ap_nama_kegiatan ?: '-' !!}</td>
