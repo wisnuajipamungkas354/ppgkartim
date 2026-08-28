@@ -63,6 +63,27 @@
             page-break-inside: auto;
         }
         
+        .section-title {
+            font-weight: bold;
+            font-size: 13px;
+            color: #2980b9;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #2980b9;
+            display: inline-block;
+            page-break-after: avoid; /* Prevent break after title */
+        }
+
+        thead {
+            page-break-inside: avoid;
+            page-break-after: avoid;
+        }
+
+        tbody {
+            page-break-inside: auto;
+            page-break-before: auto;
+        }
+
         tr {
             page-break-inside: auto;
             page-break-after: auto;
@@ -87,18 +108,8 @@
             width: 20%;
         }
 
-        .section-title {
-            font-weight: bold;
-            font-size: 13px;
-            color: #2980b9;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #2980b9;
-            display: inline-block;
-        }
-
         /* Prevent empty p tags in rich text from taking too much space */
-        p { margin-top: 0; margin-bottom: 8px; }
+        p { margin-top: 0; margin-bottom: 8px; page-break-inside: auto; }
     </style>
 </head>
 <body>
