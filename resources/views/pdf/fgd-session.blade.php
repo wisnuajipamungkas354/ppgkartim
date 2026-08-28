@@ -45,15 +45,13 @@
             padding: 8px 12px;
             font-size: 14px;
             font-weight: bold;
-            margin-bottom: 10px;
-            page-break-after: avoid;
+            margin-bottom: 5px;
         }
 
         .note-notulis {
             font-style: italic;
-            margin-bottom: 15px;
             color: #555;
-            page-break-after: avoid;
+            margin-bottom: 10px;
         }
 
         table {
@@ -61,8 +59,9 @@
             border-collapse: collapse;
             margin-bottom: 15px;
             page-break-inside: auto;
+            table-layout: fixed; /* Helps dompdf calculate breaks better */
         }
-        
+
         .section-title {
             font-weight: bold;
             font-size: 13px;
@@ -71,29 +70,25 @@
             margin-bottom: 5px;
             border-bottom: 1px solid #2980b9;
             display: inline-block;
-            page-break-after: avoid; /* Prevent break after title */
         }
 
         thead {
-            page-break-inside: avoid;
-            page-break-after: avoid;
+            display: table-header-group; /* Ensures thead repeats on new pages and sticks to tbody */
         }
 
         tbody {
-            page-break-inside: auto;
-            page-break-before: auto;
+            display: table-row-group;
         }
 
         tr {
             page-break-inside: auto;
-            page-break-after: auto;
         }
 
         th, td {
             border: 1px solid #bdc3c7;
             padding: 8px;
             vertical-align: top;
-            page-break-inside: auto;
+            word-wrap: break-word; /* Prevents overflow */
         }
 
         th {
@@ -101,7 +96,6 @@
             font-weight: bold;
             color: #2c3e50;
             text-align: left;
-            width: 33.33%;
         }
 
         .ap-th {
@@ -109,7 +103,7 @@
         }
 
         /* Prevent empty p tags in rich text from taking too much space */
-        p { margin-top: 0; margin-bottom: 8px; page-break-inside: auto; }
+        p { margin-top: 0; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -123,8 +117,8 @@
                     @endif
                 </td>
                 <td style="width: 70%; text-align: center; border: none; padding: 0; vertical-align: middle;">
-                    <h2>Laporan Hasil Focus Group Discussion (FGD)</h2>
-                    <p>Sesi: <strong>{{ $session->name }}</strong> | Tanggal: {{ \Carbon\Carbon::parse($session->date)->translatedFormat('d F Y') }}</p>
+                    <h2 style="margin: 0; font-size: 20px; color: #2c3e50; text-transform: uppercase; letter-spacing: 1px;">Laporan Hasil Focus Group Discussion (FGD)</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #7f8c8d;">Sesi: <strong>{{ $session->name }}</strong> | Tanggal: {{ \Carbon\Carbon::parse($session->date)->translatedFormat('d F Y') }}</p>
                 </td>
                 <td style="width: 15%; text-align: right; border: none; padding: 0; vertical-align: middle;">
                     @if(!empty($logoPpg))
@@ -138,21 +132,24 @@
     @if($notes->isEmpty())
         <p style="text-align: center; color: #7f8c8d; margin-top: 50px;">Belum ada catatan FGD untuk sesi ini.</p>
     @else
-        @foreach($notes as $note)
+        @foreach($notes as $index => $note)
             <div class="note-container">
-                <div class="note-header">
-                    Grup: {{ $note->group->name ?? '-' }} &nbsp;&nbsp;|&nbsp;&nbsp; Tema: {{ $note->theme->title ?? '-' }}
-                </div>
-                <div class="note-notulis">
-                    Notulis: {{ $note->notulis_name ?? 'Tidak ada nama' }}
-                </div>
-
                 <table>
                     <thead>
                         <tr>
-                            <th>Problem</th>
-                            <th>Penyebab</th>
-                            <th>Solusi</th>
+                            <td colspan="3" style="border: none; padding: 0;">
+                                <div class="note-header">
+                                    Grup: {{ $note->group->name ?? '-' }} &nbsp;&nbsp;|&nbsp;&nbsp; Tema: {{ $note->theme->title ?? '-' }}
+                                </div>
+                                <div class="note-notulis">
+                                    Notulis: {{ $note->notulis_name ?? 'Tidak ada nama' }}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="width: 33.33%;">Problem</th>
+                            <th style="width: 33.33%;">Penyebab</th>
+                            <th style="width: 33.33%;">Solusi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -165,9 +162,13 @@
                 </table>
 
                 @if($note->ap_deskripsi || $note->ap_nama_kegiatan || $note->ap_peserta || $note->ap_waktu || $note->ap_dana)
-                    <div class="section-title">Action Plan</div>
                     <table>
                         <thead>
+                            <tr>
+                                <td colspan="5" style="border: none; padding: 0;">
+                                    <div class="section-title">Action Plan</div>
+                                </td>
+                            </tr>
                             <tr>
                                 <th class="ap-th">Deskripsi</th>
                                 <th class="ap-th">Nama Kegiatan</th>
