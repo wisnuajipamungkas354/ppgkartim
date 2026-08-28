@@ -104,6 +104,12 @@ class FgdSessionResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('pdf')
+                    ->label('Cetak PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('danger')
+                    ->url(fn (\App\Models\FgdSession $record): string => route('cetak.fgd-session', $record))
+                    ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

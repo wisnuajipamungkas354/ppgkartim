@@ -26,6 +26,21 @@ class ExportPdfController extends Controller
         12 => 'Desember'
     ];
 
+    public function laporanFgdPdf(\App\Models\FgdSession $session) {
+        $notes = \App\Models\FgdNote::whereHas('group', function ($query) use ($session) {
+                $query->where('fgd_session_id', $session->id);
+            })
+            ->with(['group', 'theme'])
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.fgd-session', [
+            'session' => $session,
+            'notes' => $notes,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream('Laporan_FGD_' . \Illuminate\Support\Str::slug($session->name) . '.pdf');
+    }
+
     public function rekapPresensiPdf(Event $event) {
         setlocale(LC_ALL, 'id-ID', 'id_ID');
         $eventParticipant = EventParticipant::query()->with('attendances')->where('event_id', $event->id)->get();
