@@ -104,8 +104,24 @@
 <body>
 
     <header>
-        <h2>Laporan Hasil Focus Group Discussion (FGD)</h2>
-        <p>Sesi: <strong>{{ $session->name }}</strong> | Tanggal: {{ \Carbon\Carbon::parse($session->date)->translatedFormat('d F Y') }}</p>
+        <table style="width: 100%; border: none; margin-bottom: 0;">
+            <tr>
+                <td style="width: 15%; text-align: left; border: none; padding: 0; vertical-align: middle;">
+                    @if(!empty($logoCai))
+                        <img src="{{ $logoCai }}" alt="Logo CAI" style="max-height: 65px;">
+                    @endif
+                </td>
+                <td style="width: 70%; text-align: center; border: none; padding: 0; vertical-align: middle;">
+                    <h2>Laporan Hasil Focus Group Discussion (FGD)</h2>
+                    <p>Sesi: <strong>{{ $session->name }}</strong> | Tanggal: {{ \Carbon\Carbon::parse($session->date)->translatedFormat('d F Y') }}</p>
+                </td>
+                <td style="width: 15%; text-align: right; border: none; padding: 0; vertical-align: middle;">
+                    @if(!empty($logoPpg))
+                        <img src="{{ $logoPpg }}" alt="Logo PPG" style="max-height: 65px;">
+                    @endif
+                </td>
+            </tr>
+        </table>
     </header>
 
     @if($notes->isEmpty())
@@ -161,6 +177,10 @@
                     </table>
                 @endif
             </div>
+
+            @if(!$loop->last)
+                <div style="page-break-after: always;"></div>
+            @endif
         @endforeach
     @endif
 

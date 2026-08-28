@@ -33,9 +33,17 @@ class ExportPdfController extends Controller
             ->with(['group', 'theme'])
             ->get();
 
+        $logoCaiPath = public_path('images/logo-cai.webp');
+        $logoPpgPath = public_path('images/logo.png');
+        
+        $logoCai = file_exists($logoCaiPath) ? 'data:image/webp;base64,' . base64_encode(file_get_contents($logoCaiPath)) : null;
+        $logoPpg = file_exists($logoPpgPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPpgPath)) : null;
+
         $pdf = Pdf::loadView('pdf.fgd-session', [
             'session' => $session,
             'notes' => $notes,
+            'logoCai' => $logoCai,
+            'logoPpg' => $logoPpg,
         ])->setPaper('a4', 'landscape');
 
         return $pdf->stream('Laporan_FGD_' . \Illuminate\Support\Str::slug($session->name) . '.pdf');
