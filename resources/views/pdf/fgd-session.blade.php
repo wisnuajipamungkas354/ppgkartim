@@ -36,7 +36,7 @@
 
         .note-container {
             margin-bottom: 40px;
-            page-break-inside: avoid;
+            page-break-inside: auto;
         }
 
         .note-header {
@@ -46,24 +46,33 @@
             font-size: 14px;
             font-weight: bold;
             margin-bottom: 10px;
+            page-break-after: avoid;
         }
 
         .note-notulis {
             font-style: italic;
             margin-bottom: 15px;
             color: #555;
+            page-break-after: avoid;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
+            page-break-inside: auto;
+        }
+        
+        tr {
+            page-break-inside: auto;
+            page-break-after: auto;
         }
 
         th, td {
             border: 1px solid #bdc3c7;
             padding: 8px;
             vertical-align: top;
+            page-break-inside: auto;
         }
 
         th {
